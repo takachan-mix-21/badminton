@@ -953,7 +953,7 @@ function updateMembersCount(val) {
 }
 
 function addEntry() {
-  var newEntry = {teamName:'', members:[]};
+  var newEntry = {teamName:'', email:'', members:[], status:'approved', submittedAt: new Date().toISOString()};
   ensureEntryMembers(newEntry);
   entries.push(newEntry);
   renderEntries();
@@ -972,6 +972,11 @@ function updateEntryTeamName(idx, val) {
   scheduleAutoSave();
 }
 
+function updateEntryEmail(idx, val) {
+  entries[idx].email = val;
+  scheduleAutoSave();
+}
+
 function updateMemberName(eidx, midx, val) {
   entries[eidx].members[midx].name = val;
   scheduleAutoSave();
@@ -982,11 +987,53 @@ function updateMemberAge(eidx, midx, val) {
   scheduleAutoSave();
 }
 
+function setEntryStatusFromAdmin(idx, newStatus) {
+  var entry = entries[idx];
+  if (!entry) return;
+  if (!currentTournamentId || !entry.submittedAt) {
+    entry.status = newStatus;
+    renderEntries();
+    scheduleAutoSave();
+    return;
+  }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res) {
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || 'エラーが発生しました'); return; }
+      var prev = res.prevPlacedSlot;
+      entries[idx] = res.entry;
+      if (res.entry.placedSlot) {
+        var s = res.entry.placedSlot;
+        if (data[s.di] && data[s.di][s.li] && data[s.di][s.li].teams) {
+          data[s.di][s.li].teams[s.ti] = res.entry.teamName;
+          refreshLeaguePanel(s.di, s.li);
+          refreshRankingPanel(s.di, s.li);
+        }
+      }
+      if (prev && (!res.entry.placedSlot || prev.di !== res.entry.placedSlot.di || prev.li !== res.entry.placedSlot.li || prev.ti !== res.entry.placedSlot.ti)) {
+        if (data[prev.di] && data[prev.di][prev.li] && data[prev.di][prev.li].teams) {
+          var divName = (cfg.divisions[prev.di] && cfg.divisions[prev.di].name) || ((prev.di+1)+'部');
+          data[prev.di][prev.li].teams[prev.ti] = divName + ALPHA[prev.li] + (prev.ti+1);
+          refreshLeaguePanel(prev.di, prev.li);
+          refreshRankingPanel(prev.di, prev.li);
+        }
+      }
+      renderEntries();
+      showToast(newStatus==='approved'?'承認しました':newStatus==='rejected'?'却下しました':'保留に戻しました');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('エラー: '+e.message); })
+    .setEntryStatus(currentTournamentId, entry.submittedAt, newStatus);
+}
+
 function renderEntries() {
   var el = document.getElementById('entry-list');
   if (!el) return;
   var countEl = document.getElementById('entry-count');
-  if (countEl) countEl.textContent = entries.length + '件';
+  if (countEl) {
+    var pendingCount = entries.filter(function(e){return (e.status||'pending')==='pending';}).length;
+    countEl.textContent = entries.length + '件' + (pendingCount > 0 ? ' （承認待ち '+pendingCount+'件）' : '');
+  }
   var disp = document.getElementById('entry-mpt-display');
   if (disp) disp.textContent = cfg.membersPerTeam;
   if (entries.length === 0) {
@@ -996,11 +1043,21 @@ function renderEntries() {
   el.innerHTML = entries.map(function(e, idx) {
     ensureEntryMembers(e);
     var c = TEAM_COLORS[idx % TEAM_COLORS.length];
+    var status = e.status || 'approved';
+    var statusBg, statusColor, statusText;
+    if (status==='approved') { statusBg='var(--accent-dim)'; statusColor='var(--accent)'; statusText='承認済み'; }
+    else if (status==='rejected') { statusBg='var(--red-dim)'; statusColor='var(--red)'; statusText='却下'; }
+    else { statusBg='var(--yellow-dim)'; statusColor='var(--yellow)'; statusText='承認待ち'; }
     var html = '<div class="entry-card">';
     html += '<div class="entry-head">';
     html += '<div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+(idx+1)+'</div>';
     html += '<input class="entry-text-inp" type="text" placeholder="チーム名" value="'+esc(e.teamName||'')+'" oninput="updateEntryTeamName('+idx+',this.value)">';
+    html += '<span style="display:inline-flex;align-items:center;padding:4px 10px;background:'+statusBg+';color:'+statusColor+';border:1px solid '+statusColor+';border-radius:14px;font-size:11px;font-weight:700;flex-shrink:0">'+statusText+'</span>';
     html += '<button class="entry-remove-btn" onclick="removeEntry('+idx+')">削除</button>';
+    html += '</div>';
+    html += '<div class="entry-member-row" style="margin-bottom:8px">';
+    html += '<span class="entry-member-lbl">📧</span>';
+    html += '<input class="entry-text-inp" type="email" placeholder="代表者メールアドレス" value="'+esc(e.email||'')+'" oninput="updateEntryEmail('+idx+',this.value)">';
     html += '</div>';
     html += '<div>';
     e.members.forEach(function(m, mi) {
@@ -1010,6 +1067,20 @@ function renderEntries() {
       html += '<input class="entry-age-inp" type="number" min="0" max="120" inputmode="numeric" placeholder="年齢" value="'+(m.age!==''&&m.age!=null?esc(m.age):'')+'" oninput="updateMemberAge('+idx+','+mi+',this.value)">';
       html += '</div>';
     });
+    html += '</div>';
+    if (e.placedLabel) {
+      html += '<div style="margin-top:8px;padding:6px 10px;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius);font-size:11px;font-weight:700">配置先: '+esc(e.placedLabel)+'</div>';
+    }
+    html += '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">';
+    if (status !== 'approved') {
+      html += '<button class="btn btn-sm" style="flex:1;min-width:80px;background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)" onclick="setEntryStatusFromAdmin('+idx+',\'approved\')">✓ 承認</button>';
+    }
+    if (status !== 'rejected') {
+      html += '<button class="btn btn-sm" style="flex:1;min-width:80px;background:var(--red-dim);color:var(--red);border-color:rgba(255,79,107,0.4)" onclick="setEntryStatusFromAdmin('+idx+',\'rejected\')">✕ 却下</button>';
+    }
+    if (status !== 'pending') {
+      html += '<button class="btn btn-sm btn-ghost" style="flex:1;min-width:80px" onclick="setEntryStatusFromAdmin('+idx+',\'pending\')">↺ 保留に戻す</button>';
+    }
     html += '</div></div>';
     return html;
   }).join('');
@@ -1067,6 +1138,7 @@ function goHome() {
 
 function startNewTournament() {
   currentTournamentId = null;
+  _lastLoadTime = new Date().toISOString();
   cfg.tournamentName = '';
   cfg.membersPerTeam = 4;
   cfg.gamePoints = [11,21,21];
@@ -1118,6 +1190,7 @@ function renderTournamentList(list) {
 }
 
 function loadFromGAS(saved) {
+  _lastLoadTime = new Date().toISOString();
   if (!saved) { buildAllUI(); showPage('settings'); return; }
   if (saved.cfg) {
     if (saved.cfg.tournamentName) {
@@ -1168,6 +1241,7 @@ function loadFromGAS(saved) {
 }
 
 var _isSaving = false;
+var _lastLoadTime = null;
 var _pendingSave = false;
 var _autoSaveTimer = null;
 
@@ -1188,7 +1262,7 @@ function _doSave(isManual) {
   var name    = cfg.tournamentName || '名前なし';
   var summary = cfg.divisions.map(function(d){ return d.name+':'+d.leagueCount+'リーグ'; }).join(' / ');
   var ts = tournamentStates.map(function(t) { return t ? { seeds: t.seeds, matchResults: t.matchResults } : null; });
-  var payload = { cfg:cfg, data:data, tournamentStates:ts, entries:entries, name:name, summary:summary };
+  var payload = { cfg:cfg, data:data, tournamentStates:ts, entries:entries, name:name, summary:summary, lastLoadTime:_lastLoadTime };
   google.script.run
     .withSuccessHandler(function(newId) {
       _isSaving = false;
