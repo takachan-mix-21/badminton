@@ -150,6 +150,285 @@ function mergeNewServerEntries(clientPayload, serverPayload, lastLoadTime) {
   });
 }
 
+function exportTournamentToSheet(id) {
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(15000);
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    var payload = null;
+    var name = '';
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        try { payload = JSON.parse(rows[i][4]) || {}; } catch(err) { return {ok:false, error:'データ読み込みエラー'}; }
+        name = (payload.cfg && payload.cfg.tournamentName) || rows[i][1] || '名前なし';
+        break;
+      }
+    }
+    if (!payload) return {ok:false, error:'大会が見つかりません'};
+    var sheetName = sanitizeSheetName('📋 ' + name);
+    var existing = ss.getSheetByName(sheetName);
+    if (existing) ss.deleteSheet(existing);
+    var s = ss.insertSheet(sheetName);
+    writeTournamentReport(s, payload);
+    return {ok:true, sheetName:sheetName, url: ss.getUrl() + '#gid=' + s.getSheetId()};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function sanitizeSheetName(s) {
+  var n = String(s || '名前なし').replace(/[:\\\/\?\*\[\]]/g, '');
+  if (n.length > 90) n = n.substring(0, 90);
+  return n || '名前なし';
+}
+
+function writeTournamentReport(sheet, payload) {
+  var cfg = payload.cfg || {};
+  var data = payload.data || [];
+  var entries = (payload.entries || []).map(normalizeEntry);
+  var tournamentStates = payload.tournamentStates || [];
+  var alpha = 'ABCDEFGHIJKLMNOPQRST';
+  var row = 1;
+
+  sheet.getRange(row, 1).setValue(cfg.tournamentName || '名前なし');
+  sheet.getRange(row, 1).setFontSize(18).setFontWeight('bold');
+  row += 2;
+
+  sheet.getRange(row, 1, 2, 2).setValues([
+    ['作成日時', Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm')],
+    ['1チームのメンバー数', cfg.membersPerTeam || 4]
+  ]);
+  sheet.getRange(row, 1, 2, 1).setFontWeight('bold');
+  row += 3;
+
+  if (entries.length > 0) {
+    sheet.getRange(row, 1).setValue('▼ エントリー一覧 (' + entries.length + '件)');
+    sheet.getRange(row, 1).setFontSize(13).setFontWeight('bold').setBackground('#e8f5e9');
+    sheet.getRange(row, 1, 1, 9).merge();
+    row++;
+    var entryHeaders = ['チーム名', '希望部門', '状態', '配置先', '代表者氏名', '電話番号', 'メール', '住所', 'メンバー'];
+    sheet.getRange(row, 1, 1, entryHeaders.length).setValues([entryHeaders]).setBackground('#f0f0f0').setFontWeight('bold');
+    row++;
+    var entryRows = entries.map(function(e) {
+      var members = (e.members || []).filter(function(m){return m && m.name;}).map(function(m) {
+        return m.name + (m.age ? '('+m.age+'歳)' : '');
+      }).join(', ');
+      return [
+        e.teamName || '',
+        e.division || '',
+        statusLabel(e.status),
+        e.placedLabel || '',
+        e.repName || '',
+        e.phone || '',
+        e.email || '',
+        e.address || '',
+        members
+      ];
+    });
+    if (entryRows.length > 0) {
+      sheet.getRange(row, 1, entryRows.length, 9).setValues(entryRows);
+      for (var rr = 0; rr < entries.length; rr++) {
+        var st = entries[rr].status || 'approved';
+        var bg = st === 'approved' ? '#e8f5e9' : st === 'rejected' ? '#ffebee' : '#fffde7';
+        sheet.getRange(row + rr, 3).setBackground(bg);
+      }
+      row += entryRows.length;
+    }
+    row += 2;
+  }
+
+  (cfg.divisions || []).forEach(function(div, di) {
+    var divLeagues = data[di] || [];
+    if (!divLeagues.length) return;
+    sheet.getRange(row, 1).setValue('▼ ' + div.name);
+    sheet.getRange(row, 1).setFontSize(13).setFontWeight('bold').setBackground('#e3f2fd');
+    sheet.getRange(row, 1, 1, 9).merge();
+    row += 2;
+
+    divLeagues.forEach(function(lg, li) {
+      sheet.getRange(row, 1).setValue('■ ' + div.name + ' ' + alpha.charAt(li) + 'リーグ');
+      sheet.getRange(row, 1).setFontSize(12).setFontWeight('bold');
+      row++;
+      sheet.getRange(row, 1).setValue('順位表').setFontWeight('bold').setFontColor('#666');
+      row++;
+      var rankHeaders = ['順位', 'チーム', '総勝', 'MD', 'WD', 'XD', '得点', '失点', '差'];
+      sheet.getRange(row, 1, 1, rankHeaders.length).setValues([rankHeaders]).setBackground('#f0f0f0').setFontWeight('bold');
+      row++;
+      var standings = computeStandingsServer(lg);
+      var advCount = div.advanceCount || 0;
+      var standingRows = standings.map(function(s, idx) {
+        return [idx+1, s.name, s.totalW, s.mdW, s.wdW, s.xdW, s.pf, s.pa, (s.diff>=0?'+':'')+s.diff];
+      });
+      if (standingRows.length > 0) {
+        sheet.getRange(row, 1, standingRows.length, 9).setValues(standingRows);
+        for (var idx = 0; idx < standings.length; idx++) {
+          if (idx < advCount) sheet.getRange(row + idx, 1, 1, 9).setBackground('#c8e6c9');
+        }
+        row += standingRows.length;
+      }
+      row++;
+
+      var teams = lg.teams || [];
+      if (teams.length > 0) {
+        sheet.getRange(row, 1).setValue('対戦結果 (総勝数 A-B)').setFontWeight('bold').setFontColor('#666');
+        row++;
+        var headerRow = [''].concat(teams);
+        sheet.getRange(row, 1, 1, headerRow.length).setValues([headerRow]).setBackground('#f0f0f0').setFontWeight('bold');
+        row++;
+        var matrixRows = teams.map(function(name, ri) {
+          var rowData = [name];
+          teams.forEach(function(_, ci) {
+            if (ri === ci) { rowData.push('—'); return; }
+            var match = getMatchAtServer(lg, ri, ci);
+            if (!match) { rowData.push(''); return; }
+            var wA = 0, wB = 0;
+            ['md','wd','xd'].forEach(function(c) {
+              var w = catWinSrv(match[c]);
+              if (w === 'A') wA++; else if (w === 'B') wB++;
+            });
+            rowData.push(wA + '-' + wB);
+          });
+          return rowData;
+        });
+        sheet.getRange(row, 1, matrixRows.length, headerRow.length).setValues(matrixRows);
+        sheet.getRange(row, 1, matrixRows.length, 1).setFontWeight('bold').setBackground('#f0f0f0');
+        row += matrixRows.length;
+      }
+      row += 2;
+    });
+
+    var ts = tournamentStates[di];
+    if (ts && ts.seeds && ts.seeds.length) {
+      sheet.getRange(row, 1).setValue('■ ' + div.name + ' トーナメント');
+      sheet.getRange(row, 1).setFontSize(12).setFontWeight('bold');
+      row++;
+      sheet.getRange(row, 1).setValue('シード順').setFontWeight('bold').setFontColor('#666');
+      row++;
+      sheet.getRange(row, 1, 1, 4).setValues([['順位','チーム','元のリーグ','成績']]).setBackground('#f0f0f0').setFontWeight('bold');
+      row++;
+      var seedRows = ts.seeds.filter(function(s){return s;}).map(function(s, i) {
+        return [
+          i+1,
+          s.name || '',
+          (s.leagueLabel || '') + 'リーグ ' + ((s.rankInLeague||0)+1) + '位',
+          (s.totalW||0) + '勝 ' + ((s.diff||0)>=0?'+':'') + (s.diff||0)
+        ];
+      });
+      if (seedRows.length > 0) {
+        sheet.getRange(row, 1, seedRows.length, 4).setValues(seedRows);
+        row += seedRows.length;
+      }
+      row++;
+
+      var rounds = computeRoundsServer(ts.seeds, ts.matchResults || {});
+      var totalRounds = rounds.length - 1;
+      if (totalRounds > 0) {
+        sheet.getRange(row, 1).setValue('試合結果').setFontWeight('bold').setFontColor('#666');
+        row++;
+        sheet.getRange(row, 1, 1, 4).setValues([['ラウンド','チームA','チームB','勝者']]).setBackground('#f0f0f0').setFontWeight('bold');
+        row++;
+        var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
+        for (var ri = 0; ri < totalRounds; ri++) {
+          var matchCount = rounds[ri].length / 2;
+          var rName = roundNames[Math.max(0, roundNames.length - totalRounds + ri)] || ('第'+(ri+1)+'回戦');
+          for (var mi = 0; mi < matchCount; mi++) {
+            var teamA = rounds[ri][mi*2], teamB = rounds[ri][mi*2+1];
+            var aName = teamA ? teamA.name : '(BYE)';
+            var bName = teamB ? teamB.name : '(BYE)';
+            var res = (ts.matchResults || {})[ri+'_'+mi];
+            var winnerName = res && res.winnerName ? res.winnerName : (teamA && !teamB ? aName : !teamA && teamB ? bName : '');
+            sheet.getRange(row, 1, 1, 4).setValues([[rName, aName, bName, winnerName]]);
+            row++;
+          }
+        }
+        row++;
+        var champion = rounds[totalRounds] ? rounds[totalRounds][0] : null;
+        if (champion) {
+          sheet.getRange(row, 1).setValue('🏆 優勝');
+          sheet.getRange(row, 1).setFontWeight('bold').setFontColor('#e65100');
+          sheet.getRange(row, 2).setValue(champion.name).setFontWeight('bold').setFontColor('#e65100');
+          row++;
+        }
+      }
+      row += 2;
+    }
+  });
+
+  sheet.setColumnWidth(1, 200);
+  for (var c = 2; c <= 9; c++) sheet.setColumnWidth(c, 130);
+  sheet.setFrozenRows(1);
+}
+
+function getMatchAtServer(lg, ri, ci) {
+  if (!lg.results) return null;
+  var key = ri < ci ? (ri + '_' + ci) : (ci + '_' + ri);
+  if (!lg.results[key]) return null;
+  var r = lg.results[key];
+  if (ri < ci) return r;
+  var flip = function(g){return {a:g.b, b:g.a};};
+  return {md:(r.md||[]).map(flip), wd:(r.wd||[]).map(flip), xd:(r.xd||[]).map(flip)};
+}
+
+function catWinSrv(games) {
+  var wA=0, wB=0;
+  (games || []).forEach(function(g){if(g.a>g.b)wA++;else if(g.b>g.a)wB++;});
+  return wA > wB ? 'A' : (wB > wA ? 'B' : null);
+}
+
+function computeStandingsServer(lg) {
+  var teams = lg.teams || [];
+  var standings = teams.map(function(name, ti) {
+    var totalW=0, mdW=0, wdW=0, xdW=0, pf=0, pa=0;
+    teams.forEach(function(_, oi) {
+      if (oi === ti) return;
+      var r = getMatchAtServer(lg, ti, oi);
+      if (!r) return;
+      ['md','wd','xd'].forEach(function(c) { if (catWinSrv(r[c]) === 'A') totalW++; });
+      if (catWinSrv(r.md)==='A') mdW++;
+      if (catWinSrv(r.wd)==='A') wdW++;
+      if (catWinSrv(r.xd)==='A') xdW++;
+      ['md','wd','xd'].forEach(function(c) {
+        (r[c] || []).forEach(function(g) { pf += (g.a||0); pa += (g.b||0); });
+      });
+    });
+    return {name:name, totalW:totalW, mdW:mdW, wdW:wdW, xdW:xdW, pf:pf, pa:pa, diff:pf-pa};
+  });
+  standings.sort(function(a,b){return b.totalW-a.totalW||b.diff-a.diff||b.pf-a.pf;});
+  return standings;
+}
+
+function computeRoundsServer(seeds, matchResults) {
+  if (!seeds || !seeds.length) return [];
+  var size = 1; while (size < seeds.length) size *= 2;
+  var slots = new Array(size).fill(null);
+  seeds.forEach(function(s, i) { slots[i] = s; });
+  var rounds = [slots.slice()];
+  var current = slots.slice();
+  var ri = 0;
+  while (current.length > 1) {
+    var next = [];
+    for (var mi = 0; mi < current.length; mi += 2) {
+      var a = current[mi], b = current[mi+1];
+      if (a && !b) { next.push(a); continue; }
+      if (!a && b) { next.push(b); continue; }
+      var res = matchResults[ri+'_'+(mi/2)];
+      var winner = null;
+      if (res && res.winnerName) {
+        for (var k = 0; k < seeds.length; k++) {
+          if (seeds[k] && seeds[k].name === res.winnerName) { winner = seeds[k]; break; }
+        }
+      }
+      next.push(winner);
+    }
+    rounds.push(next);
+    current = next;
+    ri++;
+  }
+  return rounds;
+}
+
 function deleteTournament(id) {
   if (!id) return {ok: false, error: 'IDが指定されていません'};
   var lock = LockService.getScriptLock();

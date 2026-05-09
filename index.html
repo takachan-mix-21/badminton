@@ -475,25 +475,23 @@ function switchDivTab(kind, di) {
 
 function buildLeagueDivPanel(di) {
   var div=cfg.divisions[di];
-  var tabs='<div class="league-tabs" id="ltabs-'+di+'" style="padding-top:8px">';
-  var panels='<div id="lpanels-'+di+'">';
+  var html='<div style="font-size:10px;color:var(--text3);padding:8px 0 2px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+div.name+' — '+data[di].length+'リーグ×'+div.teamsPerLeague+'チーム</div>';
+  html+='<div id="lpanels-'+di+'">';
   data[di].forEach(function(_,li) {
-    tabs+='<button class="ltab'+(li===0?' active':'')+'" onclick="switchLeagueTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
-    panels+='<div class="league-sub-panel'+(li===0?' active':'')+'" id="lpanel-'+di+'-'+li+'">'+buildLeaguePanel(di,li)+'</div>';
+    html+='<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.06em;padding:14px 0 8px;border-top:1px solid var(--border);margin-top:8px">'+ALPHA[li]+'リーグ</div>';
+    html+='<div id="lpanel-'+di+'-'+li+'">'+buildLeaguePanel(di,li)+'</div>';
   });
-  tabs+='</div>'; panels+='</div>';
-  return '<div style="font-size:10px;color:var(--text3);padding:8px 0 2px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+div.name+' — '+data[di].length+'リーグ×'+div.teamsPerLeague+'チーム</div>'+tabs+panels;
+  html+='</div>';
+  return html;
 }
 
 function buildRankingDivPanel(di) {
-  var tabs='<div class="league-tabs" id="rtabs-'+di+'" style="padding-top:8px">';
-  var panels='<div id="rpanels-'+di+'">';
+  var html='<div id="rpanels-'+di+'" style="padding-top:8px">';
   data[di].forEach(function(_,li) {
-    tabs+='<button class="ltab'+(li===0?' active':'')+'" onclick="switchRankingTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
-    panels+='<div class="league-sub-panel'+(li===0?' active':'')+'" id="rpanel-'+di+'-'+li+'">'+buildRankingPanel(di,li)+'</div>';
+    html+='<div id="rpanel-'+di+'-'+li+'">'+buildRankingPanel(di,li)+'</div>';
   });
-  tabs+='</div>'; panels+='</div>';
-  return tabs+panels;
+  html+='</div>';
+  return html;
 }
 
 function switchLeagueTab(di,li) {
@@ -1352,12 +1350,35 @@ function renderTournamentList(list) {
     return;
   }
   el.innerHTML = list.map(function(t) {
-    return '<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">' +
-      '<div style="flex:1;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
+    return '<div class="card" style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">' +
+      '<div style="flex:1;min-width:200px;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
       '<div style="font-size:11px;color:var(--text2);margin-top:3px">' + (t.updatedAt || '') + ' ／ ' + (t.summary || '') + '</div></div>' +
+      '<button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)" onclick="event.stopPropagation();gasExportTournament(\''+t.id+'\')">📋 整える</button>' +
       '<button class="entry-remove-btn" onclick="event.stopPropagation();gasDeleteTournament(\''+t.id+'\')">削除</button>' +
       '<span style="color:var(--text3);font-size:20px;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')">›</span></div>';
   }).join('');
+}
+
+function gasExportTournament(id) {
+  var t = _tournamentListCache.find(function(x){return x.id === id;});
+  var name = (t && t.name) || '名前なし';
+  if (!confirm('大会「' + name + '」をスプレッドシートに整形して書き出しますか？\n（既存の同名シートは上書きされます）')) return;
+  showLoading(true);
+  if (typeof google === 'undefined' || !google.script) { showLoading(false); showToast('（ローカル：GAS未接続）'); return; }
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (res && res.ok) {
+        showToast('シート「'+res.sheetName+'」に出力しました');
+        if (res.url && confirm('出力したシートを開きますか？')) {
+          window.open(res.url, '_blank');
+        }
+      } else {
+        alert((res && res.error) || '出力に失敗しました');
+      }
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('出力エラー: ' + e.message); })
+    .exportTournamentToSheet(id);
 }
 
 function gasDeleteTournament(id) {

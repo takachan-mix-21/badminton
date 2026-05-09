@@ -115,6 +115,26 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 .view-mode-tabs{display:flex;gap:6px;margin-bottom:12px}
 .view-mode-tab{flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2);background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;min-height:36px}
 .view-mode-tab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.35)}
+.bracket-rounds{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.bracket-round{flex-shrink:0;display:flex;flex-direction:column;min-width:160px}
+.bracket-round-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 8px;background:var(--bg3);border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.bracket-col{display:flex;flex-direction:column;flex:1;border-right:1px solid var(--border)}
+.bracket-spacer{flex:1}
+.bracket-match{display:flex;flex-direction:column;margin:0 8px}
+.bracket-team{display:flex;align-items:center;gap:6px;padding:7px 8px;background:var(--bg2);border:1px solid var(--border);font-size:12px;font-weight:500;min-height:36px}
+.bracket-team:first-child{border-radius:var(--radius) var(--radius) 0 0;border-bottom:none}
+.bracket-team:last-child{border-radius:0 0 var(--radius) var(--radius)}
+.bracket-team.winner{background:var(--accent-dim);color:var(--accent);font-weight:700;border-color:rgba(0,229,160,0.3)}
+.bracket-team.bye{color:var(--text3);font-style:italic}
+.bracket-team-seed{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;width:18px;text-align:center;flex-shrink:0;color:var(--text3)}
+.bracket-divider{height:1px;background:var(--border2);margin:0 8px}
+.bracket-gap{height:12px}
+.tourn-seed-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.tourn-seed-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius)}
+.seed-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;width:28px;text-align:center;flex-shrink:0}
+.seed-league{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.seed-name{font-size:13px;font-weight:700;flex:1}
+.seed-stat{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #loading-overlay .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
@@ -208,6 +228,7 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
     <div class="view-mode-tabs">
       <button class="view-mode-tab active" id="vt-league" onclick="switchViewMode('league')">リーグ表</button>
       <button class="view-mode-tab" id="vt-ranking" onclick="switchViewMode('ranking')">順位表</button>
+      <button class="view-mode-tab" id="vt-tournament" onclick="switchViewMode('tournament')">トーナメント</button>
     </div>
     <div class="div-tab-bar" id="view-div-tabs"></div>
     <div id="view-div-panels"></div>
@@ -501,7 +522,7 @@ function openViewFor(id) {
       viewMode = 'league';
       document.getElementById('vt-league').classList.add('active');
       document.getElementById('vt-ranking').classList.remove('active');
-      document.getElementById('view-tour-title').textContent = d.name + ' リーグ表';
+      document.getElementById('view-tour-title').textContent = d.name;
       renderViewDivTabs();
       showPage('view');
     })
@@ -513,6 +534,7 @@ function switchViewMode(m) {
   viewMode = m;
   document.getElementById('vt-league').classList.toggle('active', m==='league');
   document.getElementById('vt-ranking').classList.toggle('active', m==='ranking');
+  document.getElementById('vt-tournament').classList.toggle('active', m==='tournament');
   renderViewDivTabs();
 }
 
@@ -540,21 +562,145 @@ function switchViewDivTab(di) {
 }
 
 function buildViewDivPanel(di) {
+  if (viewMode === 'tournament') return buildViewTournamentPanel(di);
   var div = viewData.divisions[di];
   var divLeagues = viewData.data[di] || [];
   if (!divLeagues.length) return '<div class="alert alert-warn">このディビジョンにはリーグがありません</div>';
-  var activeLi = viewActiveLeague[di] || 0;
-  if (activeLi >= divLeagues.length) activeLi = 0;
   var html = '<div style="font-size:10px;color:var(--text3);padding:8px 0 6px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+esc(div.name)+' — '+divLeagues.length+'リーグ×'+(divLeagues[0]?divLeagues[0].teams.length:0)+'チーム</div>';
-  html += '<div class="league-tabs">';
+  if (viewMode === 'ranking') {
+    divLeagues.forEach(function(_, li) {
+      html += '<div id="view-lpanel-'+di+'-'+li+'">'+buildViewRankingPanel(di,li)+'</div>';
+    });
+    return html;
+  }
   divLeagues.forEach(function(_, li) {
-    html += '<button class="ltab'+(li===activeLi?' active':'')+'" onclick="switchViewLeagueTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
-  });
-  html += '</div>';
-  divLeagues.forEach(function(_, li) {
-    html += '<div class="league-sub-panel'+(li===activeLi?' active':'')+'" id="view-lpanel-'+di+'-'+li+'">'+(viewMode==='ranking'?buildViewRankingPanel(di,li):buildViewLeaguePanel(di,li))+'</div>';
+    html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--accent);letter-spacing:.06em;padding:14px 0 8px;border-top:1px solid var(--border);margin-top:8px">'+ALPHA[li]+'リーグ</div>';
+    html += '<div id="view-lpanel-'+di+'-'+li+'">'+buildViewLeaguePanel(di,li)+'</div>';
   });
   return html;
+}
+
+function buildViewTournamentPanel(di) {
+  var div = viewData.divisions[di] || {};
+  var ts = (viewData.tournamentStates || [])[di];
+  if (!ts || !ts.seeds || !ts.seeds.length) {
+    return '<div class="alert alert-warn">この部門のトーナメントは未生成です</div>';
+  }
+  var seeds = ts.seeds;
+  var matchResults = ts.matchResults || {};
+  var rounds = vComputeRounds(seeds, matchResults);
+  var totalRounds = rounds.length - 1;
+
+  var html = '<div class="alert alert-info" style="margin-bottom:12px;font-size:12px">' +
+    esc(div.name) + ' — シード ' + seeds.length + ' チーム</div>';
+
+  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">SEED</div>';
+  html += '<div class="tourn-seed-list">';
+  seeds.forEach(function(s, i) {
+    if (!s) return;
+    var sc = i===0?'var(--yellow)':i===1?'var(--text2)':i===2?'#cd7f32':'var(--text3)';
+    var color = s.color || {bg:'var(--bg3)', text:'var(--text2)'};
+    html += '<div class="tourn-seed-item">' +
+      '<span class="seed-num" style="color:'+sc+'">'+(i+1)+'</span>' +
+      '<span class="seed-league" style="background:'+color.bg+';color:'+color.text+'">'+esc(s.leagueLabel||'')+'リーグ '+((s.rankInLeague||0)+1)+'位</span>' +
+      '<span class="seed-name">'+esc(s.name||'')+'</span>' +
+      '<span class="seed-stat" style="margin-left:auto">'+(s.totalW||0)+'勝 '+((s.diff||0)>=0?'+':'')+(s.diff||0)+'</span>' +
+      '</div>';
+  });
+  html += '</div>';
+
+  if (totalRounds <= 0) return html;
+
+  var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
+  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px">BRACKET</div>';
+  html += '<div class="bracket-rounds">';
+
+  for (var ri = 0; ri < totalRounds; ri++) {
+    var matchCount = rounds[ri].length / 2;
+    var rName = roundNames[Math.max(0, roundNames.length-totalRounds+ri)] || ('第'+(ri+1)+'回戦');
+    html += '<div class="bracket-round"><div class="bracket-round-title">'+rName+'</div><div class="bracket-col">';
+    for (var mi = 0; mi < matchCount; mi++) {
+      var teamA = rounds[ri][mi*2], teamB = rounds[ri][mi*2+1];
+      var key = ri+'_'+mi;
+      var res = matchResults[key];
+      var autoWinner = (!teamB && teamA) ? teamA : (!teamA && teamB ? teamB : null);
+      var winner = res ? res.winner : autoWinner;
+      html += '<div class="bracket-spacer"></div><div class="bracket-match">';
+      if (res) {
+        var cr = CATS.map(function(c) {
+          var w = vCatWin(res[c] || []);
+          return '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;color:'+(w==='A'?'var(--accent)':'var(--red)')+'">'+CAT_LABELS[c]+(w==='A'?'○':'✕')+'</span>';
+        }).join(' ');
+        html += '<div style="text-align:center;padding:2px 4px;display:flex;gap:4px;justify-content:center">'+cr+'</div>';
+      }
+      html += vTeamRow(teamA, winner === teamA, seeds);
+      html += '<div class="bracket-divider"></div>';
+      html += vTeamRow(teamB, winner === teamB, seeds);
+      html += '</div><div class="bracket-gap"></div>';
+    }
+    html += '<div class="bracket-spacer"></div></div></div>';
+  }
+
+  var champion = rounds[totalRounds] ? rounds[totalRounds][0] : null;
+  html += '<div class="bracket-round"><div class="bracket-round-title" style="color:var(--yellow)">🏆 優勝</div>' +
+    '<div class="bracket-col" style="justify-content:center;align-items:center;padding:16px 8px">' +
+    (champion
+      ? '<div style="text-align:center"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-size:11px;font-weight:700;color:var(--yellow)">'+esc(champion.name)+'</div><div style="font-size:9px;color:var(--text3);margin-top:2px">'+esc(champion.leagueLabel||'')+'リーグ '+((champion.rankInLeague||0)+1)+'位</div></div>'
+      : '<div style="text-align:center;color:var(--text3);font-size:11px">決勝<br>勝者</div>') +
+    '</div></div>';
+  html += '</div>';
+  return html;
+}
+
+function vTeamRow(team, isWin, seeds) {
+  if (!team) return '<div class="bracket-team bye"><span class="bracket-team-seed">—</span><span>BYE</span></div>';
+  var si = seeds.indexOf(team);
+  if (si < 0) {
+    for (var i = 0; i < seeds.length; i++) {
+      if (seeds[i] && seeds[i].name === team.name) { si = i; break; }
+    }
+  }
+  var color = team.color || {bg:'var(--bg3)', text:'var(--text2)'};
+  return '<div class="bracket-team'+(isWin?' winner':'')+'"><span class="bracket-team-seed" style="color:'+color.text+'">'+(si+1)+'</span><span style="font-size:9px;background:'+color.bg+';color:'+color.text+';padding:1px 4px;border-radius:3px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;flex-shrink:0">'+esc(team.leagueLabel||'')+((team.rankInLeague||0)+1)+'位</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">'+esc(team.name)+'</span>'+(isWin?'<span style="font-size:10px;color:var(--accent)">✓</span>':'')+'</div>';
+}
+
+function vComputeRounds(seeds, matchResults) {
+  if (!seeds || !seeds.length) return [];
+  var size = 1; while (size < seeds.length) size *= 2;
+  var slots = new Array(size).fill(null);
+  seeds.forEach(function(s, i) { slots[i] = s; });
+  var rounds = [slots.slice()];
+  var current = slots.slice();
+  var ri = 0;
+  while (current.length > 1) {
+    var next = [];
+    for (var mi = 0; mi < current.length; mi += 2) {
+      var a = current[mi], b = current[mi+1];
+      if (a && !b) { next.push(a); continue; }
+      if (!a && b) { next.push(b); continue; }
+      var res = matchResults[ri+'_'+(mi/2)];
+      var winner = null;
+      if (res) {
+        if (res.winnerName) {
+          for (var k = 0; k < seeds.length; k++) {
+            if (seeds[k] && seeds[k].name === res.winnerName) { winner = seeds[k]; break; }
+          }
+        }
+        if (!winner && res.winner) {
+          if (typeof res.winner === 'object' && res.winner.name) {
+            for (var k = 0; k < seeds.length; k++) {
+              if (seeds[k] && seeds[k].name === res.winner.name) { winner = seeds[k]; break; }
+            }
+          }
+        }
+      }
+      next.push(winner);
+    }
+    rounds.push(next);
+    current = next;
+    ri++;
+  }
+  return rounds;
 }
 
 function switchViewLeagueTab(di, li) {
