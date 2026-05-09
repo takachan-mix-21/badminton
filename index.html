@@ -177,6 +177,8 @@ select.team-name-sel option{background:var(--bg2);color:var(--text)}
 .entry-text-inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:40px;margin:0}
 .entry-text-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
 .entry-age-inp{width:78px!important;flex-shrink:0;text-align:center;padding:9px 8px!important;font-size:14px!important;min-height:40px!important;margin:0!important}
+.entry-gender-sel{width:64px;flex-shrink:0;padding:9px 4px;font-size:13px;font-weight:700;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;min-height:40px;-webkit-appearance:none;appearance:none;text-align:center;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238b92a8' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 8px center;padding-right:18px}
+.entry-gender-sel:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
 .entry-remove-btn{padding:6px 10px;border:1px solid rgba(255,79,107,0.3);background:var(--red-dim);color:var(--red);border-radius:var(--radius);font-size:11px;font-weight:700;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;min-height:32px;flex-shrink:0}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg)}
@@ -1003,8 +1005,9 @@ function renderTournPanel(di) {
 // ========== ENTRY ==========
 function ensureEntryMembers(e) {
   if (!e.members) e.members = [];
-  while (e.members.length < cfg.membersPerTeam) e.members.push({name:'', age:''});
+  while (e.members.length < cfg.membersPerTeam) e.members.push({name:'', age:'', gender:''});
   e.members.length = cfg.membersPerTeam;
+  e.members.forEach(function(m){ if (!('gender' in m)) m.gender = ''; });
 }
 
 function updateMembersCount(val) {
@@ -1084,6 +1087,11 @@ function updateMemberName(eidx, midx, val) {
 
 function updateMemberAge(eidx, midx, val) {
   entries[eidx].members[midx].age = val;
+  scheduleAutoSave();
+}
+
+function updateMemberGender(eidx, midx, val) {
+  entries[eidx].members[midx].gender = val;
   scheduleAutoSave();
 }
 
@@ -1206,6 +1214,7 @@ function renderEntries() {
       html += '<div class="entry-member-row">';
       html += '<span class="entry-member-lbl">'+(mi+1)+'</span>';
       html += '<input class="entry-text-inp" type="text" placeholder="メンバー名" value="'+esc(m.name||'')+'" oninput="updateMemberName('+idx+','+mi+',this.value)">';
+      html += '<select class="entry-gender-sel" onchange="updateMemberGender('+idx+','+mi+',this.value)"><option value=""'+(!m.gender?' selected':'')+'>性別</option><option value="男"'+(m.gender==='男'?' selected':'')+'>男</option><option value="女"'+(m.gender==='女'?' selected':'')+'>女</option></select>';
       html += '<input class="entry-age-inp" type="number" min="0" max="120" inputmode="numeric" placeholder="年齢" value="'+(m.age!==''&&m.age!=null?esc(m.age):'')+'" oninput="updateMemberAge('+idx+','+mi+',this.value)">';
       html += '</div>';
     });

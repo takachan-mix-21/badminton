@@ -18,6 +18,7 @@ function doGet(e) {
   t.gasPage = 'public';
   t.gasId = params.id || '';
   t.gasAction = params.action || actionMap;
+  t.gasUrl = ScriptApp.getService().getUrl();
   var title = (mode === 'view') ? 'バドミントン大会 リーグ表' :
               (mode === 'status') ? 'バドミントン大会 状況確認' : 'バドミントン大会エントリー';
   return t.evaluate()
@@ -213,7 +214,10 @@ function writeTournamentReport(sheet, payload) {
     row++;
     var entryRows = entries.map(function(e) {
       var members = (e.members || []).filter(function(m){return m && m.name;}).map(function(m) {
-        return m.name + (m.age ? '('+m.age+'歳)' : '');
+        var meta = [];
+        if (m.gender) meta.push(m.gender);
+        if (m.age) meta.push(m.age+'歳');
+        return m.name + (meta.length ? '('+meta.join('・')+')' : '');
       }).join(', ');
       return [
         e.teamName || '',
@@ -470,6 +474,18 @@ function getPublicTournamentView(id) {
     if (rows[i][0] === id) {
       try {
         var p = JSON.parse(rows[i][4]) || {};
+        var rawEntries = (p.entries || []).map(normalizeEntry);
+        var publicEntries = rawEntries
+          .filter(function(e) { return (e.status||'pending') === 'approved' && e.teamName; })
+          .map(function(e) {
+            return {
+              teamName: e.teamName,
+              division: e.division || '',
+              members: ((e.members) || []).filter(function(m){return m && m.name;}).map(function(m) {
+                return {name: m.name, age: m.age, gender: m.gender || ''};
+              })
+            };
+          });
         return {
           id: id,
           name: (p.cfg && p.cfg.tournamentName) || rows[i][1] || '名前なし',
@@ -479,7 +495,8 @@ function getPublicTournamentView(id) {
           tournamentStates: (p.tournamentStates || []).map(function(ts) {
             if (!ts) return null;
             return {seeds: ts.seeds || [], matchResults: ts.matchResults || {}};
-          })
+          }),
+          entries: publicEntries
         };
       } catch(err) { return null; }
     }
@@ -771,8 +788,10 @@ function appendEntryToEntriesSheet(tournamentId, tournamentName, entry) {
   var membersStr = ((entry && entry.members) || [])
     .filter(function(m) { return m && m.name; })
     .map(function(m) {
-      var ageStr = (m.age !== '' && m.age != null && m.age !== 0) ? ' (' + m.age + '歳)' : '';
-      return m.name + ageStr;
+      var meta = [];
+      if (m.gender) meta.push(m.gender);
+      if (m.age !== '' && m.age != null && m.age !== 0) meta.push(m.age + '歳');
+      return m.name + (meta.length ? ' (' + meta.join('・') + ')' : '');
     })
     .join('\n');
   sheet.appendRow([
