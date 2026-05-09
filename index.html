@@ -164,6 +164,14 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
 .bracket-team-seed{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;width:18px;text-align:center;flex-shrink:0;color:var(--text3)}
 .bracket-divider{height:1px;background:var(--border2);margin:0 8px}
 .bracket-gap{height:12px}
+.entry-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px}
+.entry-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.entry-member-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.entry-member-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--text3);width:34px;flex-shrink:0;text-align:center}
+.entry-text-inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:40px;margin:0}
+.entry-text-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.entry-age-inp{width:78px!important;flex-shrink:0;text-align:center;padding:9px 8px!important;font-size:14px!important;min-height:40px!important;margin:0!important}
+.entry-remove-btn{padding:6px 10px;border:1px solid rgba(255,79,107,0.3);background:var(--red-dim);color:var(--red);border-radius:var(--radius);font-size:11px;font-weight:700;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;min-height:32px;flex-shrink:0}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
@@ -182,6 +190,9 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
 <nav class="bottom-nav" id="bottom-nav" style="display:none">
   <button class="bnav-item active" onclick="showPage('settings')" id="bnav-settings">
     <span class="bnav-icon">⚙️</span><span class="bnav-label">大会設定</span>
+  </button>
+  <button class="bnav-item" onclick="showPage('entry')" id="bnav-entry">
+    <span class="bnav-icon">👥</span><span class="bnav-label">エントリー</span>
   </button>
   <button class="bnav-item" onclick="showPage('leagues')" id="bnav-leagues">
     <span class="bnav-icon">🏆</span><span class="bnav-label">リーグ表</span>
@@ -215,6 +226,10 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
         <input type="text" id="s-tournament-name" placeholder="例: 第1回 羽根杯バドミントン大会" oninput="previewSettings()" style="font-size:15px">
       </div>
       <div id="div-settings"></div>
+      <div class="form-field" style="margin-bottom:14px">
+        <label>1チームあたりのメンバー数 <span style="color:var(--text3);font-weight:400">（エントリーフォーム用）</span></label>
+        <input type="number" id="s-members-per-team" min="1" max="20" value="4" inputmode="numeric" oninput="updateMembersCount(this.value)">
+      </div>
       <div class="form-field" style="margin-bottom:14px">
         <label>ゲームポイント <span style="color:var(--text3);font-weight:400">（ゲームごとに設定）</span></label>
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -251,6 +266,13 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
     <button class="btn btn-primary btn-block" onclick="applySettings()">
       ✓ この設定でリーグ表を作成する
     </button>
+  </div>
+
+  <div class="page" id="page-entry">
+    <div class="sec-title">エントリー一覧 <span id="entry-count" style="font-weight:400;color:var(--text3);font-size:10px;letter-spacing:0"></span></div>
+    <div class="alert alert-info" id="entry-info" style="margin-bottom:12px">1チーム <span id="entry-mpt-display">4</span> 名で登録します（メンバー数は「大会設定」から変更できます）</div>
+    <div id="entry-list"></div>
+    <button class="btn btn-primary btn-block" onclick="addEntry()" style="margin-top:8px">＋ エントリーを追加</button>
   </div>
 
   <div class="page" id="page-leagues">
@@ -322,6 +344,7 @@ var TEAM_COLORS = [
 
 var cfg = {
   tournamentName: '',
+  membersPerTeam: 4,
   gamePoints: [11, 21, 21],
   divisions: [
     {name:'1部', leagueCount:2, teamsPerLeague:4, advanceCount:2},
@@ -912,6 +935,87 @@ function renderTournPanel(di) {
   panel.innerHTML=html;
 }
 
+// ========== ENTRY ==========
+function ensureEntryMembers(e) {
+  if (!e.members) e.members = [];
+  while (e.members.length < cfg.membersPerTeam) e.members.push({name:'', age:''});
+  e.members.length = cfg.membersPerTeam;
+}
+
+function updateMembersCount(val) {
+  var n = Math.max(1, Math.min(20, parseInt(val) || 1));
+  cfg.membersPerTeam = n;
+  entries.forEach(ensureEntryMembers);
+  var disp = document.getElementById('entry-mpt-display');
+  if (disp) disp.textContent = n;
+  renderEntries();
+  scheduleAutoSave();
+}
+
+function addEntry() {
+  var newEntry = {teamName:'', members:[]};
+  ensureEntryMembers(newEntry);
+  entries.push(newEntry);
+  renderEntries();
+  scheduleAutoSave();
+}
+
+function removeEntry(idx) {
+  if (!confirm('このエントリーを削除しますか？')) return;
+  entries.splice(idx, 1);
+  renderEntries();
+  scheduleAutoSave();
+}
+
+function updateEntryTeamName(idx, val) {
+  entries[idx].teamName = val;
+  scheduleAutoSave();
+}
+
+function updateMemberName(eidx, midx, val) {
+  entries[eidx].members[midx].name = val;
+  scheduleAutoSave();
+}
+
+function updateMemberAge(eidx, midx, val) {
+  entries[eidx].members[midx].age = val;
+  scheduleAutoSave();
+}
+
+function renderEntries() {
+  var el = document.getElementById('entry-list');
+  if (!el) return;
+  var countEl = document.getElementById('entry-count');
+  if (countEl) countEl.textContent = entries.length + '件';
+  var disp = document.getElementById('entry-mpt-display');
+  if (disp) disp.textContent = cfg.membersPerTeam;
+  if (entries.length === 0) {
+    el.innerHTML = '<div class="alert alert-info">まだエントリーがありません。下のボタンから追加してください。</div>';
+    return;
+  }
+  el.innerHTML = entries.map(function(e, idx) {
+    ensureEntryMembers(e);
+    var c = TEAM_COLORS[idx % TEAM_COLORS.length];
+    var html = '<div class="entry-card">';
+    html += '<div class="entry-head">';
+    html += '<div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+(idx+1)+'</div>';
+    html += '<input class="entry-text-inp" type="text" placeholder="チーム名" value="'+esc(e.teamName||'')+'" oninput="updateEntryTeamName('+idx+',this.value)">';
+    html += '<button class="entry-remove-btn" onclick="removeEntry('+idx+')">削除</button>';
+    html += '</div>';
+    html += '<div>';
+    e.members.forEach(function(m, mi) {
+      html += '<div class="entry-member-row">';
+      html += '<span class="entry-member-lbl">'+(mi+1)+'</span>';
+      html += '<input class="entry-text-inp" type="text" placeholder="メンバー名" value="'+esc(m.name||'')+'" oninput="updateMemberName('+idx+','+mi+',this.value)">';
+      html += '<input class="entry-age-inp" type="number" min="0" max="120" inputmode="numeric" placeholder="年齢" value="'+(m.age!==''&&m.age!=null?esc(m.age):'')+'" oninput="updateMemberAge('+idx+','+mi+',this.value)">';
+      html += '</div>';
+    });
+    html += '</div></div>';
+    return html;
+  }).join('');
+}
+
+// ========== TOURNAMENT (cont.) ==========
 function moveSeed(di,idx,dir) {
   var seeds=tournamentStates[di].seeds;var newIdx=idx+dir;
   if(newIdx<0||newIdx>=seeds.length)return;
@@ -931,6 +1035,7 @@ function showPage(p) {
     if(!document.querySelector('#div-tabs-tourn .dtab')) { buildTournamentUI(); }
     else { syncDivTabActive('tourn'); }
   }
+  if(p==='entry') { renderEntries(); }
   syncDivTabActive('league');
   syncDivTabActive('ranking');
   window.scrollTo(0,0);
@@ -963,6 +1068,7 @@ function goHome() {
 function startNewTournament() {
   currentTournamentId = null;
   cfg.tournamentName = '';
+  cfg.membersPerTeam = 4;
   cfg.gamePoints = [11,21,21];
   cfg.divisions = [
     {name:'1部',leagueCount:2,teamsPerLeague:4,advanceCount:2},
@@ -972,7 +1078,9 @@ function startNewTournament() {
   ];
   data = [];
   tournamentStates = [];
+  entries = [];
   document.getElementById('s-tournament-name').value = '';
+  document.getElementById('s-members-per-team').value = cfg.membersPerTeam;
   [0,1,2].forEach(function(gi) {
     document.querySelectorAll('.point-btn[data-game="'+gi+'"]').forEach(function(b) {
       b.classList.toggle('active', parseInt(b.dataset.pt)===cfg.gamePoints[gi]);
@@ -1026,8 +1134,14 @@ function loadFromGAS(saved) {
       });
     }
     if (saved.cfg.divisions) { cfg.divisions = saved.cfg.divisions; renderDivSettings(); previewSettings(); }
+    if (saved.cfg.membersPerTeam) {
+      cfg.membersPerTeam = saved.cfg.membersPerTeam;
+      var mptInp = document.getElementById('s-members-per-team');
+      if (mptInp) mptInp.value = cfg.membersPerTeam;
+    }
   }
   entries = saved.entries || [];
+  entries.forEach(ensureEntryMembers);
   data = saved.data;
   cfg.divisions.forEach(function(div,di){ if(data[di]) div.leagueCount=data[di].length; });
   tournamentStates = [];
