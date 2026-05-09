@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>バドミントン大会管理</title>
+<script>
+  var gasPage = '<?= gasPage ?>';
+  var gasId   = '<?= gasId ?>';
+  if (gasPage && gasPage.indexOf('<?') === 0) { gasPage = null; gasId = null; }
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--bg2:#181c27;--bg3:#1f2435;
+  --surface:#252b3b;--surface2:#2e3549;
+  --accent:#00e5a0;--accent2:#00b87a;
+  --accent-dim:rgba(0,229,160,0.12);--accent-dim2:rgba(0,229,160,0.06);
+  --red:#ff4f6b;--red-dim:rgba(255,79,107,0.12);
+  --yellow:#ffd166;--yellow-dim:rgba(255,209,102,0.12);
+  --blue:#4fc3f7;--blue-dim:rgba(79,195,247,0.12);
+  --purple:#b39ddb;--purple-dim:rgba(179,157,219,0.12);
+  --pink:#f48fb1;--pink-dim:rgba(244,143,177,0.12);
+  --text:#e8eaf2;--text2:#8b92a8;--text3:#555d75;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --radius:10px;--radius-lg:14px;
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;padding-bottom:calc(70px + var(--safe-bottom))}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 14px;display:flex;align-items:center;position:sticky;top:0;z-index:100;height:52px;gap:10px}
+.brand-icon{width:30px;height:30px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.brand-text{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;flex:1}
+.brand-text span{color:var(--accent)}
+.admin-badge{background:var(--red-dim);color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.06em;border:1px solid rgba(255,79,107,0.3)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;cursor:pointer;color:var(--text3);transition:.2s;gap:3px;border:none;background:transparent}
+.bnav-item.active{color:var(--accent)}
+.bnav-icon{font-size:18px;line-height:1}
+.bnav-label{font-size:9px;font-weight:500;white-space:nowrap}
+.content{padding:14px}
+.page{display:none}.page.active{display:block}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
+label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:700;letter-spacing:.02em}
+input[type=number],select{width:100%;padding:11px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;background:var(--bg);color:var(--text);margin-bottom:0;font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:44px;-webkit-appearance:none;appearance:none}
+input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.point-btns{display:flex;gap:6px;flex:1}
+.point-btn{flex:1;padding:10px 4px;border:1px solid var(--border2);background:var(--bg);border-radius:var(--radius);font-size:15px;font-weight:900;cursor:pointer;color:var(--text2);font-family:'Barlow Condensed',sans-serif;transition:.2s;min-height:44px;text-align:center}
+.point-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)}
+.game-pt-row{display:flex;align-items:center;gap:10px}
+.game-pt-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.06em;width:46px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px 0;text-align:center}
+.btn{padding:10px 18px;border:1px solid var(--border2);background:transparent;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;transition:.2s;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:active{opacity:.75}
+.btn-primary{background:var(--accent);color:#0f1117;border-color:var(--accent)}
+.btn-block{width:100%}
+.btn-sm{padding:6px 12px;font-size:12px;min-height:36px}
+.btn-ghost{border-color:var(--border2);color:var(--text2)}
+.summary-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;font-size:12px;display:flex;align-items:center;gap:6px}
+.chip-val{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--accent)}
+.chip-lbl{color:var(--text3);font-size:11px}
+.div-tab-bar{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:0}
+.div-tab-bar::-webkit-scrollbar{height:3px}
+.div-tab-bar::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
+.dtab{flex-shrink:0;position:relative;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;background:var(--bg3);color:var(--text3);border:1px solid var(--border2);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;margin-right:-1px;transition:.15s;z-index:1;clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,6px 100%);-webkit-clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,6px 100%);}
+.dtab.active{background:var(--bg2);color:var(--accent);z-index:3;border-color:rgba(0,229,160,0.35);}
+.dtab:not(.active):hover{background:var(--surface);color:var(--text2);}
+.div-tab-content{background:var(--bg2);border:1px solid var(--border2);border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);padding:14px;margin-bottom:14px;position:relative;z-index:2;}
+.div-tab-pane{display:none}.div-tab-pane.active{display:block}
+.league-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.league-tabs::-webkit-scrollbar{height:3px}
+.league-tabs::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
+.ltab{flex-shrink:0;padding:6px 14px;border:1px solid var(--border2);border-radius:var(--radius);font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);font-family:'Barlow Condensed',sans-serif;background:var(--bg);transition:.15s;letter-spacing:.04em;min-height:32px}
+.ltab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.35)}
+.league-panel{display:none}.league-panel.active{display:block}
+.league-sub-panel{display:none}.league-sub-panel.active{display:block}
+.team-name-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.team-name-row{display:flex;align-items:center;gap:10px}
+.team-badge{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex-shrink:0}
+.team-name-inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:40px;margin:0}
+.team-name-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+.league-tbl{border-collapse:collapse;font-size:11px;white-space:nowrap;width:100%}
+.league-tbl th,.league-tbl td{border:1px solid var(--border);text-align:center;padding:0}
+.league-tbl th{background:var(--bg3);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.05em;padding:7px 5px}
+.league-tbl .th-team{text-align:left;padding-left:10px;min-width:80px}
+.league-tbl td.team-cell{background:var(--bg3);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:0 10px;white-space:nowrap;min-width:80px}
+.diagonal{background:var(--bg)!important;position:relative;overflow:hidden}
+.diagonal::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom right,transparent calc(50% - 0.5px),var(--border2) calc(50%),transparent calc(50% + 0.5px))}
+.score-cell{min-width:110px;padding:5px 4px!important;vertical-align:middle}
+.score-inner{display:flex;flex-direction:column;gap:3px}
+.cat-row{display:flex;align-items:center;justify-content:center;gap:3px}
+.cat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;width:18px;flex-shrink:0}
+.cat-lbl.md{color:var(--blue)}.cat-lbl.wd{color:var(--pink)}.cat-lbl.xd{color:var(--purple)}
+.game-scores{display:flex;gap:2px}
+.gs{font-size:9px;background:var(--surface);border-radius:2px;padding:1px 3px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.gs.w{background:var(--accent-dim);color:var(--accent)}
+.gs.l{background:var(--red-dim);color:var(--red)}
+.cat-wl{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.cat-wl.w{color:var(--accent)}.cat-wl.l{color:var(--red)}
+.total-row{display:flex;align-items:center;justify-content:center;gap:3px;border-top:1px solid var(--border);padding-top:3px;margin-top:3px}
+.total-score{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;line-height:1}
+.total-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;color:var(--text3);letter-spacing:.04em}
+.empty-cell{color:var(--text3);font-size:12px;padding:10px 4px!important}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border-radius:18px 18px 0 0;padding:20px 16px calc(20px + var(--safe-bottom));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.22,1,.36,1)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--surface2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-vs{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--text3);padding:0 4px}
+.cat-block{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px}
+.cat-block-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.cat-tag{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:4px}
+.cat-tag.md{background:var(--blue-dim);color:var(--blue)}
+.cat-tag.wd{background:var(--pink-dim);color:var(--pink)}
+.cat-tag.xd{background:var(--purple-dim);color:var(--purple)}
+.cat-block-name{font-size:12px;color:var(--text2)}
+.cat-wins-info{margin-left:auto;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--text2)}
+.game-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.game-lbl{font-size:10px;color:var(--text3);width:48px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.score-inp{width:54px!important;margin:0!important;text-align:center;padding:8px 4px!important;font-size:16px!important;font-weight:700;min-height:44px;flex-shrink:0;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);outline:none}
+.score-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+.score-sep{color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;flex-shrink:0}
+.team-side-lbl{font-size:11px;color:var(--text2);width:26px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.rank-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.rank-tbl th{background:var(--bg3);border-bottom:1px solid var(--border);padding:7px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;white-space:nowrap}
+.rank-tbl td{padding:8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+.rank-tbl tr:last-child td{border-bottom:none}
+.rank-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
+.r1{color:var(--yellow)}.r2{color:var(--text2)}.r3{color:#cd7f32}
+.advance-row td{background:var(--accent-dim2)}
+.advance-row td:first-child{border-left:2px solid var(--accent)}
+.alert{padding:10px 14px;border-radius:var(--radius);font-size:12px;margin-bottom:12px;border:1px solid;line-height:1.5}
+.alert-info{background:rgba(79,195,247,0.07);color:#4fc3f7;border-color:rgba(79,195,247,0.2)}
+.alert-warn{background:var(--yellow-dim);color:var(--yellow);border-color:rgba(255,209,102,0.3)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
+.badge-pending{background:var(--yellow-dim);color:var(--yellow)}
+.badge-approved{background:var(--accent-dim);color:var(--accent)}
+.badge-rejected{background:var(--red-dim);color:var(--red)}
+.tourn-section{margin-bottom:24px}
+.tourn-seed-list{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.tourn-seed-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius)}
+.seed-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;width:28px;text-align:center;flex-shrink:0}
+.seed-league{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.seed-name{font-size:13px;font-weight:700;flex:1}
+.seed-stat{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--text3)}
+.bracket-rounds{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.bracket-round{flex-shrink:0;display:flex;flex-direction:column;min-width:160px}
+.bracket-round-title{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-align:center;padding:6px 8px;background:var(--bg3);border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+.bracket-col{display:flex;flex-direction:column;flex:1;border-right:1px solid var(--border)}
+.bracket-spacer{flex:1}
+.bracket-match{display:flex;flex-direction:column;margin:0 8px}
+.bracket-team{display:flex;align-items:center;gap:6px;padding:7px 8px;background:var(--bg2);border:1px solid var(--border);font-size:12px;font-weight:500;min-height:36px}
+.bracket-team:first-child{border-radius:var(--radius) var(--radius) 0 0;border-bottom:none}
+.bracket-team:last-child{border-radius:0 0 var(--radius) var(--radius)}
+.bracket-team.winner{background:var(--accent-dim);color:var(--accent);font-weight:700;border-color:rgba(0,229,160,0.3)}
+.bracket-team.bye{color:var(--text3);font-style:italic}
+.bracket-team-seed{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;width:18px;text-align:center;flex-shrink:0;color:var(--text3)}
+.bracket-divider{height:1px;background:var(--border2);margin:0 8px}
+.bracket-gap{height:12px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <button id="back-btn" onclick="goHome()" style="display:none;background:none;border:none;color:var(--text2);cursor:pointer;padding:4px 8px 4px 0;font-size:18px;line-height:1">←</button>
+  <img src="https://drive.google.com/uc?export=view&id=15db4Da7QdaF1Sde7pyvwtm_Sh-rqDq6o" style="width:30px;height:30px;border-radius:7px;object-fit:cover;flex-shrink:0">
+  <span class="brand-text" style="margin-left:9px">ADMIN <span>PANEL</span></span>
+  <span id="save-status" style="font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.04em;transition:.3s"></span>
+  <span class="admin-badge">ADMIN</span>
+</div>
+
+<nav class="bottom-nav" id="bottom-nav" style="display:none">
+  <button class="bnav-item active" onclick="showPage('settings')" id="bnav-settings">
+    <span class="bnav-icon">⚙️</span><span class="bnav-label">大会設定</span>
+  </button>
+  <button class="bnav-item" onclick="showPage('leagues')" id="bnav-leagues">
+    <span class="bnav-icon">🏆</span><span class="bnav-label">リーグ表</span>
+  </button>
+  <button class="bnav-item" onclick="showPage('ranking')" id="bnav-ranking">
+    <span class="bnav-icon">📊</span><span class="bnav-label">順位表</span>
+  </button>
+  <button class="bnav-item" onclick="showPage('tournament')" id="bnav-tournament">
+    <span class="bnav-icon">🎯</span><span class="bnav-label">トーナメント</span>
+  </button>
+</nav>
+
+<div class="content">
+  <div class="page active" id="page-home">
+    <div style="padding-top:8px">
+      <div class="sec-title">大会一覧</div>
+      <button class="btn btn-primary btn-block" onclick="startNewTournament()" style="margin-bottom:16px">
+        ＋ 新しい大会を作成
+      </button>
+      <div id="tournament-list">
+        <div class="alert alert-info">読み込み中...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-settings">
+    <div class="sec-title">大会設定</div>
+    <div class="card">
+      <div class="form-field" style="margin-bottom:14px">
+        <label>大会名</label>
+        <input type="text" id="s-tournament-name" placeholder="例: 第1回 羽根杯バドミントン大会" oninput="previewSettings()" style="font-size:15px">
+      </div>
+      <div id="div-settings"></div>
+      <div class="form-field" style="margin-bottom:14px">
+        <label>ゲームポイント <span style="color:var(--text3);font-weight:400">（ゲームごとに設定）</span></label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="game-pt-row">
+            <span class="game-pt-lbl">GAME 1</span>
+            <div class="point-btns">
+              <button class="point-btn active" data-game="0" data-pt="11" onclick="selectGamePoint(this,0,11)">11点</button>
+              <button class="point-btn"        data-game="0" data-pt="15" onclick="selectGamePoint(this,0,15)">15点</button>
+              <button class="point-btn"        data-game="0" data-pt="21" onclick="selectGamePoint(this,0,21)">21点</button>
+            </div>
+          </div>
+          <div class="game-pt-row">
+            <span class="game-pt-lbl">GAME 2</span>
+            <div class="point-btns">
+              <button class="point-btn"        data-game="1" data-pt="11" onclick="selectGamePoint(this,1,11)">11点</button>
+              <button class="point-btn"        data-game="1" data-pt="15" onclick="selectGamePoint(this,1,15)">15点</button>
+              <button class="point-btn active" data-game="1" data-pt="21" onclick="selectGamePoint(this,1,21)">21点</button>
+            </div>
+          </div>
+          <div class="game-pt-row">
+            <span class="game-pt-lbl">GAME 3</span>
+            <div class="point-btns">
+              <button class="point-btn"        data-game="2" data-pt="11" onclick="selectGamePoint(this,2,11)">11点</button>
+              <button class="point-btn"        data-game="2" data-pt="15" onclick="selectGamePoint(this,2,15)">15点</button>
+              <button class="point-btn active" data-game="2" data-pt="21" onclick="selectGamePoint(this,2,21)">21点</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sec-title">設定プレビュー</div>
+    <div class="summary-bar" id="summary-bar"></div>
+    <div class="alert alert-info" id="settings-info"></div>
+    <button class="btn btn-primary btn-block" onclick="applySettings()">
+      ✓ この設定でリーグ表を作成する
+    </button>
+  </div>
+
+  <div class="page" id="page-leagues">
+    <div id="no-leagues" class="alert alert-warn">まず「大会設定」でリーグ表を作成してください。</div>
+    <div id="leagues-content" style="display:none">
+      <div class="div-tab-bar" id="div-tabs-league"></div>
+      <div id="div-panels-league"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-ranking">
+    <div id="no-ranking" class="alert alert-warn">まず「大会設定」でリーグ表を作成してください。</div>
+    <div id="ranking-content" style="display:none">
+      <div class="div-tab-bar" id="div-tabs-ranking"></div>
+      <div id="div-panels-ranking"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-tournament">
+    <div id="no-tournament" class="alert alert-warn">まず「大会設定」でリーグ表を作成してください。</div>
+    <div id="tournament-content" style="display:none">
+      <div class="div-tab-bar" id="div-tabs-tourn"></div>
+      <div id="div-panels-tourn"></div>
+    </div>
+  </div>
+
+
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <button class="btn btn-primary btn-block" onclick="saveMatch()" style="margin-top:8px">確定</button>
+  </div>
+</div>
+
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+  <div style="width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div>
+  <div style="font-size:13px;color:var(--text2)">読み込み中...</div>
+</div>
+
+<div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0f1117;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:700;opacity:0;transition:opacity .3s;z-index:400;pointer-events:none"></div>
+
+<style>
+@keyframes spin{to{transform:rotate(360deg)}}
+.save-btn-wrap{padding:0 14px 14px}
+</style>
+
+<script>
+// ========== STATE ==========
+var CATS = ['md','wd','xd'];
+var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
+var CAT_LABELS = {md:'MD',wd:'WD',xd:'XD'};
+var TEAM_COLORS = [
+  {bg:'rgba(124,77,255,0.2)',text:'#b39ddb'},
+  {bg:'rgba(0,161,255,0.15)',text:'#4fc3f7'},
+  {bg:'rgba(0,229,160,0.15)',text:'#00e5a0'},
+  {bg:'rgba(255,209,102,0.15)',text:'#ffd166'},
+  {bg:'rgba(255,79,107,0.15)',text:'#ff4f6b'},
+  {bg:'rgba(255,160,50,0.15)',text:'#ffb74d'},
+  {bg:'rgba(200,80,200,0.15)',text:'#ce93d8'},
+  {bg:'rgba(100,200,80,0.15)',text:'#a5d6a7'},
+  {bg:'rgba(255,120,120,0.15)',text:'#ef9a9a'},
+  {bg:'rgba(100,160,255,0.15)',text:'#90caf9'},
+  {bg:'rgba(80,220,200,0.15)',text:'#80cbc4'},
+  {bg:'rgba(255,200,80,0.15)',text:'#ffe082'},
+];
+
+var cfg = {
+  tournamentName: '',
+  gamePoints: [11, 21, 21],
+  divisions: [
+    {name:'1部', leagueCount:2, teamsPerLeague:4, advanceCount:2},
+    {name:'2部', leagueCount:2, teamsPerLeague:4, advanceCount:2},
+    {name:'3部', leagueCount:2, teamsPerLeague:4, advanceCount:2},
+    {name:'4部', leagueCount:2, teamsPerLeague:4, advanceCount:2},
+  ]
+};
+
+var data = [];
+var currentModal = null;
+var activeDivTab = {league:0, ranking:0, tourn:0};
+
+// ========== SETTINGS PAGE ==========
+var DIV_NAMES = ['1部','2部','3部','4部'];
+
+function renderDivSettings() {
+  var d = cfg.divisions[0];
+  document.getElementById('div-settings').innerHTML =
+    '<div class="form-row" style="margin-bottom:10px">' +
+    '<div class="form-field"><label>リーグ数 <span style="color:var(--text3);font-weight:400">（全部共通）</span></label>' +
+    '<input type="number" id="shared-league-count" min="1" max="10" value="' + d.leagueCount + '" inputmode="numeric" oninput="updateSharedSetting(\'leagueCount\',this.value)"></div>' +
+    '<div class="form-field"><label>1リーグのチーム数 <span style="color:var(--text3);font-weight:400">（全部共通）</span></label>' +
+    '<input type="number" id="shared-teams" min="2" max="12" value="' + d.teamsPerLeague + '" inputmode="numeric" oninput="updateSharedSetting(\'teamsPerLeague\',this.value)"></div></div>' +
+    '<div class="form-field" style="margin-bottom:0"><label>トーナメント進出チーム数 <span style="color:var(--text3);font-weight:400">（各リーグから・全部共通）</span></label>' +
+    '<input type="number" id="shared-advance" min="1" max="8" value="' + d.advanceCount + '" inputmode="numeric" oninput="updateSharedSetting(\'advanceCount\',this.value)"></div>';
+}
+
+function updateSharedSetting(key, val) {
+  var n = parseInt(val) || 1;
+  cfg.divisions.forEach(function(div) { div[key] = n; });
+  previewSettings();
+}
+
+function previewSettings() {
+  var gp = cfg.gamePoints;
+  var totalTeams = 0, totalMatches = 0;
+  cfg.divisions.forEach(function(div) {
+    totalTeams += div.leagueCount * div.teamsPerLeague;
+    totalMatches += div.leagueCount * (div.teamsPerLeague*(div.teamsPerLeague-1)/2);
+  });
+  document.getElementById('summary-bar').innerHTML =
+    cfg.divisions.map(function(div) {
+      return '<div class="chip"><span class="chip-val">' + div.name + '</span><span class="chip-lbl">' + div.leagueCount + 'リーグ×' + div.teamsPerLeague + 'チーム</span></div>';
+    }).join('') +
+    '<div class="chip"><span class="chip-val">' + totalTeams + '</span><span class="chip-lbl">総チーム数</span></div>' +
+    '<div class="chip"><span class="chip-val">' + gp[0] + '-' + gp[1] + '-' + gp[2] + '</span><span class="chip-lbl">G1-G2-G3点</span></div>';
+  document.getElementById('settings-info').textContent =
+    '合計 ' + totalMatches + ' 試合（MD/WD/XD×3ゲーム） / G1=' + gp[0] + '点 G2=' + gp[1] + '点 G3=' + gp[2] + '点';
+}
+
+function selectGamePoint(btn, gameIdx, pt) {
+  document.querySelectorAll('.point-btn[data-game="' + gameIdx + '"]').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  cfg.gamePoints[gameIdx] = pt;
+  previewSettings();
+}
+
+function applySettings() {
+  var name = document.getElementById('s-tournament-name').value.trim();
+  cfg.tournamentName = name;
+  var brandText = document.querySelector('.brand-text');
+  brandText.innerHTML = name ? '<span style="color:var(--accent)">' + esc(name) + '</span>' : 'ADMIN <span>PANEL</span>';
+  cfg.divisions.forEach(function(div, di) {
+    div.leagueCount = Math.max(1,Math.min(10,div.leagueCount));
+    div.teamsPerLeague = Math.max(2,Math.min(12,div.teamsPerLeague));
+    div.advanceCount = Math.max(1,Math.min(div.teamsPerLeague,div.advanceCount));
+    if (!data[di]) data[di]=[];
+    while (data[di].length < div.leagueCount) {
+      var li=data[di].length;
+      data[di].push({teams:Array.from({length:div.teamsPerLeague},function(_,i){return div.name+ALPHA[li]+(i+1);}),results:{}});
+    }
+    data[di].length = div.leagueCount;
+    data[di].forEach(function(lg) {
+      while(lg.teams.length<div.teamsPerLeague) lg.teams.push('チーム'+(lg.teams.length+1));
+      lg.teams.length=div.teamsPerLeague;
+    });
+  });
+  data.length = cfg.divisions.length;
+  buildAllUI();
+  showPage('leagues');
+  scheduleAutoSave();
+}
+
+// ========== LEAGUE UI ==========
+var ALPHA = 'ABCDEFGHIJKLMNOPQRST';
+
+function buildAllUI() {
+  buildDivTabsUI('league','div-tabs-league','div-panels-league',buildLeagueDivPanel,'no-leagues','leagues-content');
+  buildDivTabsUI('ranking','div-tabs-ranking','div-panels-ranking',buildRankingDivPanel,'no-ranking','ranking-content');
+  buildTournamentUI();
+}
+
+function buildDivTabsUI(kind, tabsId, panelsId, panelBuilder, noId, contentId) {
+  var tabsEl=document.getElementById(tabsId);
+  var panelsEl=document.getElementById(panelsId);
+  tabsEl.innerHTML=''; panelsEl.innerHTML='';
+  var curDi = Math.min(activeDivTab[kind]||0, cfg.divisions.length-1);
+  cfg.divisions.forEach(function(div,di) {
+    var tab=document.createElement('button');
+    tab.className='dtab'+(di===curDi?' active':'');
+    tab.textContent=div.name;
+    tab.onclick=function(){switchDivTab(kind,di);};
+    tabsEl.appendChild(tab);
+    var panel=document.createElement('div');
+    panel.id=kind+'-div-panel-'+di;
+    panel.className='div-tab-content div-tab-pane'+(di===curDi?' active':'');
+    panel.innerHTML=panelBuilder(di);
+    panelsEl.appendChild(panel);
+  });
+  document.getElementById(noId).style.display='none';
+  document.getElementById(contentId).style.display='block';
+}
+
+function switchDivTab(kind, di) {
+  Object.keys(activeDivTab).forEach(function(k) { activeDivTab[k]=di; });
+  var tabsId=kind==='league'?'div-tabs-league':kind==='ranking'?'div-tabs-ranking':'div-tabs-tourn';
+  document.querySelectorAll('#'+tabsId+' .dtab').forEach(function(t,i){t.classList.toggle('active',i===di);});
+  var panelsId=kind==='league'?'div-panels-league':kind==='ranking'?'div-panels-ranking':'div-panels-tourn';
+  document.querySelectorAll('#'+panelsId+' .div-tab-pane').forEach(function(p,i){p.classList.toggle('active',i===di);});
+}
+
+function buildLeagueDivPanel(di) {
+  var div=cfg.divisions[di];
+  var tabs='<div class="league-tabs" id="ltabs-'+di+'" style="padding-top:8px">';
+  var panels='<div id="lpanels-'+di+'">';
+  data[di].forEach(function(_,li) {
+    tabs+='<button class="ltab'+(li===0?' active':'')+'" onclick="switchLeagueTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
+    panels+='<div class="league-sub-panel'+(li===0?' active':'')+'" id="lpanel-'+di+'-'+li+'">'+buildLeaguePanel(di,li)+'</div>';
+  });
+  tabs+='</div>'; panels+='</div>';
+  return '<div style="font-size:10px;color:var(--text3);padding:8px 0 2px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+div.name+' — '+data[di].length+'リーグ×'+div.teamsPerLeague+'チーム</div>'+tabs+panels;
+}
+
+function buildRankingDivPanel(di) {
+  var tabs='<div class="league-tabs" id="rtabs-'+di+'" style="padding-top:8px">';
+  var panels='<div id="rpanels-'+di+'">';
+  data[di].forEach(function(_,li) {
+    tabs+='<button class="ltab'+(li===0?' active':'')+'" onclick="switchRankingTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
+    panels+='<div class="league-sub-panel'+(li===0?' active':'')+'" id="rpanel-'+di+'-'+li+'">'+buildRankingPanel(di,li)+'</div>';
+  });
+  tabs+='</div>'; panels+='</div>';
+  return tabs+panels;
+}
+
+function switchLeagueTab(di,li) {
+  document.querySelectorAll('#ltabs-'+di+' .ltab').forEach(function(t,i){t.classList.toggle('active',i===li);});
+  document.querySelectorAll('#lpanels-'+di+' .league-sub-panel').forEach(function(p,i){p.classList.toggle('active',i===li);});
+}
+function switchRankingTab(di,li) {
+  document.querySelectorAll('#rtabs-'+di+' .ltab').forEach(function(t,i){t.classList.toggle('active',i===li);});
+  document.querySelectorAll('#rpanels-'+di+' .league-sub-panel').forEach(function(p,i){p.classList.toggle('active',i===li);});
+}
+
+function buildLeaguePanel(di,li) {
+  var lg=data[di][li];
+  var nameHtml='<div class="team-name-grid">';
+  lg.teams.forEach(function(name,ti) {
+    var c=TEAM_COLORS[ti%TEAM_COLORS.length];
+    nameHtml+='<div class="team-name-row"><div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+ALPHA[li]+(ti+1)+'</div><input class="team-name-inp" type="text" value="'+esc(name)+'" oninput="updateTeamName('+di+','+li+','+ti+',this.value)" placeholder="チーム名を入力"></div>';
+  });
+  nameHtml+='</div>';
+  var tbl='<div class="tbl-wrap"><table class="league-tbl"><thead><tr><th class="th-team"></th>';
+  lg.teams.forEach(function(_,ti) {
+    var c=TEAM_COLORS[ti%TEAM_COLORS.length];
+    tbl+='<th><span style="background:'+c.bg+';color:'+c.text+';padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">'+ALPHA[li]+(ti+1)+'</span></th>';
+  });
+  tbl+='<th>MD</th><th>WD</th><th>XD</th><th>総勝</th></tr></thead><tbody>';
+  lg.teams.forEach(function(name,ri) {
+    var c=TEAM_COLORS[ri%TEAM_COLORS.length];
+    var mdW=0,wdW=0,xdW=0,totalW=0;
+    tbl+='<tr><td class="team-cell"><span style="background:'+c.bg+';color:'+c.text+';padding:1px 6px;border-radius:4px;font-size:10px;margin-right:5px">'+ALPHA[li]+(ri+1)+'</span>'+esc(name)+'</td>';
+    lg.teams.forEach(function(_,ci) {
+      if(ri===ci){tbl+='<td class="diagonal"></td>';return;}
+      var r=getMatchDirect(lg,ri,ci);
+      if(!r){tbl+='<td class="empty-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer;min-width:110px"><span style="color:var(--text3);font-size:18px">+</span></td>';return;}
+      var cellW=0;CATS.forEach(function(cat){if(catWin(r[cat])==='A')cellW++;});
+      var cellL=3-cellW;
+      var tcol=cellW>cellL?'var(--accent)':cellW<cellL?'var(--red)':'var(--yellow)';
+      if(catWin(r.md)==='A')mdW++;if(catWin(r.wd)==='A')wdW++;if(catWin(r.xd)==='A')xdW++;totalW+=cellW;
+      tbl+='<td class="score-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer"><div class="score-inner"><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
+      CATS.forEach(function(cat) {
+        var games=r[cat];var wins=cWins(games);var iw=catWin(r[cat])==='A';
+        tbl+='<div class="cat-row"><span class="cat-lbl '+cat+'">'+CAT_LABELS[cat]+'</span><span style="font-size:9px;font-weight:700;color:'+(iw?'var(--accent)':'var(--red)')+'">'+( iw?'○':'✕')+'</span><span class="game-scores">';
+        games.forEach(function(g){tbl+='<span class="gs '+(g.a>g.b?'w':'l')+'">'+g.a+'-'+g.b+'</span>';});
+        tbl+='</span><span class="cat-wl '+(wins.wA>wins.wB?'w':'l')+'">'+wins.wA+'-'+wins.wB+'</span></div>';
+      });
+      tbl+='</div></td>';
+    });
+    tbl+='<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--blue)">'+mdW+'</td>';
+    tbl+='<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--pink)">'+wdW+'</td>';
+    tbl+='<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--purple)">'+xdW+'</td>';
+    tbl+='<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;color:var(--accent)">'+totalW+'</td></tr>';
+  });
+  tbl+='</tbody></table></div>';
+  return nameHtml+tbl;
+}
+
+function refreshLeaguePanel(di,li) {
+  var el=document.getElementById('lpanel-'+di+'-'+li);
+  if(el) el.innerHTML=buildLeaguePanel(di,li);
+}
+var _teamNameTimer = null;
+function updateTeamName(di,li,ti,val) {
+  data[di][li].teams[ti]=val;
+  refreshLeaguePanel(di,li);
+  refreshRankingPanel(di,li);
+  clearTimeout(_teamNameTimer);
+  _teamNameTimer = setTimeout(scheduleAutoSave, 1000);
+}
+
+// ========== MATCH HELPERS ==========
+function matchKey(a,b){return a<b?(a+'_'+b):(b+'_'+a);}
+function getMatchDirect(lg,ri,ci) {
+  var key=matchKey(ri,ci);
+  if(!lg.results[key]) return null;
+  var r=lg.results[key];
+  if(ri<ci) return r;
+  var flip=function(g){return {a:g.b,b:g.a};};
+  return{md:r.md.map(flip),wd:r.wd.map(flip),xd:r.xd.map(flip)};
+}
+function cWins(games){var wA=0,wB=0;games.forEach(function(g){if(g.a>g.b)wA++;else if(g.b>g.a)wB++;});return{wA:wA,wB:wB};}
+function catWin(games){var w=cWins(games);return w.wA>w.wB?'A':w.wB>w.wA?'B':null;}
+function totalPts(match){var pf=0,pa=0;CATS.forEach(function(c){match[c].forEach(function(g){pf+=g.a;pa+=g.b;});});return{pf:pf,pa:pa};}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ========== MODAL ==========
+function openModal(di,li,ri,ci) {
+  currentModal={di:di,li:li,ri:ri,ci:ci};
+  var lg=data[di][li];
+  var ta=lg.teams[ri],tb=lg.teams[ci];
+  var r=getMatchDirect(lg,ri,ci);
+  document.getElementById('modal-title').innerHTML='<span style="font-weight:700">'+esc(ta)+'</span><span class="modal-vs">VS</span><span style="font-weight:700">'+esc(tb)+'</span>';
+  var body='';
+  CATS.forEach(function(cat) {
+    var games=r?r[cat]:[{a:'',b:''},{a:'',b:''},{a:'',b:''}];
+    var wins=r?cWins(r[cat]):{wA:0,wB:0};var cw=r?catWin(r[cat]):null;
+    body+='<div class="cat-block"><div class="cat-block-header"><span class="cat-tag '+cat+'">'+CAT_LABELS[cat]+'</span><span class="cat-block-name">'+CAT_NAMES[cat]+'</span>'+(r?'<span class="cat-wins-info">'+esc(ta.slice(0,4))+':<b style="color:'+(cw==='A'?'var(--accent)':'var(--red)')+'">'+wins.wA+'</b>/'+esc(tb.slice(0,4))+':<b style="color:'+(cw==='B'?'var(--accent)':'var(--red)')+'">'+wins.wB+'</b></span>':'')+'</div>';
+    [0,1,2].forEach(function(gi) {
+      var gv=games[gi]||{a:'',b:''};var gpt=cfg.gamePoints[gi];
+      body+='<div class="game-row"><span class="game-lbl">G'+(gi+1)+'<span style="font-size:9px;color:var(--accent);display:block;line-height:1.2;margin-top:1px">'+gpt+'点</span></span><span class="team-side-lbl">'+esc(ta.slice(0,3))+'</span><input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="m_'+cat+'_'+gi+'_a" value="'+(gv.a!==''?gv.a:'')+'" placeholder="0"><span class="score-sep">—</span><input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="m_'+cat+'_'+gi+'_b" value="'+(gv.b!==''?gv.b:'')+'" placeholder="0"><span class="team-side-lbl">'+esc(tb.slice(0,3))+'</span></div>';
+    });
+    body+='</div>';
+  });
+  document.getElementById('modal-body').innerHTML=body;
+  document.querySelector('.modal .btn-primary').setAttribute('onclick','saveMatch()');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if(e&&e.target!==document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.querySelector('.modal .btn-primary').setAttribute('onclick','saveMatch()');
+  tournWinnerOverride=null;
+}
+
+function saveMatch() {
+  if(!currentModal) return;
+  var di=currentModal.di,li=currentModal.li,ri=currentModal.ri,ci=currentModal.ci;
+  var lg=data[di][li];
+  var key=matchKey(ri,ci);var isFlipped=ri>ci;
+  if(!lg.results[key]) lg.results[key]={md:[],wd:[],xd:[]};
+  CATS.forEach(function(cat) {
+    lg.results[key][cat]=[];
+    [0,1,2].forEach(function(gi) {
+      var sa=parseInt(document.getElementById('m_'+cat+'_'+gi+'_a') && document.getElementById('m_'+cat+'_'+gi+'_a').value)||0;
+      var sb=parseInt(document.getElementById('m_'+cat+'_'+gi+'_b') && document.getElementById('m_'+cat+'_'+gi+'_b').value)||0;
+      if(isFlipped) lg.results[key][cat].push({a:sb,b:sa});
+      else lg.results[key][cat].push({a:sa,b:sb});
+    });
+  });
+  document.getElementById('modal-overlay').classList.remove('open');
+  refreshLeaguePanel(di,li);
+  refreshRankingPanel(di,li);
+  scheduleAutoSave();
+}
+
+// ========== RANKING ==========
+function buildRankingPanel(di,li) {
+  var lg=data[di][li];var div=cfg.divisions[di];var adv=div.advanceCount;
+  var standings=lg.teams.map(function(name,ti) {
+    var totalW=0,mdW=0,wdW=0,xdW=0,pf=0,pa=0;
+    lg.teams.forEach(function(_,oi) {
+      if(oi===ti) return;var r=getMatchDirect(lg,ti,oi);if(!r) return;
+      CATS.forEach(function(c){if(catWin(r[c])==='A')totalW++;});
+      if(catWin(r.md)==='A')mdW++;if(catWin(r.wd)==='A')wdW++;if(catWin(r.xd)==='A')xdW++;
+      var pt=totalPts(r);pf+=pt.pf;pa+=pt.pa;
+    });
+    return{ti:ti,name:name,totalW:totalW,mdW:mdW,wdW:wdW,xdW:xdW,pf:pf,pa:pa,diff:pf-pa};
+  });
+  standings.sort(function(a,b){return b.totalW-a.totalW||b.diff-a.diff||b.pf-a.pf;});
+  var html='<div style="font-size:10px;color:var(--text3);padding:8px 0 6px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+div.name+' '+ALPHA[li]+'リーグ 順位表</div>' +
+  '<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px"><div class="rank-scroll"><table class="rank-tbl">' +
+  '<thead><tr><th>順位</th><th style="text-align:left">チーム</th><th>総勝</th><th>MD</th><th>WD</th><th>XD</th><th>得点</th><th>失点</th><th>差</th></tr></thead><tbody>';
+  standings.forEach(function(s,i) {
+    var rc=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    var advcls=i<adv?'advance-row':'';var diff=(s.diff>=0?'+':'')+s.diff;
+    var c=TEAM_COLORS[s.ti%TEAM_COLORS.length];
+    html+='<tr class="'+advcls+'"><td><span class="rank-num '+rc+'">'+(i+1)+'</span></td>' +
+      '<td style="text-align:left;padding:8px"><div style="display:flex;align-items:center;gap:6px">' +
+      '<span style="background:'+c.bg+';color:'+c.text+';padding:1px 7px;border-radius:4px;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700">'+ALPHA[li]+(s.ti+1)+'</span>' +
+      '<span style="font-weight:700;font-size:12px">'+esc(s.name)+'</span>' +
+      (i<adv?'<span style="font-size:9px;background:var(--accent-dim);color:var(--accent);padding:1px 5px;border-radius:3px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700">進出</span>':'') +
+      '</div></td>' +
+      '<td><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700;color:var(--accent)">'+s.totalW+'</span></td>' +
+      '<td style="color:var(--blue);font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.mdW+'</td>' +
+      '<td style="color:var(--pink);font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.wdW+'</td>' +
+      '<td style="color:var(--purple);font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.xdW+'</td>' +
+      '<td style="color:var(--accent)">'+s.pf+'</td><td style="color:var(--red)">'+s.pa+'</td>' +
+      '<td style="font-weight:700;color:'+(s.diff>=0?'var(--accent)':'var(--red)')+'">'+diff+'</td></tr>';
+  });
+  html+='</tbody></table></div></div>';
+  if(adv<standings.length) html+='<div class="alert alert-info" style="margin-bottom:14px">上位 '+adv+' チームがトーナメントへ進出（緑背景）</div>';
+  return html;
+}
+
+function refreshRankingPanel(di,li) {
+  var el=document.getElementById('rpanel-'+di+'-'+li);
+  if(el) el.innerHTML=buildRankingPanel(di,li);
+  if(tournamentStates[di]) {
+    initTournamentStateForDiv(di);
+    renderTournPanel(di);
+  }
+}
+
+// ========== TOURNAMENT ==========
+var tournamentStates = [];
+var currentTournMatch = null;
+var tournWinnerOverride = null;
+var entries = [];
+
+function seedBracket(seeds) {
+  var n=seeds.length;if(n===0)return[];
+  var size=1;while(size<n)size*=2;
+  var slots=new Array(size).fill(null);
+  var order=buildSeedOrder(size);
+  seeds.forEach(function(s,i){if(i<order.length)slots[order[i]]=s;});
+  return slots;
+}
+function buildSeedOrder(size) {
+  if(size===1)return[0];if(size===2)return[0,1];
+  var half=size/2;var top=buildSeedOrder(half);var bottom=buildSeedOrder(half);var result=new Array(size);
+  top.forEach(function(v,i){result[i]=v;});bottom.forEach(function(v,i){result[size-1-i]=v+half;});
+  return result;
+}
+
+function getDivisionSeeds(di) {
+  var div = cfg.divisions[di];
+  var adv = div.advanceCount;
+  var numLeagues = data[di].length;
+  var leagueStandings = data[di].map(function(lg, li) {
+    var standings = lg.teams.map(function(name, ti) {
+      var totalW=0,pf=0,pa=0;
+      lg.teams.forEach(function(_,oi) {
+        if(oi===ti)return;var r=getMatchDirect(lg,ti,oi);if(!r)return;
+        CATS.forEach(function(c){if(catWin(r[c])==='A')totalW++;});
+        var pt=totalPts(r);pf+=pt.pf;pa+=pt.pa;
+      });
+      return{ti:ti,name:name,totalW:totalW,diff:pf-pa,pf:pf};
+    });
+    standings.sort(function(a,b){return b.totalW-a.totalW||b.diff-a.diff||b.pf-a.pf;});
+    return standings;
+  });
+  var byRank = [];
+  for (var rank = 0; rank < adv; rank++) {
+    byRank[rank] = [];
+    for (var li = 0; li < numLeagues; li++) {
+      var s = leagueStandings[li][rank];
+      if (!s) continue;
+      byRank[rank][li] = {
+        di:di, li:li, rank:rank, rankInLeague:rank,
+        name:s.name, totalW:s.totalW, diff:s.diff, pf:s.pf,
+        color:TEAM_COLORS[s.ti % TEAM_COLORS.length],
+        leagueLabel:ALPHA[li]
+      };
+    }
+  }
+  var total = adv * numLeagues;
+  var size = 1; while (size < total) size *= 2;
+  var slots = new Array(size).fill(null);
+  var half = size / 2;
+  var topSlots = [], bottomSlots = [];
+  for (var i = 0; i < half; i++) topSlots.push(i);
+  for (var i = size-1; i >= half; i--) bottomSlots.push(i);
+  var topIdx = 0, bottomIdx = 0;
+  for (var rank = 0; rank < adv; rank++) {
+    for (var li = 0; li < numLeagues; li++) {
+      var team = byRank[rank] && byRank[rank][li];
+      if (!team) continue;
+      if (li % 2 === 0) {
+        if (topIdx < topSlots.length) slots[topSlots[topIdx++]] = team;
+      } else {
+        if (bottomIdx < bottomSlots.length) slots[bottomSlots[bottomIdx++]] = team;
+      }
+    }
+  }
+  return slots.filter(function(s){return s !== null;});
+}
+
+function initTournamentStateForDiv(di) {
+  var seeds = getDivisionSeeds(di);
+  var size = 1; while (size < seeds.length) size *= 2;
+  var slots = new Array(size).fill(null);
+  seeds.forEach(function(s, i) { slots[i] = s; });
+  tournamentStates[di] = { seeds: seeds.slice(), slots: slots, matchResults: {} };
+}
+
+function getTournamentRoundsForDiv(di) {
+  var ts = tournamentStates[di];
+  if (!ts) return [];
+  var slots = ts.slots || seedBracket(ts.seeds);
+  if (!slots.length) return [];
+  var rounds = [slots.slice()]; var current = slots.slice(); var ri = 0;
+  while (current.length > 1) {
+    var next = [];
+    for (var mi = 0; mi < current.length; mi += 2) {
+      var a=current[mi],b=current[mi+1];
+      if(a&&!b){next.push(a);continue;}if(!a&&b){next.push(b);continue;}
+      var res = ts.matchResults[ri+'_'+(mi/2)];
+      next.push(res ? res.winner : null);
+    }
+    rounds.push(next); current = next; ri++;
+  }
+  return rounds;
+}
+
+function openTournModal(di, ri, mi) {
+  var rounds = getTournamentRoundsForDiv(di);
+  var teamA = rounds[ri][mi*2], teamB = rounds[ri][mi*2+1];
+  if (!teamA || !teamB) return;
+  currentTournMatch = {di:di, ri:ri, mi:mi, teamA:teamA, teamB:teamB};
+  var key = ri+'_'+mi;
+  var res = tournamentStates[di].matchResults[key] || null;
+  document.getElementById('modal-title').innerHTML =
+    '<span style="font-size:10px;color:var(--text3)">'+cfg.divisions[di].name+' トーナメント</span><br>' +
+    '<span style="font-size:10px;color:var(--text3)">'+teamA.leagueLabel+'リーグ'+(teamA.rankInLeague+1)+'位</span>' +
+    '<span style="font-weight:700"> '+esc(teamA.name)+'</span>' +
+    '<span class="modal-vs">VS</span>' +
+    '<span style="font-size:10px;color:var(--text3)">'+teamB.leagueLabel+'リーグ'+(teamB.rankInLeague+1)+'位</span>' +
+    '<span style="font-weight:700"> '+esc(teamB.name)+'</span>';
+  var body = '';
+  CATS.forEach(function(cat) {
+    var games = res?res[cat]:[{a:'',b:''},{a:'',b:''},{a:'',b:''}];
+    var wins = res?cWins(res[cat]):{wA:0,wB:0};
+    var cw = res?catWin(res[cat]):null;
+    body += '<div class="cat-block"><div class="cat-block-header"><span class="cat-tag '+cat+'">'+CAT_LABELS[cat]+'</span><span class="cat-block-name">'+CAT_NAMES[cat]+'</span>'+(res?'<span class="cat-wins-info">'+esc(teamA.name.slice(0,4))+':<b style="color:'+(cw==='A'?'var(--accent)':'var(--red)')+'">'+wins.wA+'</b>/'+esc(teamB.name.slice(0,4))+':<b style="color:'+(cw==='B'?'var(--accent)':'var(--red)')+'">'+wins.wB+'</b></span>':'')+'</div>';
+    [0,1,2].forEach(function(gi) {
+      var gv = games[gi]||{a:'',b:''}; var gpt = cfg.gamePoints[gi];
+      body += '<div class="game-row"><span class="game-lbl">G'+(gi+1)+'<span style="font-size:9px;color:var(--accent);display:block;line-height:1.2;margin-top:1px">'+gpt+'点</span></span><span class="team-side-lbl">'+esc(teamA.name.slice(0,3))+'</span><input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="tm_'+cat+'_'+gi+'_a" value="'+(gv.a!==''?gv.a:'')+'" placeholder="0"><span class="score-sep">—</span><input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="tm_'+cat+'_'+gi+'_b" value="'+(gv.b!==''?gv.b:'')+'" placeholder="0"><span class="team-side-lbl">'+esc(teamB.name.slice(0,3))+'</span></div>';
+    });
+    body += '</div>';
+  });
+  var curWinner = res?(res.winner===teamA?'A':'B'):'';
+  body += '<div style="margin-top:8px;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius)">' +
+    '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:700">勝者（スコアから自動判定 / 手動上書き可）</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button id="tw-btn-a" onclick="selectTournWinner(\'A\')" class="btn btn-sm" style="flex:1;'+(curWinner==='A'?'background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)':'')+'">'+esc(teamA.name)+'</button>' +
+    '<button id="tw-btn-b" onclick="selectTournWinner(\'B\')" class="btn btn-sm" style="flex:1;'+(curWinner==='B'?'background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)':'')+'">'+esc(teamB.name)+'</button>' +
+    '</div></div>';
+  document.getElementById('modal-body').innerHTML = body;
+  document.querySelector('.modal .btn-primary').setAttribute('onclick','saveTournMatch()');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function selectTournWinner(side) {
+  tournWinnerOverride = side;
+  ['A','B'].forEach(function(s) {
+    var btn=document.getElementById('tw-btn-'+s.toLowerCase());if(!btn)return;
+    if(s===side){btn.style.background='var(--accent-dim)';btn.style.color='var(--accent)';btn.style.borderColor='rgba(0,229,160,0.4)';}
+    else{btn.style.background='';btn.style.color='';btn.style.borderColor='';}
+  });
+}
+
+function saveTournMatch() {
+  if (!currentTournMatch) return;
+  var di=currentTournMatch.di, ri=currentTournMatch.ri, mi=currentTournMatch.mi;
+  var teamA=currentTournMatch.teamA, teamB=currentTournMatch.teamB;
+  var key = ri+'_'+mi; var result = {md:[],wd:[],xd:[]};
+  CATS.forEach(function(cat) {
+    [0,1,2].forEach(function(gi) {
+      var sa=parseInt(document.getElementById('tm_'+cat+'_'+gi+'_a') && document.getElementById('tm_'+cat+'_'+gi+'_a').value)||0;
+      var sb=parseInt(document.getElementById('tm_'+cat+'_'+gi+'_b') && document.getElementById('tm_'+cat+'_'+gi+'_b').value)||0;
+      result[cat].push({a:sa,b:sb});
+    });
+  });
+  var winner = null;
+  if (tournWinnerOverride) { winner = tournWinnerOverride==='A'?teamA:teamB; }
+  else {
+    var wA=CATS.filter(function(c){return catWin(result[c])==='A';}).length;
+    var wB=CATS.filter(function(c){return catWin(result[c])==='B';}).length;
+    if(wA>wB)winner=teamA;else if(wB>wA)winner=teamB;
+  }
+  result.winner = winner;
+  result.winnerName = winner ? winner.name : null;
+  tournamentStates[di].matchResults[key] = result;
+  tournWinnerOverride = null;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.querySelector('.modal .btn-primary').setAttribute('onclick','saveMatch()');
+  renderTournPanel(di);
+  scheduleAutoSave();
+}
+
+function buildTournamentUI() {
+  if (!data.length) return;
+  document.getElementById('no-tournament').style.display='none';
+  document.getElementById('tournament-content').style.display='block';
+  cfg.divisions.forEach(function(_,di){ if(!tournamentStates[di]) initTournamentStateForDiv(di); });
+  buildDivTabsUI('tourn','div-tabs-tourn','div-panels-tourn',buildTournDivPanel,'no-tournament','tournament-content');
+}
+
+function buildTournDivPanel(di) {
+  setTimeout(function(){renderTournPanel(di);}, 0);
+  return '<div id="tourn-panel-'+di+'"></div>';
+}
+
+function renderTournPanel(di) {
+  var panel = document.getElementById('tourn-panel-'+di);
+  if (!panel) return;
+  if (!tournamentStates[di]) initTournamentStateForDiv(di);
+  var ts = tournamentStates[di];
+  var seeds = ts.seeds;
+  var div = cfg.divisions[di];
+
+  var html = '<div class="alert alert-info" style="margin-bottom:12px;font-size:12px">' +
+    div.name + ' — 各リーグ上位 ' + div.advanceCount + ' チーム × ' + data[di].length + ' リーグ = 計 ' + seeds.length + ' チームでトーナメント</div>';
+
+  html += '<div class="sec-title">シード順 <span style="font-weight:400;color:var(--text3);font-size:10px;letter-spacing:0">↕ で変更</span></div><div class="tourn-seed-list">';
+  seeds.forEach(function(s,i) {
+    var sc=i===0?'var(--yellow)':i===1?'var(--text2)':i===2?'#cd7f32':'var(--text3)';
+    html+='<div class="tourn-seed-item">' +
+      '<span class="seed-num" style="color:'+sc+'">'+(i+1)+'</span>' +
+      '<span class="seed-league" style="background:'+s.color.bg+';color:'+s.color.text+'">'+s.leagueLabel+'リーグ '+(s.rankInLeague+1)+'位</span>' +
+      '<span class="seed-name">'+esc(s.name)+'</span>' +
+      '<span class="seed-stat" style="margin-left:auto">'+s.totalW+'勝 '+(s.diff>=0?'+':'')+s.diff+'</span>' +
+      '<div style="display:flex;flex-direction:column;gap:2px;margin-left:8px;flex-shrink:0">' +
+      '<button onclick="moveSeed('+di+','+i+',-1)" class="btn btn-sm btn-ghost" style="padding:2px 8px;min-height:20px;font-size:12px;line-height:1"'+(i===0?' disabled style="opacity:.3;pointer-events:none"':'')+'>▲</button>' +
+      '<button onclick="moveSeed('+di+','+i+',+1)" class="btn btn-sm btn-ghost" style="padding:2px 8px;min-height:20px;font-size:12px;line-height:1"'+(i===seeds.length-1?' disabled style="opacity:.3;pointer-events:none"':'')+'>▼</button>' +
+      '</div></div>';
+  });
+  html+='</div><button class="btn btn-ghost btn-block" style="margin-bottom:16px;font-size:12px" onclick="resetTournamentSeeds('+di+')">↺ リーグ順位からシードを再計算</button>';
+
+  var rounds = getTournamentRoundsForDiv(di);
+  var totalRounds = rounds.length - 1;
+  if (totalRounds <= 0) { panel.innerHTML = html; return; }
+
+  var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
+  html += '<div class="sec-title">ブラケット <span style="font-weight:400;color:var(--text3);font-size:10px;letter-spacing:0">試合枠をタップしてスコア入力</span></div><div class="bracket-rounds">';
+
+  for (var ri = 0; ri < totalRounds; ri++) {
+    var matchCount = rounds[ri].length / 2;
+    var rName = roundNames[Math.max(0, roundNames.length-totalRounds+ri)] || '第'+(ri+1)+'回戦';
+    html += '<div class="bracket-round"><div class="bracket-round-title">'+rName+'</div><div class="bracket-col">';
+    for (var mi = 0; mi < matchCount; mi++) {
+      var teamA=rounds[ri][mi*2], teamB=rounds[ri][mi*2+1];
+      var isByeA=!teamA, isByeB=!teamB;
+      var key=ri+'_'+mi;
+      var res=ts.matchResults[key];
+      var autoWinner=isByeB?teamA:isByeA?teamB:null;
+      var winner=res?res.winner:autoWinner;
+      var canTap=!!(teamA&&teamB);
+      html+='<div class="bracket-spacer"></div><div class="bracket-match"'+(canTap?' onclick="openTournModal('+di+','+ri+','+mi+')" style="cursor:pointer"':'')+'>'; 
+      if(canTap&&!res) html+='<div style="font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.04em">TAP TO ENTER</div>';
+      if(res){
+        var cr=CATS.map(function(c){var w=catWin(res[c]);return '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;color:'+(w==='A'?'var(--accent)':'var(--red)')+'">'+CAT_LABELS[c]+(w==='A'?'○':'✕')+'</span>';}).join(' ');
+        html+='<div style="text-align:center;padding:2px 4px;display:flex;gap:4px;justify-content:center">'+cr+'</div>';
+      }
+      var teamRow=function(team,isWin){
+        if(!team)return '<div class="bracket-team bye"><span class="bracket-team-seed">—</span><span>BYE</span></div>';
+        var si=ts.seeds.indexOf(team);
+        return '<div class="bracket-team'+(isWin?' winner':'')+'"><span class="bracket-team-seed" style="color:'+team.color.text+'">'+(si+1)+'</span><span style="font-size:9px;background:'+team.color.bg+';color:'+team.color.text+';padding:1px 4px;border-radius:3px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;flex-shrink:0">'+team.leagueLabel+(team.rankInLeague+1)+'位</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">'+esc(team.name)+'</span>'+(isWin?'<span style="font-size:10px;color:var(--accent)">✓</span>':'')+'</div>';
+      };
+      html+=teamRow(teamA,winner===teamA);
+      html+='<div class="bracket-divider"></div>';
+      html+=teamRow(teamB,winner===teamB);
+      html+='</div><div class="bracket-gap"></div>';
+    }
+    html+='<div class="bracket-spacer"></div></div></div>';
+  }
+
+  var champion=rounds[totalRounds]?rounds[totalRounds][0]:null;
+  html+='<div class="bracket-round"><div class="bracket-round-title" style="color:var(--yellow)">🏆 優勝</div>' +
+    '<div class="bracket-col" style="justify-content:center;align-items:center;padding:16px 8px">' +
+    (champion
+      ?'<div style="text-align:center"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-size:11px;font-weight:700;color:var(--yellow)">'+esc(champion.name)+'</div><div style="font-size:9px;color:var(--text3);margin-top:2px">'+champion.leagueLabel+'リーグ '+(champion.rankInLeague+1)+'位</div></div>'
+      :'<div style="text-align:center;color:var(--text3);font-size:11px">決勝<br>勝者</div>') +
+    '</div></div>';
+  html+='</div>';
+  panel.innerHTML=html;
+}
+
+function moveSeed(di,idx,dir) {
+  var seeds=tournamentStates[di].seeds;var newIdx=idx+dir;
+  if(newIdx<0||newIdx>=seeds.length)return;
+  var tmp=seeds[idx];seeds[idx]=seeds[newIdx];seeds[newIdx]=tmp;
+  tournamentStates[di].matchResults={};renderTournPanel(di);scheduleAutoSave();
+}
+function resetTournamentSeeds(di) {initTournamentStateForDiv(di);renderTournPanel(di);scheduleAutoSave();}
+
+// ========== NAV ==========
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.bnav-item').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-'+p).classList.add('active');
+  var btn = document.getElementById('bnav-'+p);
+  if (btn) btn.classList.add('active');
+  if(p==='tournament') {
+    if(!document.querySelector('#div-tabs-tourn .dtab')) { buildTournamentUI(); }
+    else { syncDivTabActive('tourn'); }
+  }
+  syncDivTabActive('league');
+  syncDivTabActive('ranking');
+  window.scrollTo(0,0);
+}
+
+function syncDivTabActive(kind) {
+  var di = activeDivTab[kind]||0;
+  var tabsId = kind==='league'?'div-tabs-league':kind==='ranking'?'div-tabs-ranking':'div-tabs-tourn';
+  var panelsId = kind==='league'?'div-panels-league':kind==='ranking'?'div-panels-ranking':'div-panels-tourn';
+  document.querySelectorAll('#'+tabsId+' .dtab').forEach(function(t,i){t.classList.toggle('active',i===di);});
+  document.querySelectorAll('#'+panelsId+' .div-tab-pane').forEach(function(p,i){p.classList.toggle('active',i===di);});
+}
+
+renderDivSettings();
+previewSettings();
+
+// ========== 大会管理 ==========
+var currentTournamentId = null;
+
+function goHome() {
+  currentTournamentId = null;
+  document.getElementById('bottom-nav').style.display = 'none';
+  document.getElementById('back-btn').style.display = 'none';
+  document.querySelector('.brand-text').innerHTML = 'ADMIN <span>PANEL</span>';
+  document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
+  document.getElementById('page-home').classList.add('active');
+  gasLoadList();
+}
+
+function startNewTournament() {
+  currentTournamentId = null;
+  cfg.tournamentName = '';
+  cfg.gamePoints = [11,21,21];
+  cfg.divisions = [
+    {name:'1部',leagueCount:2,teamsPerLeague:4,advanceCount:2},
+    {name:'2部',leagueCount:2,teamsPerLeague:4,advanceCount:2},
+    {name:'3部',leagueCount:2,teamsPerLeague:4,advanceCount:2},
+    {name:'4部',leagueCount:2,teamsPerLeague:4,advanceCount:2},
+  ];
+  data = [];
+  tournamentStates = [];
+  document.getElementById('s-tournament-name').value = '';
+  [0,1,2].forEach(function(gi) {
+    document.querySelectorAll('.point-btn[data-game="'+gi+'"]').forEach(function(b) {
+      b.classList.toggle('active', parseInt(b.dataset.pt)===cfg.gamePoints[gi]);
+    });
+  });
+  renderDivSettings();
+  previewSettings();
+  enterTournament();
+  showPage('settings');
+}
+
+function enterTournament() {
+  document.getElementById('bottom-nav').style.display = 'flex';
+  document.getElementById('back-btn').style.display = 'block';
+}
+
+function openTournament(id, savedData) {
+  currentTournamentId = id;
+  loadFromGAS(savedData);
+  enterTournament();
+}
+
+function renderTournamentList(list) {
+  var el = document.getElementById('tournament-list');
+  if (!list || list.length === 0) {
+    el.innerHTML = '<div class="alert alert-info">まだ大会がありません。「新しい大会を作成」から始めてください。</div>';
+    return;
+  }
+  el.innerHTML = list.map(function(t) {
+    return '<div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:10px" onclick="gasLoadTournament(\'' + t.id + '\')">' +
+      '<div style="flex:1"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
+      '<div style="font-size:11px;color:var(--text2);margin-top:3px">' + (t.updatedAt || '') + ' ／ ' + (t.summary || '') + '</div></div>' +
+      '<span style="color:var(--text3);font-size:20px">›</span></div>';
+  }).join('');
+}
+
+function loadFromGAS(saved) {
+  if (!saved) { buildAllUI(); showPage('settings'); return; }
+  if (saved.cfg) {
+    if (saved.cfg.tournamentName) {
+      cfg.tournamentName = saved.cfg.tournamentName;
+      document.getElementById('s-tournament-name').value = saved.cfg.tournamentName;
+      document.querySelector('.brand-text').innerHTML = '<span style="color:var(--accent)">' + esc(saved.cfg.tournamentName) + '</span>';
+    }
+    if (saved.cfg.gamePoints) {
+      cfg.gamePoints = saved.cfg.gamePoints;
+      [0,1,2].forEach(function(gi) {
+        document.querySelectorAll('.point-btn[data-game="'+gi+'"]').forEach(function(b) {
+          b.classList.toggle('active', parseInt(b.dataset.pt)===cfg.gamePoints[gi]);
+        });
+      });
+    }
+    if (saved.cfg.divisions) { cfg.divisions = saved.cfg.divisions; renderDivSettings(); previewSettings(); }
+  }
+  entries = saved.entries || [];
+  data = saved.data;
+  cfg.divisions.forEach(function(div,di){ if(data[di]) div.leagueCount=data[di].length; });
+  tournamentStates = [];
+  if (saved.tournamentStates) {
+    saved.tournamentStates.forEach(function(ts, di) {
+      if (!ts) return;
+      var size = 1; var n = ts.seeds ? ts.seeds.length : 0;
+      while (size < n) size *= 2;
+      var slots = new Array(size).fill(null);
+      if (ts.seeds) ts.seeds.forEach(function(s, i) { slots[i] = s; });
+      var matchResults = {};
+      Object.entries(ts.matchResults || {}).forEach(function(entry) {
+        var key = entry[0]; var res = entry[1];
+        var winner = res.winnerName
+          ? (ts.seeds || []).find(function(s) { return s && s.name === res.winnerName; }) || null
+          : null;
+        matchResults[key] = Object.assign({}, res, {winner: winner});
+      });
+      tournamentStates[di] = { seeds: ts.seeds || [], slots: slots, matchResults: matchResults };
+    });
+  }
+  buildAllUI();
+  showPage('leagues');
+}
+
+var _isSaving = false;
+var _pendingSave = false;
+var _autoSaveTimer = null;
+
+function scheduleAutoSave() {
+  if (!currentTournamentId && !cfg.tournamentName) return;
+  clearTimeout(_autoSaveTimer);
+  showSaveStatus('pending');
+  _autoSaveTimer = setTimeout(function(){ _doSave(false); }, 2000);
+}
+
+function gasSave() { clearTimeout(_autoSaveTimer); _doSave(true); }
+
+function _doSave(isManual) {
+  if (typeof google === 'undefined' || !google.script) { if (isManual) showToast('（ローカル：GAS未接続）'); return; }
+  if (_isSaving) { _pendingSave = true; return; }
+  _isSaving = true; _pendingSave = false;
+  showSaveStatus('saving');
+  var name    = cfg.tournamentName || '名前なし';
+  var summary = cfg.divisions.map(function(d){ return d.name+':'+d.leagueCount+'リーグ'; }).join(' / ');
+  var ts = tournamentStates.map(function(t) { return t ? { seeds: t.seeds, matchResults: t.matchResults } : null; });
+  var payload = { cfg:cfg, data:data, tournamentStates:ts, entries:entries, name:name, summary:summary };
+  google.script.run
+    .withSuccessHandler(function(newId) {
+      _isSaving = false;
+      if (newId) currentTournamentId = newId;
+      showSaveStatus('saved');
+      if (_pendingSave) { _pendingSave = false; _doSave(false); }
+      if (isManual) showToast('保存しました');
+    })
+    .withFailureHandler(function(e) {
+      _isSaving = false; showSaveStatus('error');
+      if (isManual) alert('保存エラー: '+e.message);
+    })
+    .saveTournament(currentTournamentId, JSON.stringify(payload));
+}
+
+function showSaveStatus(status) {
+  var el = document.getElementById('save-status');
+  if (!el) return;
+  if (status==='pending') { el.textContent='…'; el.style.color='var(--text3)'; }
+  else if (status==='saving') { el.textContent='保存中…'; el.style.color='var(--text3)'; }
+  else if (status==='saved') { el.textContent='✓ 保存済み'; el.style.color='var(--accent)'; setTimeout(function(){ if(el.textContent==='✓ 保存済み') el.textContent=''; }, 3000); }
+  else if (status==='error') { el.textContent='⚠ 保存失敗'; el.style.color='var(--red)'; }
+}
+
+function gasLoadList() {
+  showLoading(true);
+  if (typeof google !== 'undefined' && google.script) {
+    google.script.run
+      .withSuccessHandler(function(list){ showLoading(false); renderTournamentList(list); })
+      .withFailureHandler(function(e){ showLoading(false); document.getElementById('tournament-list').innerHTML='<div class="alert alert-warn">読み込みエラー: '+e.message+'</div>'; })
+      .loadTournamentList();
+  } else { showLoading(false); renderTournamentList([]); }
+}
+
+function gasLoadTournament(id) {
+  showLoading(true);
+  if (typeof google !== 'undefined' && google.script) {
+    google.script.run
+      .withSuccessHandler(function(d){ showLoading(false); currentTournamentId=id; openTournament(id, d); })
+      .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+      .loadTournament(id);
+  } else { showLoading(false); openTournament(id, null); }
+}
+
+function showLoading(on) { document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none'; }
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(function(){ t.style.opacity='0'; }, 2500);
+}
+
+renderDivSettings();
+previewSettings();
+
+function startApp(pageType, tournamentId) {
+  if (typeof google !== 'undefined' && google.script) { gasLoadList(); }
+  else if (typeof google !== 'undefined' && google.script) { gasLoadList(); }
+  else { document.getElementById('page-home').classList.add('active'); renderTournamentList([]); }
+}
+
+try {
+  startApp(typeof gasPage !== 'undefined' ? gasPage : null,
+           typeof gasId   !== 'undefined' ? gasId   : null);
+} catch(e) {
+  console.error('startApp error:', e);
+  document.getElementById('page-home').classList.add('active');
+  renderTournamentList([]);
+}
+</script>
+</body>
+</html>
