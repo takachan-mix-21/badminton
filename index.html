@@ -84,6 +84,8 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
 .team-badge{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex-shrink:0}
 .team-name-inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:40px;margin:0}
 .team-name-inp:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+select.team-name-sel{appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:32px;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%238b92a8' d='M0 0l5 6 5-6z'/></svg>");background-repeat:no-repeat;background-position:right 12px center}
+select.team-name-sel option{background:var(--bg2);color:var(--text)}
 .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
 .league-tbl{border-collapse:collapse;font-size:11px;white-space:nowrap;width:100%}
 .league-tbl th,.league-tbl td{border:1px solid var(--border);text-align:center;padding:0}
@@ -164,7 +166,11 @@ input[type=number]:focus,select:focus{border-color:var(--accent);box-shadow:0 0 
 .bracket-team-seed{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;width:18px;text-align:center;flex-shrink:0;color:var(--text3)}
 .bracket-divider{height:1px;background:var(--border2);margin:0 8px}
 .bracket-gap{height:12px}
-.entry-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px}
+.entry-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px}
+.entry-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:700px){.entry-grid{grid-template-columns:repeat(2,1fr)}}
+@media (min-width:1000px){.entry-grid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:1300px){.entry-grid{grid-template-columns:repeat(4,1fr)}}
 .entry-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .entry-member-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .entry-member-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--text3);width:34px;flex-shrink:0;text-align:center}
@@ -501,10 +507,27 @@ function switchRankingTab(di,li) {
 
 function buildLeaguePanel(di,li) {
   var lg=data[di][li];
+  var divName=(cfg.divisions[di]&&cfg.divisions[di].name)||((di+1)+'部');
+  var availableEntries=entries.filter(function(e){return (e.status||'approved')!=='rejected' && e.teamName;});
   var nameHtml='<div class="team-name-grid">';
   lg.teams.forEach(function(name,ti) {
     var c=TEAM_COLORS[ti%TEAM_COLORS.length];
-    nameHtml+='<div class="team-name-row"><div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+ALPHA[li]+(ti+1)+'</div><input class="team-name-inp" type="text" value="'+esc(name)+'" oninput="updateTeamName('+di+','+li+','+ti+',this.value)" placeholder="チーム名を入力"></div>';
+    var defaultName=divName+ALPHA[li]+(ti+1);
+    var isDefault=(name===defaultName);
+    var assignedEntry=availableEntries.find(function(e){return e.placedSlot && e.placedSlot.di===di && e.placedSlot.li===li && e.placedSlot.ti===ti;});
+    var sel='<select class="team-name-inp team-name-sel" onchange="assignTeamToSlot('+di+','+li+','+ti+',this.value)">';
+    sel+='<option value="'+esc(defaultName)+'"'+(isDefault?' selected':'')+'>(未選択)</option>';
+    availableEntries.forEach(function(e) {
+      var used=(e.placedSlot && (e.placedSlot.di!==di||e.placedSlot.li!==li||e.placedSlot.ti!==ti));
+      var lbl=e.teamName+(e.status==='pending'?' [承認待ち]':'')+(used?' ('+(cfg.divisions[e.placedSlot.di]&&cfg.divisions[e.placedSlot.di].name||'')+ALPHA[e.placedSlot.li]+(e.placedSlot.ti+1)+'に配置済)':'');
+      var isSel=(e===assignedEntry)||(!isDefault&&!assignedEntry&&e.teamName===name);
+      sel+='<option value="'+esc(e.teamName)+'"'+(isSel?' selected':'')+'>'+esc(lbl)+'</option>';
+    });
+    if(!isDefault && !assignedEntry && !availableEntries.some(function(e){return e.teamName===name;})) {
+      sel+='<option value="'+esc(name)+'" selected>'+esc(name)+' (旧データ)</option>';
+    }
+    sel+='</select>';
+    nameHtml+='<div class="team-name-row"><div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+ALPHA[li]+(ti+1)+'</div>'+sel+'</div>';
   });
   nameHtml+='</div>';
   var tbl='<div class="tbl-wrap"><table class="league-tbl"><thead><tr><th class="th-team"></th>';
@@ -554,6 +577,50 @@ function updateTeamName(di,li,ti,val) {
   refreshRankingPanel(di,li);
   clearTimeout(_teamNameTimer);
   _teamNameTimer = setTimeout(scheduleAutoSave, 1000);
+}
+
+function assignTeamToSlot(di,li,ti,val) {
+  var divName=(cfg.divisions[di]&&cfg.divisions[di].name)||((di+1)+'部');
+  var defaultName=divName+ALPHA[li]+(ti+1);
+  var affected={};
+  affected[di+'_'+li]=true;
+
+  entries.forEach(function(e) {
+    if (e.placedSlot && e.placedSlot.di===di && e.placedSlot.li===li && e.placedSlot.ti===ti && e.teamName!==val) {
+      delete e.placedSlot;
+      delete e.placedLabel;
+    }
+  });
+
+  if (!val || val===defaultName) {
+    data[di][li].teams[ti]=defaultName;
+  } else {
+    var match=null;
+    for (var i=0;i<entries.length;i++) {
+      if (entries[i].teamName===val) { match=entries[i]; break; }
+    }
+    if (match) {
+      if (match.placedSlot && (match.placedSlot.di!==di||match.placedSlot.li!==li||match.placedSlot.ti!==ti)) {
+        var ps=match.placedSlot;
+        var prevDivName=(cfg.divisions[ps.di]&&cfg.divisions[ps.di].name)||((ps.di+1)+'部');
+        if (data[ps.di]&&data[ps.di][ps.li]&&data[ps.di][ps.li].teams) {
+          data[ps.di][ps.li].teams[ps.ti]=prevDivName+ALPHA[ps.li]+(ps.ti+1);
+          affected[ps.di+'_'+ps.li]=true;
+        }
+      }
+      match.placedSlot={di:di,li:li,ti:ti};
+      match.placedLabel=divName+' '+ALPHA[li]+'リーグ '+(ti+1)+'番';
+      if (match.status==='pending') match.status='approved';
+    }
+    data[di][li].teams[ti]=val;
+  }
+
+  Object.keys(affected).forEach(function(k) {
+    var p=k.split('_');
+    refreshLeaguePanel(parseInt(p[0]),parseInt(p[1]));
+    refreshRankingPanel(parseInt(p[0]),parseInt(p[1]));
+  });
+  scheduleAutoSave();
 }
 
 // ========== MATCH HELPERS ==========
@@ -953,7 +1020,11 @@ function updateMembersCount(val) {
 }
 
 function addEntry() {
-  var newEntry = {teamName:'', email:'', members:[], status:'approved', submittedAt: new Date().toISOString()};
+  var defaultDiv = (cfg.divisions[0] && cfg.divisions[0].name) || '';
+  if (activeEntryDivTab && activeEntryDivTab !== '__all__' && activeEntryDivTab !== '__unspecified__') {
+    defaultDiv = activeEntryDivTab;
+  }
+  var newEntry = {teamName:'', email:'', repName:'', address:'', phone:'', division: defaultDiv, members:[], status:'approved', submittedAt: new Date().toISOString()};
   ensureEntryMembers(newEntry);
   entries.push(newEntry);
   renderEntries();
@@ -968,12 +1039,43 @@ function removeEntry(idx) {
 }
 
 function updateEntryTeamName(idx, val) {
-  entries[idx].teamName = val;
+  var entry = entries[idx];
+  var oldName = entry.teamName;
+  entry.teamName = val;
+  if (entry.placedSlot) {
+    var s = entry.placedSlot;
+    if (data[s.di] && data[s.di][s.li] && data[s.di][s.li].teams && data[s.di][s.li].teams[s.ti] === oldName) {
+      data[s.di][s.li].teams[s.ti] = val;
+      refreshLeaguePanel(s.di, s.li);
+      refreshRankingPanel(s.di, s.li);
+    }
+  }
   scheduleAutoSave();
 }
 
 function updateEntryEmail(idx, val) {
   entries[idx].email = val;
+  scheduleAutoSave();
+}
+
+function updateEntryRepName(idx, val) {
+  entries[idx].repName = val;
+  scheduleAutoSave();
+}
+
+function updateEntryAddress(idx, val) {
+  entries[idx].address = val;
+  scheduleAutoSave();
+}
+
+function updateEntryPhone(idx, val) {
+  entries[idx].phone = val;
+  scheduleAutoSave();
+}
+
+function updateEntryDivision(idx, val) {
+  entries[idx].division = val;
+  renderEntries();
   scheduleAutoSave();
 }
 
@@ -1036,11 +1138,46 @@ function renderEntries() {
   }
   var disp = document.getElementById('entry-mpt-display');
   if (disp) disp.textContent = cfg.membersPerTeam;
+
+  if (!activeEntryDivTab) activeEntryDivTab = '__all__';
+
+  var divTabsHtml = '<div class="div-tab-bar" style="margin-bottom:12px">';
+  var allCount = entries.length;
+  var allPending = entries.filter(function(e){return (e.status||'pending')==='pending';}).length;
+  divTabsHtml += '<button class="dtab'+(activeEntryDivTab==='__all__'?' active':'')+'" onclick="setEntryDivTab(\'__all__\')">全部 '+allCount+(allPending?' (待'+allPending+')':'')+'</button>';
+  cfg.divisions.forEach(function(div) {
+    var divEntries = entries.filter(function(e){return e.division === div.name;});
+    var divPending = divEntries.filter(function(e){return (e.status||'pending')==='pending';}).length;
+    divTabsHtml += '<button class="dtab'+(activeEntryDivTab===div.name?' active':'')+'" onclick="setEntryDivTab(\''+esc(div.name).replace(/'/g,"\\'")+'\')">'+esc(div.name)+' '+divEntries.length+(divPending?' (待'+divPending+')':'')+'</button>';
+  });
+  var unspecified = entries.filter(function(e){
+    return !e.division || !cfg.divisions.some(function(d){return d.name === e.division;});
+  });
+  if (unspecified.length > 0) {
+    divTabsHtml += '<button class="dtab'+(activeEntryDivTab==='__unspecified__'?' active':'')+'" onclick="setEntryDivTab(\'__unspecified__\')">未指定 '+unspecified.length+'</button>';
+  }
+  divTabsHtml += '</div>';
+
   if (entries.length === 0) {
-    el.innerHTML = '<div class="alert alert-info">まだエントリーがありません。下のボタンから追加してください。</div>';
+    el.innerHTML = divTabsHtml + '<div class="alert alert-info">まだエントリーがありません。下のボタンから追加してください。</div>';
     return;
   }
-  el.innerHTML = entries.map(function(e, idx) {
+
+  var visible = entries.map(function(e, idx) { return {e:e, idx:idx}; }).filter(function(x) {
+    if (activeEntryDivTab === '__all__') return true;
+    if (activeEntryDivTab === '__unspecified__') {
+      return !x.e.division || !cfg.divisions.some(function(d){return d.name === x.e.division;});
+    }
+    return x.e.division === activeEntryDivTab;
+  });
+
+  if (visible.length === 0) {
+    el.innerHTML = divTabsHtml + '<div class="alert alert-info">この部門にはエントリーがありません。</div>';
+    return;
+  }
+
+  var listHtml = visible.map(function(x, vi) {
+    var e = x.e; var idx = x.idx;
     ensureEntryMembers(e);
     var c = TEAM_COLORS[idx % TEAM_COLORS.length];
     var status = e.status || 'approved';
@@ -1050,16 +1187,23 @@ function renderEntries() {
     else { statusBg='var(--yellow-dim)'; statusColor='var(--yellow)'; statusText='承認待ち'; }
     var html = '<div class="entry-card">';
     html += '<div class="entry-head">';
-    html += '<div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+(idx+1)+'</div>';
+    html += '<div class="team-badge" style="background:'+c.bg+';color:'+c.text+'">'+(vi+1)+'</div>';
     html += '<input class="entry-text-inp" type="text" placeholder="チーム名" value="'+esc(e.teamName||'')+'" oninput="updateEntryTeamName('+idx+',this.value)">';
     html += '<span style="display:inline-flex;align-items:center;padding:4px 10px;background:'+statusBg+';color:'+statusColor+';border:1px solid '+statusColor+';border-radius:14px;font-size:11px;font-weight:700;flex-shrink:0">'+statusText+'</span>';
     html += '<button class="entry-remove-btn" onclick="removeEntry('+idx+')">削除</button>';
     html += '</div>';
-    html += '<div class="entry-member-row" style="margin-bottom:8px">';
-    html += '<span class="entry-member-lbl">📧</span>';
-    html += '<input class="entry-text-inp" type="email" placeholder="代表者メールアドレス" value="'+esc(e.email||'')+'" oninput="updateEntryEmail('+idx+',this.value)">';
-    html += '</div>';
-    html += '<div>';
+    if (cfg.divisions.length > 0) {
+      html += '<div class="entry-member-row" style="margin-bottom:8px">';
+      html += '<span class="entry-member-lbl">部</span>';
+      html += '<select class="entry-text-inp" onchange="updateEntryDivision('+idx+',this.value)">';
+      html += '<option value=""'+(!e.division?' selected':'')+'>(未指定)</option>';
+      cfg.divisions.forEach(function(d) {
+        html += '<option value="'+esc(d.name)+'"'+(e.division===d.name?' selected':'')+'>'+esc(d.name)+'</option>';
+      });
+      html += '</select>';
+      html += '</div>';
+    }
+    html += '<div style="margin-bottom:8px">';
     e.members.forEach(function(m, mi) {
       html += '<div class="entry-member-row">';
       html += '<span class="entry-member-lbl">'+(mi+1)+'</span>';
@@ -1067,6 +1211,22 @@ function renderEntries() {
       html += '<input class="entry-age-inp" type="number" min="0" max="120" inputmode="numeric" placeholder="年齢" value="'+(m.age!==''&&m.age!=null?esc(m.age):'')+'" oninput="updateMemberAge('+idx+','+mi+',this.value)">';
       html += '</div>';
     });
+    html += '</div>';
+    html += '<div class="entry-member-row" style="margin-bottom:8px">';
+    html += '<span class="entry-member-lbl">👤</span>';
+    html += '<input class="entry-text-inp" type="text" placeholder="代表者氏名" value="'+esc(e.repName||'')+'" oninput="updateEntryRepName('+idx+',this.value)">';
+    html += '</div>';
+    html += '<div class="entry-member-row" style="margin-bottom:8px">';
+    html += '<span class="entry-member-lbl">🏠</span>';
+    html += '<input class="entry-text-inp" type="text" placeholder="住所" value="'+esc(e.address||'')+'" oninput="updateEntryAddress('+idx+',this.value)">';
+    html += '</div>';
+    html += '<div class="entry-member-row" style="margin-bottom:8px">';
+    html += '<span class="entry-member-lbl">📞</span>';
+    html += '<input class="entry-text-inp" type="tel" placeholder="電話番号" value="'+esc(e.phone||'')+'" oninput="updateEntryPhone('+idx+',this.value)">';
+    html += '</div>';
+    html += '<div class="entry-member-row" style="margin-bottom:8px">';
+    html += '<span class="entry-member-lbl">📧</span>';
+    html += '<input class="entry-text-inp" type="email" placeholder="メールアドレス" value="'+esc(e.email||'')+'" oninput="updateEntryEmail('+idx+',this.value)">';
     html += '</div>';
     if (e.placedLabel) {
       html += '<div style="margin-top:8px;padding:6px 10px;background:var(--accent-dim);color:var(--accent);border-radius:var(--radius);font-size:11px;font-weight:700">配置先: '+esc(e.placedLabel)+'</div>';
@@ -1084,6 +1244,14 @@ function renderEntries() {
     html += '</div></div>';
     return html;
   }).join('');
+
+  el.innerHTML = divTabsHtml + '<div class="entry-grid">' + listHtml + '</div>';
+}
+
+var activeEntryDivTab = '__all__';
+function setEntryDivTab(tab) {
+  activeEntryDivTab = tab;
+  renderEntries();
 }
 
 // ========== TOURNAMENT (cont.) ==========
@@ -1175,18 +1343,37 @@ function openTournament(id, savedData) {
   enterTournament();
 }
 
+var _tournamentListCache = [];
 function renderTournamentList(list) {
+  _tournamentListCache = list || [];
   var el = document.getElementById('tournament-list');
   if (!list || list.length === 0) {
     el.innerHTML = '<div class="alert alert-info">まだ大会がありません。「新しい大会を作成」から始めてください。</div>';
     return;
   }
   el.innerHTML = list.map(function(t) {
-    return '<div class="card" style="display:flex;align-items:center;gap:12px;cursor:pointer;margin-bottom:10px" onclick="gasLoadTournament(\'' + t.id + '\')">' +
-      '<div style="flex:1"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
+    return '<div class="card" style="display:flex;align-items:center;gap:12px;margin-bottom:10px">' +
+      '<div style="flex:1;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
       '<div style="font-size:11px;color:var(--text2);margin-top:3px">' + (t.updatedAt || '') + ' ／ ' + (t.summary || '') + '</div></div>' +
-      '<span style="color:var(--text3);font-size:20px">›</span></div>';
+      '<button class="entry-remove-btn" onclick="event.stopPropagation();gasDeleteTournament(\''+t.id+'\')">削除</button>' +
+      '<span style="color:var(--text3);font-size:20px;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')">›</span></div>';
   }).join('');
+}
+
+function gasDeleteTournament(id) {
+  var t = _tournamentListCache.find(function(x){return x.id === id;});
+  var name = (t && t.name) || '名前なし';
+  if (!confirm('大会「' + name + '」を削除しますか？\nこの操作は元に戻せません。')) return;
+  showLoading(true);
+  if (typeof google === 'undefined' || !google.script) { showLoading(false); showToast('（ローカル：GAS未接続）'); return; }
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (res && res.ok) { showToast('削除しました'); gasLoadList(); }
+      else alert((res && res.error) || '削除に失敗しました');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('削除エラー: ' + e.message); })
+    .deleteTournament(id);
 }
 
 function loadFromGAS(saved) {

@@ -1,21 +1,29 @@
 const SHEET_ID = '1hJnmYf7dV7J1DD4EkV1M18LonrVwRwMKz1lVT5MUnKI';
 const SHEET_NAME = 'tournaments';
 
+var FAVICON_URL = 'https://raw.githubusercontent.com/takachan-mix-21/badminton/main/6342.ico';
+
 function doGet(e) {
   var params = (e && e.parameter) || {};
   var mode = params.mode || '';
-  if (mode === 'public') {
-    var t = HtmlService.createTemplateFromFile('public');
-    t.gasPage = mode;
-    t.gasId = params.id || '';
-    t.gasAction = params.action || '';
-    return t.evaluate()
+  if (mode === 'admin') {
+    return HtmlService.createHtmlOutputFromFile('index')
       .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .setTitle('バドミントン大会エントリー');
+      .setFaviconUrl(FAVICON_URL)
+      .setTitle('バドミントン大会管理');
   }
-  return HtmlService.createHtmlOutputFromFile('index')
+  var publicModes = {'':'', public:'', view:'view', status:'status', entry:''};
+  var actionMap = (mode in publicModes) ? publicModes[mode] : '';
+  var t = HtmlService.createTemplateFromFile('public');
+  t.gasPage = 'public';
+  t.gasId = params.id || '';
+  t.gasAction = params.action || actionMap;
+  var title = (mode === 'view') ? 'バドミントン大会 リーグ表' :
+              (mode === 'status') ? 'バドミントン大会 状況確認' : 'バドミントン大会エントリー';
+  return t.evaluate()
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-    .setTitle('バドミントン大会管理');
+    .setFaviconUrl(FAVICON_URL)
+    .setTitle(title);
 }
 
 function getSheet() {
@@ -142,6 +150,25 @@ function mergeNewServerEntries(clientPayload, serverPayload, lastLoadTime) {
   });
 }
 
+function deleteTournament(id) {
+  if (!id) return {ok: false, error: 'IDが指定されていません'};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        sheet.deleteRow(i + 1);
+        return {ok: true};
+      }
+    }
+    return {ok: false, error: '大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function loadTournament(id) {
   var sheet = getSheet();
   var rows = sheet.getDataRange().getValues();
@@ -152,6 +179,30 @@ function loadTournament(id) {
         if (p && p.entries) p.entries.forEach(normalizeEntry);
         return p;
       } catch(e) { return null; }
+    }
+  }
+  return null;
+}
+
+function getPublicTournamentView(id) {
+  var sheet = getSheet();
+  var rows = sheet.getDataRange().getValues();
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === id) {
+      try {
+        var p = JSON.parse(rows[i][4]) || {};
+        return {
+          id: id,
+          name: (p.cfg && p.cfg.tournamentName) || rows[i][1] || '名前なし',
+          divisions: (p.cfg && p.cfg.divisions) || [],
+          gamePoints: (p.cfg && p.cfg.gamePoints) || [11, 21, 21],
+          data: p.data || [],
+          tournamentStates: (p.tournamentStates || []).map(function(ts) {
+            if (!ts) return null;
+            return {seeds: ts.seeds || [], matchResults: ts.matchResults || {}};
+          })
+        };
+      } catch(err) { return null; }
     }
   }
   return null;
@@ -169,7 +220,8 @@ function getPublicTournamentInfo(id) {
           id: id,
           name: cfg.tournamentName || rows[i][1] || '名前なし',
           membersPerTeam: cfg.membersPerTeam || 4,
-          entryCount: (payload.entries || []).length
+          entryCount: (payload.entries || []).length,
+          divisions: (cfg.divisions || []).map(function(d) { return {name: d.name}; })
         };
       } catch(err) { return null; }
     }
@@ -199,6 +251,25 @@ function submitEntry(id, entryJson) {
         });
         if (dup) return {ok: false, error: 'このメールアドレスは既にエントリー済みです'};
         if (!entry.teamName || !String(entry.teamName).trim()) return {ok: false, error: 'チーム名は必須です'};
+        var divs = (payload.cfg && payload.cfg.divisions) || [];
+        var division = (entry.division || '').trim();
+        if (divs.length > 0) {
+          var validNames = divs.map(function(d) { return d.name; });
+          if (!division || validNames.indexOf(division) === -1) {
+            return {ok: false, error: '希望部門を選択してください'};
+          }
+        }
+        var repName = (entry.repName || '').trim();
+        var address = (entry.address || '').trim();
+        var phone = (entry.phone || '').trim();
+        if (!repName) return {ok: false, error: '代表者氏名は必須です'};
+        if (!address) return {ok: false, error: '住所は必須です'};
+        if (!phone) return {ok: false, error: '電話番号は必須です'};
+        if (!/^[\d\-+()\s]+$/.test(phone)) return {ok: false, error: '電話番号の形式が正しくありません'};
+        entry.repName = repName;
+        entry.address = address;
+        entry.phone = phone;
+        entry.division = division;
         entry.email = email;
         entry.teamName = String(entry.teamName).trim();
         entry.submittedAt = new Date().toISOString();
@@ -246,6 +317,7 @@ function checkEntryStatus(id, email) {
           status: found.status || 'pending',
           teamName: found.teamName || '',
           placedLabel: found.placedLabel || '',
+          division: found.division || '',
           submittedAt: found.submittedAt || '',
           tournamentName: tournamentName,
           memberCount: (found.members || []).filter(function(m){return m && m.name;}).length
@@ -279,7 +351,7 @@ function setEntryStatus(tournamentId, submittedAt, newStatus) {
         var prevPlacedSlot = entry.placedSlot ? {di: entry.placedSlot.di, li: entry.placedSlot.li, ti: entry.placedSlot.ti} : null;
         if (newStatus === 'approved') {
           if (!entry.placedSlot) {
-            var placement = placeTeamInLeague(payload, entry.teamName);
+            var placement = placeTeamInLeague(payload, entry.teamName, entry.division);
             if (placement) {
               entry.placedSlot = {di: placement.di, li: placement.li, ti: placement.ti};
               entry.placedLabel = placement.label;
@@ -334,11 +406,21 @@ function statusLabel(status) {
   return '承認待ち';
 }
 
-function placeTeamInLeague(payload, teamName) {
+function placeTeamInLeague(payload, teamName, preferredDivision) {
   if (!payload.data || !payload.data.length) return null;
   var divs = (payload.cfg && payload.cfg.divisions) || [];
   var alpha = 'ABCDEFGHIJKLMNOPQRST';
-  for (var di = 0; di < payload.data.length; di++) {
+  var divIndices = [];
+  if (preferredDivision) {
+    for (var di = 0; di < divs.length; di++) {
+      if (divs[di] && divs[di].name === preferredDivision) { divIndices.push(di); break; }
+    }
+  }
+  if (divIndices.length === 0) {
+    for (var di = 0; di < payload.data.length; di++) divIndices.push(di);
+  }
+  for (var k = 0; k < divIndices.length; k++) {
+    var di = divIndices[k];
     var divLeagues = payload.data[di];
     if (!divLeagues || !divLeagues.length) continue;
     for (var li = 0; li < divLeagues.length; li++) {
@@ -360,12 +442,32 @@ function placeTeamInLeague(payload, teamName) {
 function getEntriesSheet() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   var sheet = ss.getSheetByName('entries');
-  var newHeaders = ['受付日時', '大会ID', '大会名', 'チーム名', 'メール', 'メンバー', '状態', '配置先'];
+  var newHeaders = ['受付日時', '大会ID', '大会名', 'チーム名', 'メール', 'メンバー', '状態', '配置先', '希望部門', '代表者氏名', '住所', '電話番号'];
   if (sheet) {
     var lastCol = sheet.getLastColumn();
     var headers = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
-    var matches = lastCol >= 8 && headers[4] === 'メール' && headers[6] === '状態';
-    if (!matches) {
+    var hasFull = lastCol >= 12 && headers[8] === '希望部門' && headers[9] === '代表者氏名';
+    var hasV2 = lastCol >= 9 && headers[8] === '希望部門';
+    var hasV1 = lastCol >= 8 && headers[4] === 'メール' && headers[6] === '状態';
+    if (hasFull) {
+      // OK
+    } else if (hasV2) {
+      sheet.getRange(1, 10).setValue('代表者氏名').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.getRange(1, 11).setValue('住所').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.getRange(1, 12).setValue('電話番号').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.setColumnWidth(10, 160);
+      sheet.setColumnWidth(11, 280);
+      sheet.setColumnWidth(12, 140);
+    } else if (hasV1) {
+      sheet.getRange(1, 9).setValue('希望部門').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.getRange(1, 10).setValue('代表者氏名').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.getRange(1, 11).setValue('住所').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.getRange(1, 12).setValue('電話番号').setBackground('#263238').setFontColor('#00e5a0').setFontWeight('bold');
+      sheet.setColumnWidth(9, 120);
+      sheet.setColumnWidth(10, 160);
+      sheet.setColumnWidth(11, 280);
+      sheet.setColumnWidth(12, 140);
+    } else {
       sheet.setName('entries_old_' + new Date().getTime());
       sheet = null;
     }
@@ -378,7 +480,7 @@ function getEntriesSheet() {
       .setBackground('#263238')
       .setFontColor('#00e5a0')
       .setFontWeight('bold');
-    [150, 280, 200, 180, 220, 320, 100, 180].forEach(function(w, i) {
+    [150, 280, 200, 180, 220, 320, 100, 180, 120, 160, 280, 140].forEach(function(w, i) {
       sheet.setColumnWidth(i + 1, w);
     });
   }
@@ -402,7 +504,11 @@ function appendEntryToEntriesSheet(tournamentId, tournamentName, entry) {
     entry.email || '',
     membersStr,
     statusLabel(entry.status),
-    entry.placedLabel || ''
+    entry.placedLabel || '',
+    entry.division || '',
+    entry.repName || '',
+    entry.address || '',
+    entry.phone || ''
   ]);
 }
 
@@ -411,13 +517,18 @@ function updateEntryStateInSheet(tournamentId, entry) {
   var sheet = getEntriesSheet();
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return;
-  var data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
+  var lastCol = sheet.getLastColumn();
+  var data = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
   var emailKey = String(entry.email).toLowerCase().trim();
   for (var i = data.length - 1; i >= 0; i--) {
     var r = data[i];
     if (r[1] === tournamentId && String(r[4] || '').toLowerCase().trim() === emailKey) {
       sheet.getRange(i + 2, 7).setValue(statusLabel(entry.status));
       sheet.getRange(i + 2, 8).setValue(entry.placedLabel || '');
+      if (lastCol >= 9) sheet.getRange(i + 2, 9).setValue(entry.division || '');
+      if (lastCol >= 10) sheet.getRange(i + 2, 10).setValue(entry.repName || '');
+      if (lastCol >= 11) sheet.getRange(i + 2, 11).setValue(entry.address || '');
+      if (lastCol >= 12) sheet.getRange(i + 2, 12).setValue(entry.phone || '');
       return;
     }
   }

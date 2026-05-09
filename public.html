@@ -38,13 +38,14 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px}
 label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:700;letter-spacing:.02em}
-input[type=text],input[type=email],input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:44px;-webkit-appearance:none;appearance:none;margin:0}
+input[type=text],input[type=email],input[type=tel],input[type=number]{width:100%;padding:11px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:16px;background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;outline:none;transition:.2s;min-height:44px;-webkit-appearance:none;appearance:none;margin:0}
 input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 .btn{padding:10px 18px;border:1px solid var(--border2);background:transparent;border-radius:var(--radius);font-size:14px;font-weight:700;cursor:pointer;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;transition:.2s;min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:active{opacity:.75}
 .btn-primary{background:var(--accent);color:#0f1117;border-color:var(--accent)}
 .btn-block{width:100%}
 .btn-ghost{border-color:var(--border2);color:var(--text2)}
+.btn-sm{padding:6px 12px;font-size:12px;min-height:36px}
 .alert{padding:10px 14px;border-radius:var(--radius);font-size:12px;margin-bottom:12px;border:1px solid;line-height:1.5}
 .alert-info{background:rgba(79,195,247,0.07);color:#4fc3f7;border-color:rgba(79,195,247,0.2)}
 .alert-warn{background:var(--yellow-dim);color:var(--yellow);border-color:rgba(255,209,102,0.3)}
@@ -53,6 +54,8 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 .tour-card:active{background:var(--bg3)}
 .tour-card-name{font-weight:700;font-size:15px;line-height:1.3}
 .tour-card-sum{font-size:11px;color:var(--text2);margin-top:4px;line-height:1.4}
+.div-pick-btn{padding:8px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text2);cursor:pointer;font-size:13px;font-weight:700;font-family:'Zen Kaku Gothic New',sans-serif;min-height:40px;transition:.15s}
+.div-pick-btn.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.4)}
 .member-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .member-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:var(--text3);width:34px;flex-shrink:0;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:7px 0}
 .member-name-inp{flex:1!important;width:auto!important;min-height:40px!important;padding:9px 12px!important;font-size:14px!important}
@@ -61,6 +64,57 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 .tour-info-lbl{font-size:10px;color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:.08em;margin-bottom:4px}
 .tour-info-name{font-size:17px;font-weight:700;line-height:1.3}
 .tour-info-sub{font-size:11px;color:var(--text2);margin-top:6px}
+.div-tab-bar{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:0}
+.div-tab-bar::-webkit-scrollbar{height:3px}
+.dtab{flex-shrink:0;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;background:var(--bg3);color:var(--text3);border:1px solid var(--border2);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;margin-right:-1px;transition:.15s;clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,6px 100%);-webkit-clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,6px 100%)}
+.dtab.active{background:var(--bg2);color:var(--accent);border-color:rgba(0,229,160,0.35)}
+.div-tab-content{background:var(--bg2);border:1px solid var(--border2);border-radius:0 var(--radius-lg) var(--radius-lg) var(--radius-lg);padding:14px;margin-bottom:14px}
+.div-tab-pane{display:none}.div-tab-pane.active{display:block}
+.league-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;-webkit-overflow-scrolling:touch}
+.league-tabs::-webkit-scrollbar{height:3px}
+.ltab{flex-shrink:0;padding:6px 14px;border:1px solid var(--border2);border-radius:var(--radius);font-size:11px;font-weight:700;cursor:pointer;color:var(--text2);font-family:'Barlow Condensed',sans-serif;background:var(--bg);letter-spacing:.04em;min-height:32px}
+.ltab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.35)}
+.league-sub-panel{display:none}.league-sub-panel.active{display:block}
+.team-list-row{display:flex;align-items:center;gap:10px;padding:6px 8px;border-bottom:1px solid var(--border)}
+.team-list-row:last-child{border-bottom:none}
+.team-list-badge{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex-shrink:0}
+.team-list-name{flex:1;font-size:14px;font-weight:500}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:14px}
+.league-tbl{border-collapse:collapse;font-size:11px;white-space:nowrap;width:100%}
+.league-tbl th,.league-tbl td{border:1px solid var(--border);text-align:center;padding:0}
+.league-tbl th{background:var(--bg3);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.05em;padding:7px 5px}
+.league-tbl .th-team{text-align:left;padding-left:10px;min-width:80px}
+.league-tbl td.team-cell{background:var(--bg3);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:0 10px;white-space:nowrap;min-width:80px}
+.diagonal{background:var(--bg)!important;position:relative;overflow:hidden}
+.diagonal::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom right,transparent calc(50% - 0.5px),var(--border2) calc(50%),transparent calc(50% + 0.5px))}
+.score-cell{min-width:110px;padding:5px 4px!important;vertical-align:middle}
+.score-inner{display:flex;flex-direction:column;gap:3px}
+.cat-row{display:flex;align-items:center;justify-content:center;gap:3px}
+.cat-lbl{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;width:18px;flex-shrink:0}
+.cat-lbl.md{color:var(--blue)}.cat-lbl.wd{color:#f48fb1}.cat-lbl.xd{color:#b39ddb}
+.game-scores{display:flex;gap:2px}
+.gs{font-size:9px;background:var(--surface);border-radius:2px;padding:1px 3px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.gs.w{background:var(--accent-dim);color:var(--accent)}
+.gs.l{background:var(--red-dim);color:var(--red)}
+.cat-wl{font-size:9px;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.cat-wl.w{color:var(--accent)}.cat-wl.l{color:var(--red)}
+.total-row{display:flex;align-items:center;justify-content:center;gap:3px;border-top:1px solid var(--border);padding-top:3px;margin-top:3px}
+.total-score{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;line-height:1}
+.total-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;color:var(--text3);letter-spacing:.04em}
+.empty-cell{color:var(--text3);font-size:12px;padding:10px 4px!important}
+.rank-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.rank-tbl th{background:var(--bg3);border-bottom:1px solid var(--border);padding:7px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.06em;color:var(--text3);text-transform:uppercase;white-space:nowrap}
+.rank-tbl td{padding:8px;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap}
+.rank-tbl tr:last-child td{border-bottom:none}
+.rank-num{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
+.r1{color:var(--yellow)}.r2{color:var(--text2)}.r3{color:#cd7f32}
+.advance-row td{background:var(--accent-dim2)}
+.advance-row td:first-child{border-left:2px solid var(--accent)}
+.view-section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:14px 0 10px;display:flex;align-items:center;gap:8px}
+.view-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.view-mode-tabs{display:flex;gap:6px;margin-bottom:12px}
+.view-mode-tab{flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:12px;font-weight:700;cursor:pointer;color:var(--text2);background:var(--bg);font-family:'Zen Kaku Gothic New',sans-serif;min-height:36px}
+.view-mode-tab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.35)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 #loading-overlay .spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
@@ -97,13 +151,29 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
         <label>チーム名 <span style="color:var(--red)">*</span></label>
         <input type="text" id="e-team-name" placeholder="チーム名を入力" maxlength="60">
       </div>
-      <div style="margin-bottom:14px">
-        <label>代表者メールアドレス <span style="color:var(--red)">*</span> <span style="color:var(--text3);font-weight:400">（重複不可）</span></label>
-        <input type="email" id="e-email" placeholder="example@example.com" maxlength="120" autocomplete="email">
+      <div style="margin-bottom:14px" id="e-division-wrap">
+        <label>希望部門 <span style="color:var(--red)">*</span></label>
+        <div id="e-divisions" style="display:flex;flex-wrap:wrap;gap:8px"></div>
       </div>
-      <div>
+      <div style="margin-bottom:14px">
         <label>メンバー <span id="e-member-count" style="color:var(--text3);font-weight:400"></span></label>
         <div id="e-members"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label>代表者氏名 <span style="color:var(--red)">*</span></label>
+        <input type="text" id="e-rep-name" placeholder="山田 太郎" maxlength="60" autocomplete="name">
+      </div>
+      <div style="margin-bottom:14px">
+        <label>住所 <span style="color:var(--red)">*</span></label>
+        <input type="text" id="e-address" placeholder="〒000-0000 ○○県○○市○○町..." maxlength="200" autocomplete="street-address">
+      </div>
+      <div style="margin-bottom:14px">
+        <label>電話番号 <span style="color:var(--red)">*</span></label>
+        <input type="tel" id="e-phone" placeholder="090-1234-5678" maxlength="20" autocomplete="tel">
+      </div>
+      <div>
+        <label>代表者メールアドレス <span style="color:var(--red)">*</span> <span style="color:var(--text3);font-weight:400">（重複不可）</span></label>
+        <input type="email" id="e-email" placeholder="example@example.com" maxlength="120" autocomplete="email">
       </div>
     </div>
     <button class="btn btn-primary btn-block" onclick="onSubmit()" style="margin-bottom:8px">エントリーを送信</button>
@@ -132,6 +202,17 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
     <button class="btn btn-ghost btn-block" onclick="goHome()" style="margin-top:8px">戻る</button>
   </div>
 
+  <div class="page" id="page-view">
+    <div class="sec-title" id="view-tour-title">リーグ表</div>
+    <div class="alert alert-info" style="margin-bottom:12px;font-size:11px">📖 このページは閲覧専用です</div>
+    <div class="view-mode-tabs">
+      <button class="view-mode-tab active" id="vt-league" onclick="switchViewMode('league')">リーグ表</button>
+      <button class="view-mode-tab" id="vt-ranking" onclick="switchViewMode('ranking')">順位表</button>
+    </div>
+    <div class="div-tab-bar" id="view-div-tabs"></div>
+    <div id="view-div-panels"></div>
+  </div>
+
   <div class="page" id="page-thanks">
     <div style="margin-top:24px;text-align:center">
       <div style="font-size:48px;line-height:1;margin-bottom:16px">🎉</div>
@@ -151,11 +232,32 @@ input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
 <div id="toast"></div>
 
 <script>
-var initialAction = (gasAction === 'status') ? 'status' : 'entry';
+var initialAction = (gasAction === 'status') ? 'status' : (gasAction === 'view' ? 'view' : 'entry');
 var directMode = !!gasId;
 var directTourId = gasId || null;
 var currentTour = null;
 var lastSubmitted = null;
+var viewData = null;
+var viewActiveDiv = 0;
+var viewActiveLeague = {};
+var viewMode = 'league';
+var ALPHA = 'ABCDEFGHIJKLMNOPQRST';
+var CATS = ['md','wd','xd'];
+var CAT_LABELS = {md:'MD',wd:'WD',xd:'XD'};
+var TEAM_COLORS = [
+  {bg:'rgba(124,77,255,0.2)',text:'#b39ddb'},
+  {bg:'rgba(0,161,255,0.15)',text:'#4fc3f7'},
+  {bg:'rgba(0,229,160,0.15)',text:'#00e5a0'},
+  {bg:'rgba(255,209,102,0.15)',text:'#ffd166'},
+  {bg:'rgba(255,79,107,0.15)',text:'#ff4f6b'},
+  {bg:'rgba(255,160,50,0.15)',text:'#ffb74d'},
+  {bg:'rgba(200,80,200,0.15)',text:'#ce93d8'},
+  {bg:'rgba(100,200,80,0.15)',text:'#a5d6a7'},
+  {bg:'rgba(255,120,120,0.15)',text:'#ef9a9a'},
+  {bg:'rgba(100,160,255,0.15)',text:'#90caf9'},
+  {bg:'rgba(80,220,200,0.15)',text:'#80cbc4'},
+  {bg:'rgba(255,200,80,0.15)',text:'#ffe082'}
+];
 
 function esc(s){return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function showLoading(on){document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';}
@@ -164,7 +266,7 @@ function showToast(msg){var t=document.getElementById('toast');t.textContent=msg
 function showPage(p) {
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
-  var hideBackInDirect = directMode && (p === 'entry' || p === 'status-form');
+  var hideBackInDirect = directMode && (p === 'entry' || p === 'status-form' || p === 'view');
   var showBack = (p !== 'home') && !hideBackInDirect;
   document.getElementById('back-btn').style.display = showBack ? 'block' : 'none';
   window.scrollTo(0,0);
@@ -173,6 +275,7 @@ function showPage(p) {
 function goHome() {
   if (directMode) {
     if (initialAction === 'status') openStatusFor(directTourId);
+    else if (initialAction === 'view') openViewFor(directTourId);
     else openEntryFor(directTourId);
     return;
   }
@@ -208,12 +311,15 @@ function renderTourList(list) {
     return '<div class="tour-card" style="display:block;cursor:default">' +
       '<div style="margin-bottom:10px"><div class="tour-card-name">'+esc(t.name || '名前なし')+'</div>' +
       '<div class="tour-card-sum">'+esc(t.summary || '')+'</div></div>' +
-      '<div style="display:flex;gap:8px">' +
-      '<button class="btn btn-primary" style="flex:1" onclick="openEntryFor(\''+esc(t.id)+'\')">エントリー</button>' +
-      '<button class="btn btn-ghost" style="flex:1" onclick="openStatusFor(\''+esc(t.id)+'\')">状況確認</button>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="btn btn-primary btn-sm" style="flex:1;min-width:100px;font-size:12px" onclick="openEntryFor(\''+esc(t.id)+'\')">エントリー</button>' +
+      '<button class="btn btn-ghost btn-sm" style="flex:1;min-width:100px;font-size:12px" onclick="openStatusFor(\''+esc(t.id)+'\')">状況確認</button>' +
+      '<button class="btn btn-ghost btn-sm" style="flex:1;min-width:100px;font-size:12px" onclick="openViewFor(\''+esc(t.id)+'\')">リーグ表</button>' +
       '</div></div>';
   }).join('');
 }
+
+var selectedDivision = '';
 
 function openEntryFor(id) {
   showLoading(true);
@@ -225,13 +331,31 @@ function openEntryFor(id) {
       document.getElementById('tour-name').textContent = info.name;
       document.getElementById('tour-sub').textContent = '1チーム ' + info.membersPerTeam + ' 名で登録 ／ 現在 ' + info.entryCount + ' チーム エントリー済み';
       document.getElementById('e-team-name').value = '';
-      var emailInp = document.getElementById('e-email');
-      if (emailInp) emailInp.value = '';
+      ['e-email','e-rep-name','e-address','e-phone'].forEach(function(idStr){var n=document.getElementById(idStr); if(n) n.value='';});
+      selectedDivision = '';
+      renderDivisionPicker();
       renderMembers();
       showPage('entry');
     })
     .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
     .getPublicTournamentInfo(id);
+}
+
+function renderDivisionPicker() {
+  var wrap = document.getElementById('e-division-wrap');
+  var el = document.getElementById('e-divisions');
+  var divs = (currentTour && currentTour.divisions) || [];
+  if (!divs.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  el.innerHTML = divs.map(function(d) {
+    var isSel = d.name === selectedDivision;
+    return '<button type="button" class="div-pick-btn'+(isSel?' active':'')+'" onclick="pickDivision(\''+esc(d.name)+'\')">'+esc(d.name)+'</button>';
+  }).join('');
+}
+
+function pickDivision(name) {
+  selectedDivision = name;
+  renderDivisionPicker();
 }
 
 function openStatusFor(id) {
@@ -267,9 +391,18 @@ function onSubmit() {
   if (!currentTour) return;
   var teamName = document.getElementById('e-team-name').value.trim();
   if (!teamName) { showToast('チーム名を入力してください'); return; }
+  var repName = document.getElementById('e-rep-name').value.trim();
+  if (!repName) { showToast('代表者氏名を入力してください'); return; }
+  var address = document.getElementById('e-address').value.trim();
+  if (!address) { showToast('住所を入力してください'); return; }
+  var phone = document.getElementById('e-phone').value.trim();
+  if (!phone) { showToast('電話番号を入力してください'); return; }
+  if (!/^[\d\-+()\s]+$/.test(phone)) { showToast('電話番号の形式が正しくありません'); return; }
   var email = document.getElementById('e-email').value.trim();
   if (!email) { showToast('メールアドレスを入力してください'); return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('メールアドレスの形式が正しくありません'); return; }
+  var divs = (currentTour && currentTour.divisions) || [];
+  if (divs.length > 0 && !selectedDivision) { showToast('希望部門を選択してください'); return; }
   var members = [];
   var n = currentTour.membersPerTeam;
   var filledCount = 0;
@@ -282,16 +415,19 @@ function onSubmit() {
   }
   if (filledCount === 0) { showToast('メンバーを最低1名入力してください'); return; }
 
-  var payload = {teamName: teamName, email: email, members: members};
+  var payload = {teamName: teamName, email: email, repName: repName, address: address, phone: phone, division: selectedDivision, members: members};
   showLoading(true);
   google.script.run
     .withSuccessHandler(function(res) {
       showLoading(false);
       if (!res || !res.ok) { alert((res && res.error) || '送信に失敗しました'); return; }
-      lastSubmitted = {tournament: currentTour.name, team: teamName, email: email, members: members};
+      lastSubmitted = {tournament: currentTour.name, team: teamName, email: email, repName: repName, address: address, phone: phone, division: selectedDivision, members: members};
       renderThanks();
       var btn = document.getElementById('thanks-back-btn');
-      if (btn) btn.textContent = directMode ? '別のチームをエントリー' : '大会一覧へ戻る';
+      if (btn) {
+        if (directMode) { btn.style.display = 'none'; }
+        else { btn.style.display = ''; btn.textContent = '大会一覧へ戻る'; }
+      }
       showPage('thanks');
     })
     .withFailureHandler(function(e){ showLoading(false); alert('送信エラー: '+e.message); })
@@ -339,6 +475,10 @@ function renderStatusResult(res, email) {
   html += '<div style="font-weight:700;margin-bottom:10px">'+esc(res.tournamentName)+'</div>';
   html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">TEAM</div>';
   html += '<div style="font-weight:700;margin-bottom:10px">'+esc(res.teamName || '-')+'</div>';
+  if (res.division) {
+    html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">DIVISION</div>';
+    html += '<div style="font-weight:700;margin-bottom:10px">'+esc(res.division)+'</div>';
+  }
   html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">EMAIL</div>';
   html += '<div style="margin-bottom:10px">'+esc(email)+'</div>';
   if (res.placedLabel) {
@@ -349,12 +489,196 @@ function renderStatusResult(res, email) {
   el.innerHTML = html;
 }
 
+function openViewFor(id) {
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(d) {
+      showLoading(false);
+      if (!d) { alert('大会情報を取得できませんでした'); return; }
+      viewData = d;
+      viewActiveDiv = 0;
+      viewActiveLeague = {};
+      viewMode = 'league';
+      document.getElementById('vt-league').classList.add('active');
+      document.getElementById('vt-ranking').classList.remove('active');
+      document.getElementById('view-tour-title').textContent = d.name + ' リーグ表';
+      renderViewDivTabs();
+      showPage('view');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+    .getPublicTournamentView(id);
+}
+
+function switchViewMode(m) {
+  viewMode = m;
+  document.getElementById('vt-league').classList.toggle('active', m==='league');
+  document.getElementById('vt-ranking').classList.toggle('active', m==='ranking');
+  renderViewDivTabs();
+}
+
+function renderViewDivTabs() {
+  if (!viewData) return;
+  var tabsEl = document.getElementById('view-div-tabs');
+  var panelsEl = document.getElementById('view-div-panels');
+  if (!viewData.divisions.length || !viewData.data.length) {
+    tabsEl.innerHTML = '';
+    panelsEl.innerHTML = '<div class="alert alert-warn">まだリーグが作成されていません。</div>';
+    return;
+  }
+  tabsEl.innerHTML = viewData.divisions.map(function(div, di) {
+    return '<button class="dtab'+(di===viewActiveDiv?' active':'')+'" onclick="switchViewDivTab('+di+')">'+esc(div.name)+'</button>';
+  }).join('');
+  panelsEl.innerHTML = viewData.divisions.map(function(div, di) {
+    return '<div class="div-tab-content div-tab-pane'+(di===viewActiveDiv?' active':'')+'" id="view-div-pane-'+di+'">'+buildViewDivPanel(di)+'</div>';
+  }).join('');
+}
+
+function switchViewDivTab(di) {
+  viewActiveDiv = di;
+  document.querySelectorAll('#view-div-tabs .dtab').forEach(function(t,i){t.classList.toggle('active',i===di);});
+  document.querySelectorAll('#view-div-panels .div-tab-pane').forEach(function(p,i){p.classList.toggle('active',i===di);});
+}
+
+function buildViewDivPanel(di) {
+  var div = viewData.divisions[di];
+  var divLeagues = viewData.data[di] || [];
+  if (!divLeagues.length) return '<div class="alert alert-warn">このディビジョンにはリーグがありません</div>';
+  var activeLi = viewActiveLeague[di] || 0;
+  if (activeLi >= divLeagues.length) activeLi = 0;
+  var html = '<div style="font-size:10px;color:var(--text3);padding:8px 0 6px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+esc(div.name)+' — '+divLeagues.length+'リーグ×'+(divLeagues[0]?divLeagues[0].teams.length:0)+'チーム</div>';
+  html += '<div class="league-tabs">';
+  divLeagues.forEach(function(_, li) {
+    html += '<button class="ltab'+(li===activeLi?' active':'')+'" onclick="switchViewLeagueTab('+di+','+li+')">'+ALPHA[li]+'リーグ</button>';
+  });
+  html += '</div>';
+  divLeagues.forEach(function(_, li) {
+    html += '<div class="league-sub-panel'+(li===activeLi?' active':'')+'" id="view-lpanel-'+di+'-'+li+'">'+(viewMode==='ranking'?buildViewRankingPanel(di,li):buildViewLeaguePanel(di,li))+'</div>';
+  });
+  return html;
+}
+
+function switchViewLeagueTab(di, li) {
+  viewActiveLeague[di] = li;
+  document.querySelectorAll('#view-div-pane-'+di+' .ltab').forEach(function(t,i){t.classList.toggle('active',i===li);});
+  document.querySelectorAll('#view-div-pane-'+di+' .league-sub-panel').forEach(function(p,i){p.classList.toggle('active',i===li);});
+}
+
+function vMatchKey(a,b){return a<b?(a+'_'+b):(b+'_'+a);}
+function vGetMatch(lg, ri, ci) {
+  if (!lg.results) return null;
+  var key = vMatchKey(ri, ci);
+  if (!lg.results[key]) return null;
+  var r = lg.results[key];
+  if (ri < ci) return r;
+  var flip = function(g) { return {a:g.b, b:g.a}; };
+  return {md:r.md.map(flip), wd:r.wd.map(flip), xd:r.xd.map(flip)};
+}
+function vCWins(games){var wA=0,wB=0;games.forEach(function(g){if(g.a>g.b)wA++;else if(g.b>g.a)wB++;});return{wA:wA,wB:wB};}
+function vCatWin(games){var w=vCWins(games);return w.wA>w.wB?'A':w.wB>w.wA?'B':null;}
+function vTotalPts(match){var pf=0,pa=0;CATS.forEach(function(c){match[c].forEach(function(g){pf+=g.a;pa+=g.b;});});return{pf:pf,pa:pa};}
+
+function buildViewLeaguePanel(di, li) {
+  var lg = viewData.data[di][li];
+  var teams = lg.teams || [];
+  var nameHtml = '<div style="margin-bottom:14px">';
+  teams.forEach(function(name, ti) {
+    var c = TEAM_COLORS[ti % TEAM_COLORS.length];
+    nameHtml += '<div class="team-list-row"><div class="team-list-badge" style="background:'+c.bg+';color:'+c.text+'">'+ALPHA[li]+(ti+1)+'</div><div class="team-list-name">'+esc(name)+'</div></div>';
+  });
+  nameHtml += '</div>';
+  var tbl = '<div class="tbl-wrap"><table class="league-tbl"><thead><tr><th class="th-team"></th>';
+  teams.forEach(function(_, ti) {
+    var c = TEAM_COLORS[ti % TEAM_COLORS.length];
+    tbl += '<th><span style="background:'+c.bg+';color:'+c.text+';padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">'+ALPHA[li]+(ti+1)+'</span></th>';
+  });
+  tbl += '<th>MD</th><th>WD</th><th>XD</th><th>総勝</th></tr></thead><tbody>';
+  teams.forEach(function(name, ri) {
+    var c = TEAM_COLORS[ri % TEAM_COLORS.length];
+    var mdW=0, wdW=0, xdW=0, totalW=0;
+    tbl += '<tr><td class="team-cell"><span style="background:'+c.bg+';color:'+c.text+';padding:1px 6px;border-radius:4px;font-size:10px;margin-right:5px">'+ALPHA[li]+(ri+1)+'</span>'+esc(name)+'</td>';
+    teams.forEach(function(_, ci) {
+      if (ri===ci) { tbl += '<td class="diagonal"></td>'; return; }
+      var r = vGetMatch(lg, ri, ci);
+      if (!r) { tbl += '<td class="empty-cell" style="min-width:110px"><span style="color:var(--text3);font-size:11px">—</span></td>'; return; }
+      var cellW=0; CATS.forEach(function(cat){if(vCatWin(r[cat])==='A')cellW++;});
+      var cellL=3-cellW;
+      var tcol = cellW>cellL?'var(--accent)':cellW<cellL?'var(--red)':'var(--yellow)';
+      if (vCatWin(r.md)==='A') mdW++; if (vCatWin(r.wd)==='A') wdW++; if (vCatWin(r.xd)==='A') xdW++; totalW+=cellW;
+      tbl += '<td class="score-cell"><div class="score-inner"><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
+      CATS.forEach(function(cat) {
+        var games = r[cat]; var wins = vCWins(games); var iw = vCatWin(r[cat])==='A';
+        tbl += '<div class="cat-row"><span class="cat-lbl '+cat+'">'+CAT_LABELS[cat]+'</span><span style="font-size:9px;font-weight:700;color:'+(iw?'var(--accent)':'var(--red)')+'">'+(iw?'○':'✕')+'</span><span class="game-scores">';
+        games.forEach(function(g){ tbl += '<span class="gs '+(g.a>g.b?'w':'l')+'">'+g.a+'-'+g.b+'</span>'; });
+        tbl += '</span><span class="cat-wl '+(wins.wA>wins.wB?'w':'l')+'">'+wins.wA+'-'+wins.wB+'</span></div>';
+      });
+      tbl += '</div></td>';
+    });
+    tbl += '<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:var(--blue)">'+mdW+'</td>';
+    tbl += '<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:#f48fb1">'+wdW+'</td>';
+    tbl += '<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:13px;font-weight:700;color:#b39ddb">'+xdW+'</td>';
+    tbl += '<td style="padding:5px;font-family:\'Barlow Condensed\',sans-serif;font-size:18px;font-weight:900;color:var(--accent)">'+totalW+'</td></tr>';
+  });
+  tbl += '</tbody></table></div>';
+  return nameHtml + tbl;
+}
+
+function buildViewRankingPanel(di, li) {
+  var lg = viewData.data[di][li];
+  var teams = lg.teams || [];
+  var div = viewData.divisions[di] || {};
+  var adv = div.advanceCount || 0;
+  var standings = teams.map(function(name, ti) {
+    var totalW=0, mdW=0, wdW=0, xdW=0, pf=0, pa=0;
+    teams.forEach(function(_, oi) {
+      if (oi===ti) return;
+      var r = vGetMatch(lg, ti, oi); if (!r) return;
+      CATS.forEach(function(c){ if (vCatWin(r[c])==='A') totalW++; });
+      if (vCatWin(r.md)==='A') mdW++; if (vCatWin(r.wd)==='A') wdW++; if (vCatWin(r.xd)==='A') xdW++;
+      var pt = vTotalPts(r); pf += pt.pf; pa += pt.pa;
+    });
+    return {ti:ti, name:name, totalW:totalW, mdW:mdW, wdW:wdW, xdW:xdW, pf:pf, pa:pa, diff:pf-pa};
+  });
+  standings.sort(function(a,b){return b.totalW-a.totalW||b.diff-a.diff||b.pf-a.pf;});
+  var html = '<div style="font-size:10px;color:var(--text3);padding:8px 0 6px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.08em">'+esc(div.name||'')+' '+ALPHA[li]+'リーグ 順位表</div>';
+  html += '<div class="card" style="padding:0;overflow:hidden;margin-bottom:14px"><table class="rank-tbl"><thead><tr><th>順位</th><th style="text-align:left">チーム</th><th>総勝</th><th>MD</th><th>WD</th><th>XD</th><th>得点</th><th>失点</th><th>差</th></tr></thead><tbody>';
+  standings.forEach(function(s, i) {
+    var rc = i===0?'r1':i===1?'r2':i===2?'r3':'';
+    var advcls = i<adv?'advance-row':'';
+    var diff = (s.diff>=0?'+':'') + s.diff;
+    var c = TEAM_COLORS[s.ti % TEAM_COLORS.length];
+    html += '<tr class="'+advcls+'"><td><span class="rank-num '+rc+'">'+(i+1)+'</span></td>' +
+      '<td style="text-align:left;padding:8px"><div style="display:flex;align-items:center;gap:6px">' +
+      '<span style="background:'+c.bg+';color:'+c.text+';padding:1px 7px;border-radius:4px;font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700">'+ALPHA[li]+(s.ti+1)+'</span>' +
+      '<span style="font-weight:700;font-size:12px">'+esc(s.name)+'</span>' +
+      (i<adv?'<span style="font-size:9px;background:var(--accent-dim);color:var(--accent);padding:1px 5px;border-radius:3px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700">進出</span>':'') +
+      '</div></td>' +
+      '<td><span style="font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:700;color:var(--accent)">'+s.totalW+'</span></td>' +
+      '<td style="color:var(--blue);font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.mdW+'</td>' +
+      '<td style="color:#f48fb1;font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.wdW+'</td>' +
+      '<td style="color:#b39ddb;font-family:\'Barlow Condensed\',sans-serif;font-weight:700">'+s.xdW+'</td>' +
+      '<td style="color:var(--accent)">'+s.pf+'</td><td style="color:var(--red)">'+s.pa+'</td>' +
+      '<td style="font-weight:700;color:'+(s.diff>=0?'var(--accent)':'var(--red)')+'">'+diff+'</td></tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
 function renderThanks() {
   if (!lastSubmitted) return;
   var html = '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">TOURNAMENT</div>';
   html += '<div style="font-weight:700;margin-bottom:10px">'+esc(lastSubmitted.tournament)+'</div>';
   html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">TEAM</div>';
   html += '<div style="font-weight:700;margin-bottom:10px">'+esc(lastSubmitted.team)+'</div>';
+  if (lastSubmitted.division) {
+    html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">DIVISION</div>';
+    html += '<div style="font-weight:700;margin-bottom:10px;color:var(--accent)">'+esc(lastSubmitted.division)+'</div>';
+  }
+  html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">REPRESENTATIVE</div>';
+  html += '<div style="margin-bottom:10px">'+esc(lastSubmitted.repName||'')+'</div>';
+  html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">ADDRESS</div>';
+  html += '<div style="margin-bottom:10px">'+esc(lastSubmitted.address||'')+'</div>';
+  html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">PHONE</div>';
+  html += '<div style="margin-bottom:10px">'+esc(lastSubmitted.phone||'')+'</div>';
   html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">EMAIL</div>';
   html += '<div style="margin-bottom:10px">'+esc(lastSubmitted.email)+'</div>';
   html += '<div style="font-size:11px;color:var(--text3);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;margin-bottom:4px">MEMBERS</div>';
@@ -367,6 +691,7 @@ function renderThanks() {
 
 if (directMode) {
   if (initialAction === 'status') openStatusFor(directTourId);
+  else if (initialAction === 'view') openViewFor(directTourId);
   else openEntryFor(directTourId);
 } else {
   loadTourList();
