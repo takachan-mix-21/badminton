@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>バドミントン大会エントリー</title>
 <script>
-  var gasPage   = '<?= gasPage ?>';
-  var gasId     = '<?= gasId ?>';
-  var gasAction = '<?= gasAction ?>';
-  var gasUrl    = '<?= gasUrl ?>';
+  var gasPage     = '<?= gasPage ?>';
+  var gasId       = '<?= gasId ?>';
+  var gasAction   = '<?= gasAction ?>';
+  var gasViewMode = '<?= gasViewMode ?>';
+  var gasUrl      = '<?= gasUrl ?>';
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -44,8 +45,8 @@ body::after{content:'';position:fixed;bottom:-100px;left:-100px;width:300px;heig
 .brand-text{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:.06em;flex:1;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,0.15)}
 .brand-text span{color:#fff;background:rgba(255,255,255,0.28);padding:3px 10px;border-radius:10px;backdrop-filter:blur(4px);margin-left:4px}
 .user-badge{background:rgba(255,255,255,0.28);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;padding:5px 12px;border-radius:20px;letter-spacing:.08em;border:1px solid rgba(255,255,255,0.4);backdrop-filter:blur(4px)}
-.back-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;cursor:pointer;width:36px;height:36px;font-size:20px;line-height:1;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .15s ease}
-.back-btn:hover{transform:translateX(-2px) scale(1.05)}
+.back-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;cursor:pointer;width:36px;height:36px;font-size:20px;line-height:1;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:transform .15s ease;text-decoration:none}
+.back-btn:hover{transform:translateX(-2px) scale(1.05);text-decoration:none}
 .content{padding:18px 14px;max-width:560px;margin:0 auto;position:relative;z-index:1}
 .page{display:none}.page.active{display:block;animation:fadeUp .4s cubic-bezier(.22,1,.36,1)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -70,7 +71,7 @@ input::placeholder{color:#c0a995}
 .alert-info{background:linear-gradient(135deg,#e3f4ff,#cfeaff);color:#0d6fa3;box-shadow:0 2px 8px rgba(61,201,255,0.15)}
 .alert-warn{background:linear-gradient(135deg,#fff3d6,#ffe5a3);color:#a26b00;box-shadow:0 2px 8px rgba(255,170,0,0.18)}
 .alert-success{background:linear-gradient(135deg,#d4f7e8,#b8f0d8);color:#0e8a5e;box-shadow:0 2px 8px rgba(34,211,154,0.2)}
-.tour-card{background:#fff;border:none;border-radius:20px;padding:18px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .2s ease,box-shadow .2s ease;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.tour-card{background:#fff;border:none;border-radius:20px;padding:18px;margin-bottom:12px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .2s ease,box-shadow .2s ease;box-shadow:var(--shadow-sm);position:relative;overflow:hidden;text-decoration:none;color:inherit}
 .tour-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,#ff5e8a,#ff9148)}
 .tour-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
 .tour-card:active{transform:translateY(0)}
@@ -103,7 +104,8 @@ input::placeholder{color:#c0a995}
 .ltab.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,229,160,0.35)}
 .league-sub-panel{display:none}.league-sub-panel.active{display:block}
 .menu-tour-name{font-size:38px;font-weight:900;text-align:center;margin:20px 8px 28px;color:#1a1a2e;letter-spacing:.04em;line-height:1.2;text-shadow:0 2px 0 rgba(0,0,0,0.06)}
-.menu-pill{display:block;width:100%;padding:22px 16px;margin-bottom:20px;background:linear-gradient(180deg,#7ed852 0%,#5eb52b 100%);color:#fff;border:4px solid #4a8c1f;border-radius:42px;font-size:24px;font-weight:900;font-family:'Zen Kaku Gothic New',sans-serif;text-shadow:0 2px 4px rgba(0,0,0,0.22);box-shadow:0 5px 0 #3d7019,0 8px 22px rgba(110,207,70,0.28);cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;letter-spacing:.04em}
+.menu-pill{display:block;width:100%;padding:22px 16px;margin-bottom:20px;background:linear-gradient(180deg,#7ed852 0%,#5eb52b 100%);color:#fff;border:4px solid #4a8c1f;border-radius:42px;font-size:24px;font-weight:900;font-family:'Zen Kaku Gothic New',sans-serif;text-shadow:0 2px 4px rgba(0,0,0,0.22);box-shadow:0 5px 0 #3d7019,0 8px 22px rgba(110,207,70,0.28);cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;letter-spacing:.04em;text-align:center;text-decoration:none;box-sizing:border-box}
+.menu-pill:hover{text-decoration:none}
 .menu-pill:hover{transform:translateY(-1px)}
 .menu-pill:active{transform:translateY(4px);box-shadow:0 1px 0 #3d7019,0 2px 8px rgba(110,207,70,0.18)}
 .menu-current-box{background:linear-gradient(180deg,#ffd23f 0%,#ffb800 100%);border:4px solid #c98800;border-radius:28px;padding:20px 18px;margin-top:24px;box-shadow:0 6px 18px rgba(255,180,0,0.3)}
@@ -159,25 +161,42 @@ input::placeholder{color:#c0a995}
 .advance-row td:first-child{border-left:3px solid var(--pop-green)}
 .view-section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:14px 0 10px;display:flex;align-items:center;gap:8px}
 .view-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-.view-mode-tabs{display:flex;gap:10px;margin-bottom:18px;background:transparent;padding:0;box-shadow:none;justify-content:center}
-.view-mode-tab{flex:1;padding:14px 12px;border:none;border-radius:30px;font-size:17px;font-weight:900;cursor:pointer;color:#5eb52b;background:#fff;font-family:'Zen Kaku Gothic New',sans-serif;min-height:54px;transition:transform .15s ease,box-shadow .15s ease;letter-spacing:.04em;border:3px solid #5eb52b;box-shadow:0 4px 0 #4ca025}
+.view-mode-tabs{display:flex;gap:8px;margin-bottom:18px;background:transparent;padding:4px 2px;box-shadow:none;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.view-mode-tabs::-webkit-scrollbar{height:0}
+.view-mode-tab{flex:0 0 auto;padding:14px 20px;border-radius:30px;font-size:15px;font-weight:900;cursor:pointer;color:#5eb52b;background:#fff;font-family:'Zen Kaku Gothic New',sans-serif;min-height:50px;transition:transform .15s ease,box-shadow .15s ease;letter-spacing:.02em;border:3px solid #5eb52b;box-shadow:0 4px 0 #4ca025;white-space:nowrap}
 .view-mode-tab:hover{transform:translateY(-2px)}
 .view-mode-tab:active{transform:translateY(2px);box-shadow:0 2px 0 #4ca025}
 .view-mode-tab.active{background:linear-gradient(180deg,#7ed852 0%,#5eb52b 100%);color:#fff;border-color:#4a8c1f;box-shadow:0 4px 0 #4a8c1f,0 6px 16px rgba(110,207,70,0.35);text-shadow:0 2px 4px rgba(0,0,0,0.2)}
-.bracket-rounds{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-.bracket-round{flex-shrink:0;display:flex;flex-direction:column;min-width:160px}
-.bracket-round-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#fff;text-align:center;padding:8px;background:linear-gradient(135deg,#ff5e8a,#ff9148);border-bottom:none;border-right:1px solid rgba(255,255,255,0.2);border-radius:8px 8px 0 0;margin-bottom:6px}
+.view-mode-title{background:linear-gradient(180deg,#7ed852 0%,#5eb52b 100%);color:#fff;padding:14px 24px;border-radius:32px;font-size:22px;font-weight:900;text-align:center;margin:0 0 16px;text-shadow:0 2px 4px rgba(0,0,0,0.2);box-shadow:0 4px 0 #4a8c1f,0 6px 16px rgba(110,207,70,0.3);letter-spacing:.06em;font-family:'Zen Kaku Gothic New',sans-serif;border:3px solid #4a8c1f}
+.bracket-rounds{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;align-items:stretch}
+.bracket-round{flex-shrink:0;display:flex;flex-direction:column;min-width:80px}
+.bracket-round:not(:last-child){padding-right:18px}
+.bracket-round:not(:last-child) .bracket-match::after{content:'';position:absolute;right:-18px;top:25%;bottom:25%;width:14px;border-top:2px solid #e63333;border-right:2px solid #e63333;border-bottom:2px solid #e63333;pointer-events:none}
+.bracket-round:not(:last-child) .bracket-match::before{content:'';position:absolute;right:-4px;top:50%;width:4px;height:2px;background:#e63333;pointer-events:none;margin-top:-1px}
+.bracket-jp{display:flex;align-items:stretch;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.bracket-jp-teams{display:flex;flex-direction:column;flex-shrink:0}
+.bj-team{display:flex;align-items:stretch;height:54px;border:1.5px solid #e63333;border-bottom:none;background:#fff;width:96px;box-sizing:border-box;overflow:hidden}
+.bracket-jp-teams .bj-team:last-child{border-bottom:1.5px solid #e63333}
+.bj-team-name{flex:1;writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;font-size:11px;font-weight:700;color:#222;text-align:center;white-space:nowrap;overflow:hidden;padding:4px 2px;display:flex;align-items:center;justify-content:center;letter-spacing:.05em}
+.bj-team-num{width:26px;flex-shrink:0;background:#fff7eb;border-left:1.5px solid #e63333;display:flex;align-items:center;justify-content:center;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:13px;color:#222}
+.bj-team.bye .bj-team-name{color:#bbb;font-style:italic}
+.bj-team.winner-path{background:#fff5e8}
+.bracket-jp-svg{flex-shrink:0;display:block}
+.bracket-round-title{font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;font-weight:900;letter-spacing:.08em;color:#fff;text-align:center;padding:11px 8px;background:linear-gradient(180deg,#e63333 0%,#b02020 100%);border:none;border-radius:6px;margin-bottom:8px;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
 .bracket-col{display:flex;flex-direction:column;flex:1}
 .bracket-spacer{flex:1}
-.bracket-match{display:flex;flex-direction:column;margin:0 8px}
-.bracket-team{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#fff;border:2px solid #ffd6c2;font-size:12px;font-weight:600;min-height:38px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-.bracket-team:first-child{border-radius:12px 12px 0 0;border-bottom:none}
-.bracket-team:last-child{border-radius:0 0 12px 12px}
-.bracket-team.winner{background:linear-gradient(135deg,#d4f7e8,#a8edd0);color:#0e8a5e;font-weight:900;border-color:#22d39a}
-.bracket-team.bye{color:var(--text3);font-style:italic;background:#fff5e6}
-.bracket-team-seed{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;width:20px;text-align:center;flex-shrink:0;color:var(--text3)}
-.bracket-divider{height:2px;background:#ffd6c2;margin:0 10px}
-.bracket-gap{height:14px}
+.bracket-match{display:flex;flex-direction:column;margin:0 4px;position:relative}
+.bracket-team{display:flex;align-items:stretch;background:#fff;border:1.5px solid #e63333;font-size:12px;font-weight:700;min-height:90px;padding:0;box-shadow:none;overflow:hidden;width:48px}
+.bracket-team:first-child{border-radius:6px 6px 0 0;border-bottom:none}
+.bracket-team:last-child{border-radius:0 0 6px 6px}
+.bracket-team.winner{background:#fff;border-color:#e63333;font-weight:900}
+.bracket-team.winner .bracket-team-name-v{color:#000;font-weight:900}
+.bracket-team.bye{color:var(--text3);background:#fff5e6}
+.bracket-team-seed{font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;font-weight:900;width:20px;flex-shrink:0;color:#222;background:#fff7eb;border-left:1.5px solid #e63333;display:flex;align-items:center;justify-content:center;padding:4px 0}
+.bracket-team.winner .bracket-team-seed{background:#ffe8d4}
+.bracket-team-name-v{flex:1;writing-mode:vertical-rl;-webkit-writing-mode:vertical-rl;padding:6px 2px;text-align:center;font-size:11px;line-height:1.4;letter-spacing:.04em;color:#222;display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}
+.bracket-divider{height:2px;background:#e63333;margin:0}
+.bracket-gap{height:10px}
 .tourn-seed-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
 .tourn-seed-item{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:2px solid #ffd6c2;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
 .seed-num{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;width:30px;text-align:center;flex-shrink:0}
@@ -201,7 +220,7 @@ input::placeholder{color:#c0a995}
 <body>
 
 <div class="header">
-  <button id="back-btn" class="back-btn" onclick="goHome()" style="display:none">←</button>
+  <a id="back-btn" class="back-btn" target="_top" href="#" style="display:none">←</a>
   <span style="font-size:28px;line-height:1;animation:wiggle 3s ease-in-out infinite;display:inline-block">🏸</span>
   <span class="brand-text">BADMINTON <span>POP</span></span>
   <span class="user-badge">USER</span>
@@ -279,17 +298,17 @@ input::placeholder{color:#c0a995}
 
   <div class="page" id="page-tour-menu">
     <h1 class="menu-tour-name" id="menu-tour-name">大会名</h1>
-    <button class="menu-pill" onclick="goToMode('entries')">エントリー結果</button>
-    <button class="menu-pill" onclick="goToMode('info')">大会要項</button>
-    <button class="menu-pill" onclick="goToMode('league')">リーグ表</button>
-    <button class="menu-pill" onclick="goToMode('tournament')">トーナメント表</button>
+    <a class="menu-pill" id="menu-pill-entries" target="_top" href="#">エントリー結果</a>
+    <a class="menu-pill" id="menu-pill-info" target="_top" href="#">大会要項</a>
+    <a class="menu-pill" id="menu-pill-league" target="_top" href="#">リーグ表</a>
+    <a class="menu-pill" id="menu-pill-tournament" target="_top" href="#">トーナメント表</a>
     <div class="menu-current-box">
       <div class="menu-current-title">現在試合中の試合番号</div>
       <div class="menu-current-grid" id="menu-current-matches"></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:18px">
-      <button class="btn btn-ghost btn-block" onclick="goToMode('entry')">エントリー登録</button>
-      <button class="btn btn-ghost btn-block" onclick="goToMode('status')">状況確認</button>
+      <a class="btn btn-ghost btn-block" id="menu-pill-entry" target="_top" href="#">エントリー登録</a>
+      <a class="btn btn-ghost btn-block" id="menu-pill-status" target="_top" href="#">状況確認</a>
     </div>
   </div>
 
@@ -307,6 +326,7 @@ input::placeholder{color:#c0a995}
       <button class="view-mode-tab" id="vt-tournament" onclick="switchViewMode('tournament')">トーナメント</button>
       <button class="view-mode-tab" id="vt-entries" onclick="switchViewMode('entries')">エントリー結果</button>
     </div>
+    <h2 class="view-mode-title" id="view-mode-title" style="display:none">トーナメント表</h2>
     <div class="div-tab-bar" id="view-div-tabs"></div>
     <div id="view-div-panels"></div>
   </div>
@@ -317,7 +337,7 @@ input::placeholder{color:#c0a995}
       <div style="font-size:20px;font-weight:700;margin-bottom:8px;color:var(--accent)">送信完了</div>
       <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px">エントリーを受け付けました。<br>ご応募ありがとうございました。</div>
       <div id="thanks-summary" class="card" style="text-align:left;font-size:13px;line-height:1.6"></div>
-      <button id="thanks-back-btn" class="btn btn-block btn-primary" onclick="onThanksBack()" style="margin-top:8px">大会一覧へ戻る</button>
+      <a id="thanks-back-btn" class="btn btn-block btn-primary" target="_top" href="#" style="margin-top:8px;text-align:center;text-decoration:none">大会一覧へ戻る</a>
     </div>
   </div>
 
@@ -332,11 +352,26 @@ input::placeholder{color:#c0a995}
 <div id="toast"></div>
 
 <script>
-var initialAction = (gasAction === 'status') ? 'status' : (gasAction === 'view' ? 'view' : 'entry');
+var validActions = {status:1, view:1, menu:1, info:1, entry:1};
+var initialAction;
+if (validActions[gasAction]) initialAction = gasAction;
+else if (gasId) initialAction = 'menu';
+else initialAction = 'entry';
 var directMode = !!gasId;
 var directTourId = gasId || null;
 var currentTour = null;
 var lastSubmitted = null;
+
+function buildUrl(mode, id, extra) {
+  var qs = 'mode=' + encodeURIComponent(mode);
+  if (id) qs += '&id=' + encodeURIComponent(id);
+  if (extra) {
+    Object.keys(extra).forEach(function(k){
+      if (extra[k] != null && extra[k] !== '') qs += '&' + k + '=' + encodeURIComponent(extra[k]);
+    });
+  }
+  return (gasUrl || '') + '?' + qs;
+}
 var viewData = null;
 var viewActiveDiv = 0;
 var viewActiveLeague = {};
@@ -369,45 +404,41 @@ function showPage(p) {
   currentPage = p;
   document.querySelectorAll('.page').forEach(function(x){x.classList.remove('active');});
   document.getElementById('page-'+p).classList.add('active');
-  var inDirectStartPage = directMode && (p === 'entry' || p === 'status-form' || p === 'view');
+  var inDirectStartPage = directMode && (p === 'entry' || p === 'status-form' || p === 'view' || p === 'tour-info');
   var showBack = (p !== 'home') && !inDirectStartPage;
-  document.getElementById('back-btn').style.display = showBack ? 'block' : 'none';
+  var backBtn = document.getElementById('back-btn');
+  if (backBtn) {
+    backBtn.style.display = showBack ? 'flex' : 'none';
+    var backHref;
+    if (p === 'tour-menu') backHref = buildUrl('public');
+    else if (gasId) backHref = buildUrl('menu', gasId);
+    else backHref = buildUrl('public');
+    backBtn.href = backHref;
+  }
   var topBtn = document.getElementById('top-btn');
   if (topBtn) {
-    if (gasUrl) topBtn.href = gasUrl + '?mode=public';
-    topBtn.style.display = (p === 'home') ? 'none' : 'block';
+    topBtn.href = gasId ? buildUrl('menu', gasId) : buildUrl('public');
+    topBtn.style.display = (p === 'home' || p === 'tour-menu') ? 'none' : 'block';
   }
   window.scrollTo(0,0);
 }
 
 
-function goHome() {
-  if (directMode) {
-    if (initialAction === 'status') openStatusFor(directTourId);
-    else if (initialAction === 'view') openViewFor(directTourId);
-    else openEntryFor(directTourId);
-    return;
-  }
-  if (currentPage === 'tour-menu') {
-    currentTour = null;
-    menuTour = null;
-    showPage('home');
-    loadTourList();
-    return;
-  }
-  if (menuTour) {
-    showPage('tour-menu');
-    return;
-  }
-  currentTour = null;
-  showPage('home');
-  loadTourList();
+function navTo(url) {
+  var a = document.createElement('a');
+  a.target = '_top';
+  a.href = url;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
 }
 
-function onThanksBack() {
-  if (directMode) { goHome(); return; }
-  if (menuTour) { showPage('tour-menu'); return; }
-  goHome();
+function goHome() {
+  var url;
+  if (currentPage === 'tour-menu') url = buildUrl('public');
+  else if (gasId) url = buildUrl('menu', gasId);
+  else url = buildUrl('public');
+  navTo(url);
 }
 
 function loadTourList() {
@@ -430,12 +461,12 @@ function renderTourList(list) {
     return;
   }
   el.innerHTML = list.map(function(t) {
-    return '<div class="tour-card" onclick="openTourMenu(\''+esc(t.id)+'\')">' +
+    return '<a class="tour-card" target="_top" href="'+esc(buildUrl('menu', t.id))+'">' +
       '<div style="flex:1;min-width:0">' +
       '<div class="tour-card-name">'+esc(t.name || '名前なし')+'</div>' +
       '<div class="tour-card-sum">'+esc(t.summary || '')+'</div>' +
       '</div>' +
-      '<span style="color:var(--text3);font-size:24px;flex-shrink:0;font-weight:900">›</span></div>';
+      '<span style="color:var(--text3);font-size:24px;flex-shrink:0;font-weight:900">›</span></a>';
   }).join('');
 }
 
@@ -458,7 +489,14 @@ function openTourMenu(id) {
 
 function renderTourMenu() {
   if (!menuTour) return;
+  var id = menuTour.id;
   document.getElementById('menu-tour-name').textContent = menuTour.name;
+  document.getElementById('menu-pill-entries').href    = buildUrl('view', id, {v:'entries'});
+  document.getElementById('menu-pill-info').href       = buildUrl('info', id);
+  document.getElementById('menu-pill-league').href     = buildUrl('view', id, {v:'league'});
+  document.getElementById('menu-pill-tournament').href = buildUrl('view', id, {v:'tournament'});
+  document.getElementById('menu-pill-entry').href      = buildUrl('entry', id);
+  document.getElementById('menu-pill-status').href     = buildUrl('status', id);
   var grid = document.getElementById('menu-current-matches');
   var divs = (menuTour.divisions || []);
   if (!divs.length) {
@@ -480,6 +518,20 @@ function goToMode(mode) {
   else if (mode === 'info') showInfoPage();
   else if (mode === 'entry') openEntryFor(id);
   else if (mode === 'status') openStatusFor(id);
+}
+
+function showInfoPageFor(id) {
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(info) {
+      showLoading(false);
+      if (!info) { alert('大会情報を取得できませんでした'); return; }
+      menuTour = info;
+      currentTour = info;
+      showInfoPage();
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+    .getPublicTournamentInfo(id);
 }
 
 function showInfoPage() {
@@ -605,8 +657,14 @@ function onSubmit() {
       renderThanks();
       var btn = document.getElementById('thanks-back-btn');
       if (btn) {
-        if (directMode) { btn.style.display = 'none'; }
-        else { btn.style.display = ''; btn.textContent = menuTour ? '大会メニューへ戻る' : '大会一覧へ戻る'; }
+        btn.style.display = '';
+        if (gasId) {
+          btn.textContent = '大会メニューへ戻る';
+          btn.href = buildUrl('menu', gasId);
+        } else {
+          btn.textContent = '大会一覧へ戻る';
+          btn.href = buildUrl('public');
+        }
       }
       showPage('thanks');
     })
@@ -682,6 +740,17 @@ function openViewFor(id, initialMode) {
       ['league','ranking','tournament','entries'].forEach(function(m){
         var btn = document.getElementById('vt-'+m); if (btn) btn.classList.toggle('active', m===viewMode);
       });
+      var modeTabsEl = document.querySelector('.view-mode-tabs');
+      if (modeTabsEl) modeTabsEl.style.display = (viewMode === 'tournament') ? 'none' : '';
+      var modeTitleEl = document.getElementById('view-mode-title');
+      if (modeTitleEl) {
+        if (viewMode === 'tournament') {
+          modeTitleEl.style.display = '';
+          modeTitleEl.textContent = 'トーナメント表';
+        } else {
+          modeTitleEl.style.display = 'none';
+        }
+      }
       document.getElementById('view-tour-title').textContent = d.name;
       renderViewDivTabs();
       showPage('view');
@@ -692,10 +761,20 @@ function openViewFor(id, initialMode) {
 
 function switchViewMode(m) {
   viewMode = m;
-  document.getElementById('vt-league').classList.toggle('active', m==='league');
-  document.getElementById('vt-ranking').classList.toggle('active', m==='ranking');
-  document.getElementById('vt-tournament').classList.toggle('active', m==='tournament');
-  var ve = document.getElementById('vt-entries'); if (ve) ve.classList.toggle('active', m==='entries');
+  ['league','ranking','tournament','entries'].forEach(function(mode){
+    var btn = document.getElementById('vt-'+mode); if (btn) btn.classList.toggle('active', mode===m);
+  });
+  var modeTabsEl = document.querySelector('.view-mode-tabs');
+  if (modeTabsEl) modeTabsEl.style.display = (m === 'tournament') ? 'none' : '';
+  var modeTitleEl = document.getElementById('view-mode-title');
+  if (modeTitleEl) {
+    if (m === 'tournament') {
+      modeTitleEl.style.display = '';
+      modeTitleEl.textContent = 'トーナメント表';
+    } else {
+      modeTitleEl.style.display = 'none';
+    }
+  }
   renderViewDivTabs();
 }
 
@@ -776,13 +855,16 @@ function buildViewTournamentPanel(di) {
   }
   var seeds = ts.seeds;
   var matchResults = ts.matchResults || {};
+  var size = 1; while (size < seeds.length) size *= 2;
+  var slots = new Array(size).fill(null);
+  seeds.forEach(function(s, i) { slots[i] = s; });
   var rounds = vComputeRounds(seeds, matchResults);
   var totalRounds = rounds.length - 1;
 
   var html = '<div class="alert alert-info" style="margin-bottom:12px;font-size:12px">' +
     esc(div.name) + ' — シード ' + seeds.length + ' チーム</div>';
 
-  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">SEED</div>';
+  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--text3);margin-bottom:8px">SEED</div>';
   html += '<div class="tourn-seed-list">';
   seeds.forEach(function(s, i) {
     if (!s) return;
@@ -799,57 +881,111 @@ function buildViewTournamentPanel(di) {
 
   if (totalRounds <= 0) return html;
 
-  var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
-  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:16px 0 8px">BRACKET</div>';
-  html += '<div class="bracket-rounds">';
+  html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--text3);margin:16px 0 8px">BRACKET</div>';
+
+  var teamH = 54;
+  var colW = 56;
+  var endPad = 40;
+  var totalH = slots.length * teamH;
+  var svgW = totalRounds * colW + endPad;
+  var lineColor = '#e63333';
+  var thinW = 1.5;
+  var thickW = 4;
+
+  html += '<div class="bracket-jp">';
+  html += '<div class="bracket-jp-teams">';
+  slots.forEach(function(s, i) {
+    if (s) {
+      html += '<div class="bj-team"><span class="bj-team-name">'+esc(s.name)+'</span><span class="bj-team-num">'+(i+1)+'</span></div>';
+    } else {
+      html += '<div class="bj-team bye"><span class="bj-team-name">BYE</span><span class="bj-team-num">—</span></div>';
+    }
+  });
+  html += '</div>';
+
+  html += '<svg class="bracket-jp-svg" width="'+svgW+'" height="'+totalH+'" xmlns="http://www.w3.org/2000/svg">';
+
+  var prevYs = [];
+  for (var i = 0; i < slots.length; i++) prevYs.push(i * teamH + teamH/2);
+
+  function ln(x1,y1,x2,y2,w){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+lineColor+'" stroke-width="'+w+'" stroke-linecap="square"/>';}
 
   for (var ri = 0; ri < totalRounds; ri++) {
-    var matchCount = rounds[ri].length / 2;
-    var rName = roundNames[Math.max(0, roundNames.length-totalRounds+ri)] || ('第'+(ri+1)+'回戦');
-    html += '<div class="bracket-round"><div class="bracket-round-title">'+rName+'</div><div class="bracket-col">';
-    for (var mi = 0; mi < matchCount; mi++) {
-      var teamA = rounds[ri][mi*2], teamB = rounds[ri][mi*2+1];
-      var key = ri+'_'+mi;
-      var res = matchResults[key];
-      var autoWinner = (!teamB && teamA) ? teamA : (!teamA && teamB ? teamB : null);
-      var winner = res ? res.winner : autoWinner;
-      html += '<div class="bracket-spacer"></div><div class="bracket-match">';
-      if (res) {
-        var cr = CATS.map(function(c) {
-          var w = vCatWin(res[c] || []);
-          return '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;color:'+(w==='A'?'var(--accent)':'var(--red)')+'">'+CAT_LABELS[c]+(w==='A'?'○':'✕')+'</span>';
-        }).join(' ');
-        html += '<div style="text-align:center;padding:2px 4px;display:flex;gap:4px;justify-content:center">'+cr+'</div>';
+    var leftX = ri * colW;
+    var bracketX = (ri+1) * colW - 8;
+    var rightX = (ri+1) * colW;
+    var nextYs = [];
+    for (var mi = 0; mi < prevYs.length / 2; mi++) {
+      var topY = prevYs[mi*2];
+      var botY = prevYs[mi*2+1];
+      var topTeam = rounds[ri][mi*2];
+      var botTeam = rounds[ri][mi*2+1];
+      var winner = rounds[ri+1] ? rounds[ri+1][mi] : null;
+      if (topTeam && !botTeam) {
+        html += ln(leftX, topY, rightX, topY, thickW);
+        nextYs.push(topY);
+      } else if (!topTeam && botTeam) {
+        html += ln(leftX, botY, rightX, botY, thickW);
+        nextYs.push(botY);
+      } else if (topTeam && botTeam) {
+        var midY = (topY + botY) / 2;
+        var topWon = winner && winner === topTeam;
+        var botWon = winner && winner === botTeam;
+        var topW = topWon ? thickW : thinW;
+        var botW = botWon ? thickW : thinW;
+        var outW = (topWon || botWon) ? thickW : thinW;
+        html += ln(leftX, topY, bracketX, topY, topW);
+        html += ln(leftX, botY, bracketX, botY, botW);
+        if (topWon) {
+          html += ln(bracketX, topY, bracketX, midY, thickW);
+          html += ln(bracketX, midY, bracketX, botY, thinW);
+        } else if (botWon) {
+          html += ln(bracketX, topY, bracketX, midY, thinW);
+          html += ln(bracketX, midY, bracketX, botY, thickW);
+        } else {
+          html += ln(bracketX, topY, bracketX, botY, thinW);
+        }
+        html += ln(bracketX, midY, rightX, midY, outW);
+        nextYs.push(midY);
+      } else {
+        nextYs.push((topY + botY) / 2);
       }
-      html += vTeamRow(teamA, winner === teamA, seeds);
-      html += '<div class="bracket-divider"></div>';
-      html += vTeamRow(teamB, winner === teamB, seeds);
-      html += '</div><div class="bracket-gap"></div>';
     }
-    html += '<div class="bracket-spacer"></div></div></div>';
+    prevYs = nextYs;
   }
 
-  var champion = rounds[totalRounds] ? rounds[totalRounds][0] : null;
-  html += '<div class="bracket-round"><div class="bracket-round-title" style="color:var(--yellow)">🏆 優勝</div>' +
-    '<div class="bracket-col" style="justify-content:center;align-items:center;padding:16px 8px">' +
-    (champion
-      ? '<div style="text-align:center"><div style="font-size:22px;margin-bottom:6px">🏆</div><div style="font-size:11px;font-weight:700;color:var(--yellow)">'+esc(champion.name)+'</div><div style="font-size:9px;color:var(--text3);margin-top:2px">'+esc(champion.leagueLabel||'')+'リーグ '+((champion.rankInLeague||0)+1)+'位</div></div>'
-      : '<div style="text-align:center;color:var(--text3);font-size:11px">決勝<br>勝者</div>') +
-    '</div></div>';
+  if (prevYs.length === 1) {
+    var champY = prevYs[0];
+    var champStartX = totalRounds * colW;
+    var champion = rounds[totalRounds] ? rounds[totalRounds][0] : null;
+    var champLineW = champion ? thickW : thinW;
+    html += ln(champStartX, champY, champStartX + endPad - 8, champY, champLineW);
+    if (champion) {
+      html += '<text x="'+(champStartX + endPad/2)+'" y="'+(champY - 6)+'" font-size="10" font-weight="900" fill="#e65100" text-anchor="middle">🏆</text>';
+      html += '<text x="'+(champStartX + endPad/2)+'" y="'+(champY + 14)+'" font-size="10" font-weight="900" fill="#222" text-anchor="middle">'+esc(champion.name)+'</text>';
+    } else {
+      html += '<text x="'+(champStartX + endPad/2)+'" y="'+(champY - 4)+'" font-size="9" fill="#aaa" text-anchor="middle">決勝</text>';
+      html += '<text x="'+(champStartX + endPad/2)+'" y="'+(champY + 8)+'" font-size="9" fill="#aaa" text-anchor="middle">勝者</text>';
+    }
+  }
+
+  html += '</svg>';
   html += '</div>';
   return html;
 }
 
 function vTeamRow(team, isWin, seeds) {
-  if (!team) return '<div class="bracket-team bye"><span class="bracket-team-seed">—</span><span>BYE</span></div>';
+  if (!team) return '<div class="bracket-team bye"><span class="bracket-team-seed">—</span><span class="bracket-team-name-v">BYE</span></div>';
   var si = seeds.indexOf(team);
   if (si < 0) {
     for (var i = 0; i < seeds.length; i++) {
       if (seeds[i] && seeds[i].name === team.name) { si = i; break; }
     }
   }
-  var color = team.color || {bg:'var(--bg3)', text:'var(--text2)'};
-  return '<div class="bracket-team'+(isWin?' winner':'')+'"><span class="bracket-team-seed" style="color:'+color.text+'">'+(si+1)+'</span><span style="font-size:9px;background:'+color.bg+';color:'+color.text+';padding:1px 4px;border-radius:3px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;flex-shrink:0">'+esc(team.leagueLabel||'')+((team.rankInLeague||0)+1)+'位</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px">'+esc(team.name)+'</span>'+(isWin?'<span style="font-size:10px;color:var(--accent)">✓</span>':'')+'</div>';
+  return '<div class="bracket-team'+(isWin?' winner':'')+'">' +
+    '<span class="bracket-team-name-v">'+esc(team.name)+'</span>' +
+    '<span class="bracket-team-seed">'+(si+1)+'</span>' +
+    '</div>';
 }
 
 function vComputeRounds(seeds, matchResults) {
@@ -1028,7 +1164,9 @@ function renderThanks() {
 
 if (directMode) {
   if (initialAction === 'status') openStatusFor(directTourId);
-  else if (initialAction === 'view') openViewFor(directTourId);
+  else if (initialAction === 'view') openViewFor(directTourId, gasViewMode || 'league');
+  else if (initialAction === 'menu') openTourMenu(directTourId);
+  else if (initialAction === 'info') showInfoPageFor(directTourId);
   else openEntryFor(directTourId);
 } else {
   loadTourList();

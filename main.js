@@ -12,15 +12,18 @@ function doGet(e) {
       .setFaviconUrl(FAVICON_URL)
       .setTitle('バドミントン大会管理');
   }
-  var publicModes = {'':'', public:'', view:'view', status:'status', entry:''};
+  var publicModes = {'':'', public:'', view:'view', status:'status', entry:'entry', menu:'menu', info:'info'};
   var actionMap = (mode in publicModes) ? publicModes[mode] : '';
   var t = HtmlService.createTemplateFromFile('public');
   t.gasPage = 'public';
   t.gasId = params.id || '';
   t.gasAction = params.action || actionMap;
+  t.gasViewMode = params.v || '';
   t.gasUrl = ScriptApp.getService().getUrl();
   var title = (mode === 'view') ? 'バドミントン大会 リーグ表' :
-              (mode === 'status') ? 'バドミントン大会 状況確認' : 'バドミントン大会エントリー';
+              (mode === 'status') ? 'バドミントン大会 状況確認' :
+              (mode === 'menu') ? 'バドミントン大会' :
+              (mode === 'info') ? 'バドミントン大会要項' : 'バドミントン大会エントリー';
   return t.evaluate()
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setFaviconUrl(FAVICON_URL)
@@ -431,6 +434,10 @@ function computeRoundsServer(seeds, matchResults) {
     ri++;
   }
   return rounds;
+}
+
+function getDeployUrl() {
+  return ScriptApp.getService().getUrl();
 }
 
 function deleteTournament(id) {
