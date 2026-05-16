@@ -833,6 +833,51 @@ function getPublicTournamentView(id) {
   return null;
 }
 
+// 各部の「現在進行中とみなす試合」を自動判定
+// 1) リーグ戦で未入力の最初の試合 (ri,ci) を返す
+// 2) リーグ戦が全て終わっていれば、トーナメント戦で両チーム確定済 & 未入力の最初の試合
+function computeCurrentMatches(payload) {
+  var result = {};
+  var divs = (payload.cfg && payload.cfg.divisions) || [];
+  var data = payload.data || [];
+  var tsArr = payload.tournamentStates || [];
+
+  divs.forEach(function(div, di) {
+    var current = null;
+    var divLeagues = data[di] || [];
+    for (var li = 0; li < divLeagues.length && !current; li++) {
+      var lg = divLeagues[li] || {};
+      var teams = lg.teams || [];
+      for (var ri = 0; ri < teams.length && !current; ri++) {
+        for (var ci = ri + 1; ci < teams.length && !current; ci++) {
+          var key = ri + '_' + ci;
+          if (!lg.results || !lg.results[key]) {
+            current = (di + 1) + ALPHA_SRV.charAt(li) + '-' + padMatchNumSrv(leagueMatchSeqSrv(ri, ci, teams.length));
+          }
+        }
+      }
+    }
+    if (!current) {
+      var ts = tsArr[di];
+      if (ts && ts.seeds && ts.seeds.length) {
+        var rounds = computeRoundsServer(ts.seeds, ts.matchResults || {});
+        var totalRounds = rounds.length - 1;
+        for (var rIdx = 0; rIdx < totalRounds && !current; rIdx++) {
+          var matchCount = rounds[rIdx].length / 2;
+          for (var mi = 0; mi < matchCount && !current; mi++) {
+            var teamA = rounds[rIdx][mi * 2], teamB = rounds[rIdx][mi * 2 + 1];
+            if (teamA && teamB && !(ts.matchResults || {})[rIdx + '_' + mi]) {
+              current = (di + 1) + 'T-' + padMatchNumSrv(tournMatchSeqSrv(ts.seeds.length, rIdx, mi));
+            }
+          }
+        }
+      }
+    }
+    result[div.name] = current; // 該当なしは null
+  });
+  return result;
+}
+
 function getPublicTournamentInfo(id) {
   var sheet = getSheet();
   var rows = sheet.getDataRange().getValues();
@@ -846,7 +891,9 @@ function getPublicTournamentInfo(id) {
           name: cfg.tournamentName || rows[i][1] || '名前なし',
           membersPerTeam: cfg.membersPerTeam || 4,
           entryCount: (payload.entries || []).length,
-          divisions: (cfg.divisions || []).map(function(d) { return {name: d.name}; })
+          divisions: (cfg.divisions || []).map(function(d) { return {name: d.name}; }),
+          infoUrl: cfg.infoUrl || '',
+          currentMatch: computeCurrentMatches(payload)
         };
       } catch(err) { return null; }
     }

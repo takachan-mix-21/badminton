@@ -260,6 +260,10 @@ select.team-name-sel option{background:#fff;color:var(--text)}
         <label>大会名</label>
         <input type="text" id="s-tournament-name" placeholder="例: 第1回 羽根杯バドミントン大会" oninput="previewSettings()" style="font-size:15px">
       </div>
+      <div class="form-field" style="margin-bottom:14px">
+        <label>大会要項URL <span style="color:var(--text3);font-weight:400">（メニューの「大会要項」ボタンが別タブで開きます）</span></label>
+        <input type="url" id="s-info-url" placeholder="https://example.com/tournament-guide.pdf" oninput="updateInfoUrl(this.value)" style="font-size:14px">
+      </div>
       <div id="div-settings"></div>
       <div class="form-field" style="margin-bottom:14px">
         <label>1チームあたりのメンバー数 <span style="color:var(--text3);font-weight:400">（エントリーフォーム用）</span></label>
@@ -1074,6 +1078,11 @@ function ensureEntryMembers(e) {
   e.members.forEach(function(m){ if (!('gender' in m)) m.gender = ''; });
 }
 
+function updateInfoUrl(val) {
+  cfg.infoUrl = (val || '').trim();
+  scheduleAutoSave();
+}
+
 function updateMembersCount(val) {
   var n = Math.max(1, Math.min(20, parseInt(val) || 1));
   cfg.membersPerTeam = n;
@@ -1380,6 +1389,7 @@ function startNewTournament() {
   currentTournamentId = null;
   _lastLoadTime = new Date().toISOString();
   cfg.tournamentName = '';
+  cfg.infoUrl = '';
   cfg.membersPerTeam = 4;
   cfg.gamePoints = [11,21,21];
   cfg.divisions = [
@@ -1392,6 +1402,7 @@ function startNewTournament() {
   tournamentStates = [];
   entries = [];
   document.getElementById('s-tournament-name').value = '';
+  var infoUrlInp = document.getElementById('s-info-url'); if (infoUrlInp) infoUrlInp.value = '';
   document.getElementById('s-members-per-team').value = cfg.membersPerTeam;
   [0,1,2].forEach(function(gi) {
     document.querySelectorAll('.point-btn[data-game="'+gi+'"]').forEach(function(b) {
@@ -1682,6 +1693,9 @@ function loadFromGAS(saved) {
       document.getElementById('s-tournament-name').value = saved.cfg.tournamentName;
       document.querySelector('.brand-text').innerHTML = '<span>' + esc(saved.cfg.tournamentName) + '</span>';
     }
+    cfg.infoUrl = saved.cfg.infoUrl || '';
+    var infoUrlInp2 = document.getElementById('s-info-url');
+    if (infoUrlInp2) infoUrlInp2.value = cfg.infoUrl;
     if (saved.cfg.gamePoints) {
       cfg.gamePoints = saved.cfg.gamePoints;
       [0,1,2].forEach(function(gi) {

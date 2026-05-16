@@ -540,7 +540,16 @@ function renderTourMenu() {
   var id = menuTour.id;
   document.getElementById('menu-tour-name').textContent = menuTour.name;
   document.getElementById('menu-pill-entries').href    = buildUrl('view', id, {v:'entries'});
-  document.getElementById('menu-pill-info').href       = buildUrl('info', id);
+  var infoPill = document.getElementById('menu-pill-info');
+  if (menuTour.infoUrl) {
+    infoPill.href = menuTour.infoUrl;
+    infoPill.target = '_blank';
+    infoPill.setAttribute('rel', 'noopener noreferrer');
+  } else {
+    infoPill.href = buildUrl('info', id);
+    infoPill.target = '_top';
+    infoPill.removeAttribute('rel');
+  }
   document.getElementById('menu-pill-league').href     = buildUrl('view', id, {v:'league'});
   document.getElementById('menu-pill-tournament').href = buildUrl('view', id, {v:'tournament'});
   document.getElementById('menu-pill-scoreedit').href  = buildUrl('scoreedit', id);
