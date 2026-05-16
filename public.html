@@ -150,7 +150,8 @@ input::placeholder{color:#c0a995}
 .total-row{display:flex;align-items:center;justify-content:center;gap:3px;border-top:1px solid var(--border);padding-top:3px;margin-top:3px}
 .total-score{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;line-height:1}
 .total-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:700;color:var(--text3);letter-spacing:.04em}
-.empty-cell{color:var(--text3);font-size:12px;padding:10px 4px!important}
+.empty-cell{color:var(--text3);font-size:12px;padding:8px 4px!important}
+.match-name{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;letter-spacing:.06em;color:var(--accent);padding:0 0 2px;line-height:1;text-align:center}
 .rank-tbl{width:100%;border-collapse:collapse;font-size:12px}
 .rank-tbl th{background:linear-gradient(180deg,#fff5e6,#ffe9cc);border-bottom:2px solid #ffd6c2;padding:9px 8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.08em;color:var(--text2);text-transform:uppercase;white-space:nowrap;font-weight:800}
 .rank-tbl td{padding:10px 8px;text-align:center;border-bottom:1px solid #ffe9cc;white-space:nowrap}
@@ -1023,6 +1024,21 @@ function vCWins(games){var wA=0,wB=0;games.forEach(function(g){if(g.a>g.b)wA++;e
 function vCatWin(games){var w=vCWins(games);return w.wA>w.wB?'A':w.wB>w.wA?'B':null;}
 function vTotalPts(match){var pf=0,pa=0;CATS.forEach(function(c){match[c].forEach(function(g){pf+=g.a;pa+=g.b;});});return{pf:pf,pa:pa};}
 
+// 部+リーグ+連番（例: 1A-01）
+function vPadMatchNum(n){return n<10?'0'+n:''+n;}
+function vLeagueMatchSeq(ri,ci,teamCount){
+  var a=Math.min(ri,ci),b=Math.max(ri,ci),seq=0;
+  for(var i=0;i<a;i++)seq+=(teamCount-1-i);
+  seq+=(b-a);
+  return seq;
+}
+function vGetLeagueMatchName(di,li,ri,ci){
+  var lg=viewData.data[di]&&viewData.data[di][li];
+  if(!lg)return '';
+  var teams=lg.teams||[];
+  return (di+1)+ALPHA[li]+'-'+vPadMatchNum(vLeagueMatchSeq(ri,ci,teams.length));
+}
+
 function buildViewLeaguePanel(di, li) {
   var lg = viewData.data[di][li];
   var teams = lg.teams || [];
@@ -1044,13 +1060,14 @@ function buildViewLeaguePanel(di, li) {
     tbl += '<tr><td class="team-cell"><span style="background:'+c.bg+';color:'+c.text+';padding:1px 6px;border-radius:4px;font-size:10px;margin-right:5px">'+ALPHA[li]+(ri+1)+'</span>'+esc(name)+'</td>';
     teams.forEach(function(_, ci) {
       if (ri===ci) { tbl += '<td class="diagonal"></td>'; return; }
+      var mname = vGetLeagueMatchName(di, li, ri, ci);
       var r = vGetMatch(lg, ri, ci);
-      if (!r) { tbl += '<td class="empty-cell" style="min-width:110px"><span style="color:var(--text3);font-size:11px">—</span></td>'; return; }
+      if (!r) { tbl += '<td class="empty-cell" style="min-width:110px"><div class="match-name">'+mname+'</div><span style="color:var(--text3);font-size:11px">—</span></td>'; return; }
       var cellW=0; CATS.forEach(function(cat){if(vCatWin(r[cat])==='A')cellW++;});
       var cellL=3-cellW;
       var tcol = cellW>cellL?'var(--accent)':cellW<cellL?'var(--red)':'var(--yellow)';
       if (vCatWin(r.md)==='A') mdW++; if (vCatWin(r.wd)==='A') wdW++; if (vCatWin(r.xd)==='A') xdW++; totalW+=cellW;
-      tbl += '<td class="score-cell"><div class="score-inner"><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
+      tbl += '<td class="score-cell"><div class="score-inner"><div class="match-name">'+mname+'</div><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
       CATS.forEach(function(cat) {
         var games = r[cat]; var wins = vCWins(games); var iw = vCatWin(r[cat])==='A';
         tbl += '<div class="cat-row"><span class="cat-lbl '+cat+'">'+CAT_LABELS[cat]+'</span><span style="font-size:9px;font-weight:700;color:'+(iw?'var(--accent)':'var(--red)')+'">'+(iw?'○':'✕')+'</span><span class="game-scores">';

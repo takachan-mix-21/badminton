@@ -130,7 +130,9 @@ select.team-name-sel option{background:#fff;color:var(--text)}
 .total-row{display:flex;align-items:center;justify-content:center;gap:3px;border-top:1px solid #ffd6c2;padding-top:3px;margin-top:3px}
 .total-score{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:900;line-height:1}
 .total-lbl{font-family:'Barlow Condensed',sans-serif;font-size:8px;font-weight:800;color:var(--text3);letter-spacing:.04em}
-.empty-cell{color:var(--text3);font-size:12px;padding:10px 4px!important;background:#fffaf2}
+.empty-cell{color:var(--text3);font-size:12px;padding:8px 4px!important;background:#fffaf2}
+.match-name{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:900;letter-spacing:.06em;color:var(--accent);padding:0 0 2px;line-height:1;text-align:center}
+.match-name-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;padding:4px 12px;border-radius:10px;letter-spacing:.06em;box-shadow:0 2px 6px rgba(255,94,138,0.3);display:inline-block}
 .modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal{background:#fff;border-radius:24px 24px 0 0;padding:22px 18px calc(22px + var(--safe-bottom));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.22,1,.36,1);box-shadow:0 -10px 40px rgba(255,94,138,0.2)}
@@ -572,13 +574,14 @@ function buildLeaguePanel(di,li) {
     tbl+='<tr><td class="team-cell"><span style="background:'+c.bg+';color:'+c.text+';padding:1px 6px;border-radius:4px;font-size:10px;margin-right:5px">'+ALPHA[li]+(ri+1)+'</span>'+esc(name)+'</td>';
     lg.teams.forEach(function(_,ci) {
       if(ri===ci){tbl+='<td class="diagonal"></td>';return;}
+      var mname=getLeagueMatchName(di,li,ri,ci);
       var r=getMatchDirect(lg,ri,ci);
-      if(!r){tbl+='<td class="empty-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer;min-width:110px"><span style="color:var(--text3);font-size:18px">+</span></td>';return;}
+      if(!r){tbl+='<td class="empty-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer;min-width:110px"><div class="match-name">'+mname+'</div><span style="color:var(--text3);font-size:16px">+</span></td>';return;}
       var cellW=0;CATS.forEach(function(cat){if(catWin(r[cat])==='A')cellW++;});
       var cellL=3-cellW;
       var tcol=cellW>cellL?'var(--accent)':cellW<cellL?'var(--red)':'var(--yellow)';
       if(catWin(r.md)==='A')mdW++;if(catWin(r.wd)==='A')wdW++;if(catWin(r.xd)==='A')xdW++;totalW+=cellW;
-      tbl+='<td class="score-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer"><div class="score-inner"><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
+      tbl+='<td class="score-cell" onclick="openModal('+di+','+li+','+ri+','+ci+')" style="cursor:pointer"><div class="score-inner"><div class="match-name">'+mname+'</div><div class="total-row"><span class="total-lbl">TOT</span><span class="total-score" style="color:'+tcol+'">'+cellW+'</span><span style="font-size:10px;color:var(--text3)">-</span><span class="total-score" style="color:var(--text3)">'+cellL+'</span></div>';
       CATS.forEach(function(cat) {
         var games=r[cat];var wins=cWins(games);var iw=catWin(r[cat])==='A';
         tbl+='<div class="cat-row"><span class="cat-lbl '+cat+'">'+CAT_LABELS[cat]+'</span><span style="font-size:9px;font-weight:700;color:'+(iw?'var(--accent)':'var(--red)')+'">'+( iw?'○':'✕')+'</span><span class="game-scores">';
@@ -668,13 +671,37 @@ function catWin(games){var w=cWins(games);return w.wA>w.wB?'A':w.wB>w.wA?'B':nul
 function totalPts(match){var pf=0,pa=0;CATS.forEach(function(c){match[c].forEach(function(g){pf+=g.a;pa+=g.b;});});return{pf:pf,pa:pa};}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ========== MATCH NAMING ==========
+// 部+リーグ+連番（例: 1A-01）でリーグ戦、部T+連番（例: 1T-01）でトーナメント戦
+function padMatchNum(n){return n<10?'0'+n:''+n;}
+function leagueMatchSeq(ri,ci,teamCount){
+  var a=Math.min(ri,ci),b=Math.max(ri,ci),seq=0;
+  for(var i=0;i<a;i++)seq+=(teamCount-1-i);
+  seq+=(b-a);
+  return seq;
+}
+function getLeagueMatchName(di,li,ri,ci){
+  var lg=data[di]&&data[di][li];
+  if(!lg)return '';
+  return (di+1)+ALPHA[li]+'-'+padMatchNum(leagueMatchSeq(ri,ci,lg.teams.length));
+}
+function getTournMatchName(di,ri,mi){
+  var ts=tournamentStates[di];
+  if(!ts||!ts.slots||!ts.slots.length)return '';
+  var size=ts.slots.length,seq=0;
+  for(var r=0;r<ri;r++)seq+=Math.floor(size/Math.pow(2,r+1));
+  seq+=mi+1;
+  return (di+1)+'T-'+padMatchNum(seq);
+}
+
 // ========== MODAL ==========
 function openModal(di,li,ri,ci) {
   currentModal={di:di,li:li,ri:ri,ci:ci};
   var lg=data[di][li];
   var ta=lg.teams[ri],tb=lg.teams[ci];
   var r=getMatchDirect(lg,ri,ci);
-  document.getElementById('modal-title').innerHTML='<span style="font-weight:700">'+esc(ta)+'</span><span class="modal-vs">VS</span><span style="font-weight:700">'+esc(tb)+'</span>';
+  var mname=getLeagueMatchName(di,li,ri,ci);
+  document.getElementById('modal-title').innerHTML='<span class="match-name-chip">'+esc(mname)+'</span><span style="font-weight:700">'+esc(ta)+'</span><span class="modal-vs">VS</span><span style="font-weight:700">'+esc(tb)+'</span>';
   var body='';
   CATS.forEach(function(cat) {
     var games=r?r[cat]:[{a:'',b:''},{a:'',b:''},{a:'',b:''}];
@@ -879,7 +906,9 @@ function openTournModal(di, ri, mi) {
   currentTournMatch = {di:di, ri:ri, mi:mi, teamA:teamA, teamB:teamB};
   var key = ri+'_'+mi;
   var res = tournamentStates[di].matchResults[key] || null;
+  var tmname=getTournMatchName(di,ri,mi);
   document.getElementById('modal-title').innerHTML =
+    '<span class="match-name-chip">'+esc(tmname)+'</span>' +
     '<span style="font-size:10px;color:var(--text3)">'+cfg.divisions[di].name+' トーナメント</span><br>' +
     '<span style="font-size:10px;color:var(--text3)">'+teamA.leagueLabel+'リーグ'+(teamA.rankInLeague+1)+'位</span>' +
     '<span style="font-weight:700"> '+esc(teamA.name)+'</span>' +
@@ -1006,8 +1035,9 @@ function renderTournPanel(di) {
       var autoWinner=isByeB?teamA:isByeA?teamB:null;
       var winner=res?res.winner:autoWinner;
       var canTap=!!(teamA&&teamB);
-      html+='<div class="bracket-spacer"></div><div class="bracket-match"'+(canTap?' onclick="openTournModal('+di+','+ri+','+mi+')" style="cursor:pointer"':'')+'>'; 
-      if(canTap&&!res) html+='<div style="font-size:9px;color:var(--text3);text-align:center;padding:2px 0;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:.04em">TAP TO ENTER</div>';
+      var tname=getTournMatchName(di,ri,mi);
+      html+='<div class="bracket-spacer"></div><div class="bracket-match"'+(canTap?' onclick="openTournModal('+di+','+ri+','+mi+')" style="cursor:pointer"':'')+'>';
+      if(canTap&&tname) html+='<div class="match-name" style="padding:0 0 4px">'+tname+(res?'':' ・未入力')+'</div>';
       if(res){
         var cr=CATS.map(function(c){var w=catWin(res[c]);return '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:9px;color:'+(w==='A'?'var(--accent)':'var(--red)')+'">'+CAT_LABELS[c]+(w==='A'?'○':'✕')+'</span>';}).join(' ');
         html+='<div style="text-align:center;padding:2px 4px;display:flex;gap:4px;justify-content:center">'+cr+'</div>';
