@@ -207,11 +207,18 @@ input::placeholder{color:#c0a995}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes wiggle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
-.modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:stretch;justify-content:stretch;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:#fff;border-radius:24px 24px 0 0;padding:22px 18px calc(22px + var(--safe-bottom));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.22,1,.36,1);box-shadow:0 -10px 40px rgba(255,94,138,0.2)}
+.modal{background:linear-gradient(180deg,#fff8f0 0%,#ffe9d4 50%,#ffd9e8 100%);border-radius:0;padding:68px 16px calc(22px + var(--safe-bottom));width:100%;max-width:none;height:100%;overflow-y:auto;transform:translateY(12px);transition:transform .22s cubic-bezier(.22,1,.36,1);box-shadow:none;position:relative}
 .modal-overlay.open .modal{transform:translateY(0)}
-.modal-handle{width:42px;height:5px;background:#ffd6c2;border-radius:3px;margin:0 auto 16px}
+.modal-close{position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid #ffd6c2;color:var(--text2);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:210;font-weight:900;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform .12s ease,border-color .12s ease,color .12s ease}
+.modal-close:hover{border-color:var(--accent);color:var(--accent)}
+.modal-close:active{transform:scale(0.92)}
+.modal-handle{display:none}
+.modal > #se-modal-body,.modal > .modal-title,.modal > .btn-primary{max-width:560px;margin-left:auto!important;margin-right:auto!important}
+.modal > #se-modal-body{display:block}
+.modal > .modal-title{margin-bottom:16px;display:flex}
+.modal > .btn-primary{display:flex;width:calc(100% - 16px);font-size:16px;min-height:56px}
 .modal-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text);flex-wrap:wrap}
 .modal-vs{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--accent);padding:0 6px;font-weight:900}
 .match-name-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;padding:4px 12px;border-radius:10px;letter-spacing:.06em;box-shadow:0 2px 6px rgba(255,94,138,0.3);display:inline-block}
@@ -222,12 +229,12 @@ input::placeholder{color:#c0a995}
 .cat-tag.wd{background:linear-gradient(135deg,#ff8fa3,#f48fb1)}
 .cat-tag.xd{background:linear-gradient(135deg,#9b6bff,#b39ddb)}
 .cat-block-name{font-size:12px;color:var(--text2);font-weight:700}
-.game-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-.game-lbl{font-size:10px;color:var(--text2);width:48px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900}
-.score-inp{width:56px!important;margin:0!important;text-align:center;padding:8px 4px!important;font-size:16px!important;font-weight:800;min-height:44px;flex-shrink:0;border:2px solid #ffd6c2!important;border-radius:12px!important;background:#fff;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
+.game-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.game-lbl{font-size:13px;color:var(--text2);width:54px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900;line-height:1.2}
+.score-inp{flex:1;min-width:0;max-width:120px;margin:0!important;text-align:center;padding:12px 6px!important;font-size:22px!important;font-weight:800;min-height:54px;border:2px solid #ffd6c2!important;border-radius:14px!important;background:#fff;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
 .score-inp:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(255,94,138,0.15)}
-.score-sep{color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;flex-shrink:0}
-.team-side-lbl{font-size:11px;color:var(--text2);width:28px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:800}
+.score-sep{color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;flex-shrink:0}
+.team-side-lbl{font-size:13px;color:var(--text2);width:24px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900}
 .se-section{margin-bottom:22px}
 .se-section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-left:6px;display:flex;align-items:center;gap:8px}
 .se-section-title::before{content:'';width:5px;height:18px;background:linear-gradient(180deg,#ff5e8a,#ff9148);border-radius:3px}
@@ -386,7 +393,7 @@ input::placeholder{color:#c0a995}
 
 <div class="modal-overlay" id="se-modal-overlay" onclick="seCloseModal(event)">
   <div class="modal" id="se-modal">
-    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="seCloseModal()" aria-label="閉じる">✕</button>
     <div class="modal-title" id="se-modal-title"></div>
     <div id="se-modal-body"></div>
     <button class="btn btn-primary btn-block" id="se-modal-save" onclick="seSaveScore()" style="margin-top:8px">保存する</button>
