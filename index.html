@@ -1428,6 +1428,7 @@ function renderTournamentList(list) {
       '<div style="flex:1;min-width:200px;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')"><div style="font-weight:700;font-size:15px">' + esc(t.name || '名前なし') + '</div>' +
       '<div style="font-size:11px;color:var(--text2);margin-top:3px">' + (t.updatedAt || '') + ' ／ ' + (t.summary || '') + '</div></div>' +
       '<button class="btn btn-sm" style="background:var(--blue-dim);color:var(--blue);border-color:rgba(79,195,247,0.4)" onclick="event.stopPropagation();gasShowUrls(\''+t.id+'\')">🔗 URL</button>' +
+      '<button class="btn btn-sm" style="background:var(--yellow-dim);color:#a26b00;border:2px solid rgba(255,170,0,0.3)" onclick="event.stopPropagation();gasShowMatchPasswords(\''+t.id+'\')">🔑 PW</button>' +
       '<button class="btn btn-sm" style="background:var(--accent-dim);color:var(--accent);border-color:rgba(255,94,138,0.4)" onclick="event.stopPropagation();gasExportTournament(\''+t.id+'\')">📋 整える</button>' +
       '<button class="entry-remove-btn" onclick="event.stopPropagation();gasDeleteTournament(\''+t.id+'\')">削除</button>' +
       '<span style="color:var(--text3);font-size:20px;cursor:pointer" onclick="gasLoadTournament(\'' + t.id + '\')">›</span></div>';
@@ -1435,6 +1436,133 @@ function renderTournamentList(list) {
 }
 
 var _cachedDeployUrl = null;
+var _currentMatchPwdTournamentId = null;
+var _currentMatchPwdName = '';
+
+function copyTextToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text).then(
+      function(){ showToast('コピーしました'); },
+      function(){ try { var t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast('コピーしました'); } catch(e){ showToast('コピー失敗'); } }
+    );
+  }
+  try { var t=document.createElement('textarea'); t.value=text; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast('コピーしました'); } catch(e){ showToast('コピー失敗'); }
+}
+
+function gasShowMatchPasswords(id) {
+  var t = _tournamentListCache.find(function(x){return x.id === id;});
+  _currentMatchPwdTournamentId = id;
+  _currentMatchPwdName = (t && t.name) || '名前なし';
+  if (typeof google === 'undefined' || !google.script) { showToast('（ローカル：GAS未接続）'); return; }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '読み込みに失敗しました'); return; }
+      renderMatchPasswordsModal(res.matches || []);
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+    .getAllMatchPasswords(id);
+}
+
+function renderMatchPasswordsModal(matches) {
+  var name = _currentMatchPwdName;
+  var id = _currentMatchPwdTournamentId;
+  document.getElementById('modal-title').innerHTML = '🔑 ' + esc(name) + ' の試合パスワード一覧';
+  // 部・リーグ・トーナメントごとにグループ化
+  var groups = {};
+  matches.forEach(function(m) {
+    var gkey = m.type === 'league'
+      ? (m.divisionName + ' / ' + m.leagueLabel)
+      : (m.divisionName + ' トーナメント / ' + (m.roundName || ''));
+    if (!groups[gkey]) groups[gkey] = [];
+    groups[gkey].push(m);
+  });
+  var groupOrder = Object.keys(groups);
+
+  var html = '<div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.5">各試合に固有のパスワードが設定されています。担当者ごとに該当する試合のパスワードを伝えてください。</div>';
+  html += '<div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">';
+  html += '<button class="btn btn-sm btn-ghost" onclick="gasCopyAllMatchPasswords()" style="flex:1;min-width:120px">📋 全件コピー (CSV)</button>';
+  html += '<button class="btn btn-sm" style="background:rgba(255,79,107,0.1);color:var(--red);border:2px solid rgba(255,79,107,0.3);flex:1;min-width:120px" onclick="gasRegenerateAllMatchPasswords()">↻ 全パスワード再生成</button>';
+  html += '</div>';
+  html += '<div id="mp-list-body">' + buildMatchPwdGroupsHtml(groups, groupOrder) + '</div>';
+  document.getElementById('modal-body').innerHTML = html;
+  // 保存ボタンは非表示（一覧モーダルなので不要）
+  var primaryBtn = document.querySelector('.modal .btn-primary');
+  if (primaryBtn) {
+    primaryBtn.style.display = 'none';
+    primaryBtn.setAttribute('data-was-hidden', '1');
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  // 全件CSV用に保存
+  _lastMatchPasswordList = matches;
+}
+
+var _lastMatchPasswordList = [];
+
+function buildMatchPwdGroupsHtml(groups, groupOrder) {
+  return groupOrder.map(function(gkey) {
+    var items = groups[gkey];
+    var rows = items.map(function(m) {
+      var teamsLabel = esc(m.teamA || '?') + ' vs ' + esc(m.teamB || '?');
+      var pwd = esc(m.password || '');
+      return '<div style="display:flex;gap:8px;align-items:center;padding:8px 10px;background:#fff;border:1px solid #ffe9cc;border-radius:10px">'
+        + '<div style="flex-shrink:0;min-width:60px"><div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:13px;color:var(--accent);letter-spacing:.04em">'+esc(m.matchName)+'</div></div>'
+        + '<div style="flex:1;min-width:120px;font-size:12px;color:var(--text2);font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis">'+teamsLabel+'</div>'
+        + '<input type="text" readonly value="'+pwd+'" style="width:100px;font-family:\'Barlow Condensed\',monospace;font-weight:900;font-size:14px;letter-spacing:.06em;padding:6px 8px;background:#fff8f0;border:2px solid #ffd6c2;border-radius:8px;color:var(--text);outline:none;-webkit-appearance:none;text-align:center" onclick="this.select()">'
+        + '<button class="btn btn-sm btn-ghost" style="padding:6px 10px;min-height:32px" onclick="copyTextToClipboard(\''+pwd+'\')">📋</button>'
+        + '<button class="btn btn-sm" style="padding:6px 10px;min-height:32px;background:rgba(255,79,107,0.1);color:var(--red);border:2px solid rgba(255,79,107,0.3)" onclick="gasRegenerateMatchPassword(\''+m.key+'\')">↻</button>'
+        + '</div>';
+    }).join('');
+    return '<div style="margin-bottom:14px">'
+      + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:12px;font-weight:900;color:var(--text);letter-spacing:.08em;padding:6px 8px;background:linear-gradient(135deg,#fff5e6,#ffe9cc);border-radius:8px;margin-bottom:6px">'+esc(gkey)+'</div>'
+      + '<div style="display:flex;flex-direction:column;gap:6px">' + rows + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function gasRegenerateMatchPassword(matchKey) {
+  if (!confirm('この試合のパスワードを再生成します。よろしいですか？')) return;
+  if (typeof google === 'undefined' || !google.script) { showToast('（ローカル：GAS未接続）'); return; }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (res && res.ok && res.password) {
+        // 一覧を再ロード
+        showToast('再生成しました');
+        gasShowMatchPasswords(_currentMatchPwdTournamentId);
+      } else {
+        alert((res && res.error) || '再生成に失敗しました');
+      }
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('再生成エラー: '+e.message); })
+    .regenerateMatchPassword(_currentMatchPwdTournamentId, matchKey);
+}
+
+function gasRegenerateAllMatchPasswords() {
+  if (!confirm('全試合のパスワードを再生成します。既に配布済みのパスワードは無効になりますがよろしいですか？')) return;
+  if (typeof google === 'undefined' || !google.script) { showToast('（ローカル：GAS未接続）'); return; }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '再生成に失敗しました'); return; }
+      showToast('全パスワードを再生成しました');
+      renderMatchPasswordsModal(res.matches || []);
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('再生成エラー: '+e.message); })
+    .regenerateAllMatchPasswords(_currentMatchPwdTournamentId);
+}
+
+function gasCopyAllMatchPasswords() {
+  var lines = ['試合名,部門,対戦,パスワード'];
+  _lastMatchPasswordList.forEach(function(m) {
+    var ctx = m.type === 'league' ? (m.divisionName + ' ' + m.leagueLabel) : (m.divisionName + ' トーナメント ' + (m.roundName || ''));
+    lines.push([m.matchName, ctx, (m.teamA || '?') + ' vs ' + (m.teamB || '?'), m.password || ''].map(function(s){ return '"' + String(s).replace(/"/g,'""') + '"'; }).join(','));
+  });
+  copyTextToClipboard(lines.join('\n'));
+}
 
 function gasShowUrls(id) {
   var t = _tournamentListCache.find(function(x){return x.id === id;});
@@ -1456,14 +1584,19 @@ function showUrlsModal(id, name, baseUrl) {
   var urls = [
     {label:'大会メニュー', icon:'🏠', url: baseUrl + '?mode=menu&id=' + encodeURIComponent(id)},
     {label:'エントリー登録', icon:'📝', url: baseUrl + '?mode=entry&id=' + encodeURIComponent(id)},
-    {label:'状況確認', icon:'🔍', url: baseUrl + '?mode=status&id=' + encodeURIComponent(id)},
+    {label:'エントリー確認', icon:'🔍', url: baseUrl + '?mode=status&id=' + encodeURIComponent(id)},
     {label:'リーグ表', icon:'📊', url: baseUrl + '?mode=view&id=' + encodeURIComponent(id) + '&v=league'},
     {label:'順位表', icon:'🏅', url: baseUrl + '?mode=view&id=' + encodeURIComponent(id) + '&v=ranking'},
     {label:'トーナメント表', icon:'🏆', url: baseUrl + '?mode=view&id=' + encodeURIComponent(id) + '&v=tournament'},
-    {label:'エントリー結果', icon:'👥', url: baseUrl + '?mode=view&id=' + encodeURIComponent(id) + '&v=entries'}
+    {label:'エントリー結果', icon:'👥', url: baseUrl + '?mode=view&id=' + encodeURIComponent(id) + '&v=entries'},
+    {label:'スコア入力（要パスワード）', icon:'🎯', url: baseUrl + '?mode=scoreedit&id=' + encodeURIComponent(id)}
   ];
   document.getElementById('modal-title').innerHTML = '🔗 ' + esc(name) + ' の公開URL';
   var html = '<div style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5">参加者やスマホに共有するURLです。タップでコピー or 別タブで開けます。</div>';
+  html += '<div style="background:linear-gradient(135deg,#fff3d6,#ffe5a3);border-radius:14px;padding:12px 14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(255,170,0,0.18)">'
+    + '<div style="font-size:12px;font-weight:800;color:#a26b00;margin-bottom:6px">🔑 スコア入力パスワードは「試合ごと」に個別生成されます</div>'
+    + '<button class="btn btn-sm btn-block" style="background:#fff;border:2px solid #c98800;color:#a26b00;font-weight:900" onclick="closeModal({target:document.getElementById(\'modal-overlay\')});gasShowMatchPasswords(\''+id+'\')">📋 試合パスワード一覧を開く</button>'
+    + '</div>';
   html += '<div style="display:flex;flex-direction:column;gap:8px">';
   urls.forEach(function(u, i) {
     html += '<div style="background:linear-gradient(135deg,#fff5e6,#ffeede);border:none;border-radius:14px;padding:12px 14px;box-shadow:0 2px 8px rgba(255,94,138,0.06)">';

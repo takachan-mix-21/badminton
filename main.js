@@ -12,7 +12,7 @@ function doGet(e) {
       .setFaviconUrl(FAVICON_URL)
       .setTitle('バドミントン大会管理');
   }
-  var publicModes = {'':'', public:'', view:'view', status:'status', entry:'entry', menu:'menu', info:'info'};
+  var publicModes = {'':'', public:'', view:'view', status:'status', entry:'entry', menu:'menu', info:'info', scoreedit:'scoreedit'};
   var actionMap = (mode in publicModes) ? publicModes[mode] : '';
   var t = HtmlService.createTemplateFromFile('public');
   t.gasPage = 'public';
@@ -21,9 +21,10 @@ function doGet(e) {
   t.gasViewMode = params.v || '';
   t.gasUrl = ScriptApp.getService().getUrl();
   var title = (mode === 'view') ? 'バドミントン大会 リーグ表' :
-              (mode === 'status') ? 'バドミントン大会 状況確認' :
+              (mode === 'status') ? 'バドミントン大会 エントリー確認' :
               (mode === 'menu') ? 'バドミントン大会' :
-              (mode === 'info') ? 'バドミントン大会要項' : 'バドミントン大会エントリー';
+              (mode === 'info') ? 'バドミントン大会要項' :
+              (mode === 'scoreedit') ? 'バドミントン大会 スコア入力' : 'バドミントン大会エントリー';
   return t.evaluate()
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setFaviconUrl(FAVICON_URL)
@@ -67,6 +68,150 @@ function loadTournamentList() {
   return list.reverse();
 }
 
+// 各試合用パスワード: 紛らわしい文字 (0/O, 1/I/l) を除いた英数字 6 桁 (3-3 ハイフン区切り)
+function generateMatchPassword() {
+  var chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  var result = '';
+  for (var i = 0; i < 6; i++) {
+    if (i === 3) result += '-';
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+function normalizePassword(p) {
+  return String(p || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+}
+
+// 現在の cfg / data / tournamentStates から想定される全ての試合キーを列挙
+function enumerateMatchKeys(payload) {
+  var keys = [];
+  var data = payload.data || [];
+  for (var di = 0; di < data.length; di++) {
+    var divLeagues = data[di] || [];
+    for (var li = 0; li < divLeagues.length; li++) {
+      var lg = divLeagues[li] || {};
+      var teamCount = (lg.teams || []).length;
+      for (var ri = 0; ri < teamCount; ri++) {
+        for (var ci = ri + 1; ci < teamCount; ci++) {
+          keys.push('L_' + di + '_' + li + '_' + ri + '_' + ci);
+        }
+      }
+    }
+  }
+  var tsArr = payload.tournamentStates || [];
+  for (var tdi = 0; tdi < tsArr.length; tdi++) {
+    var ts = tsArr[tdi];
+    if (!ts || !ts.seeds || !ts.seeds.length) continue;
+    var size = 1; while (size < ts.seeds.length) size *= 2;
+    var roundSlots = size;
+    var rIdx = 0;
+    while (roundSlots > 1) {
+      var matchCount = roundSlots / 2;
+      for (var mi = 0; mi < matchCount; mi++) {
+        keys.push('T_' + tdi + '_' + rIdx + '_' + mi);
+      }
+      roundSlots = matchCount;
+      rIdx++;
+    }
+  }
+  return keys;
+}
+
+function ensureMatchPasswords(payload) {
+  if (!payload.cfg) payload.cfg = {};
+  if (!payload.cfg.matchPasswords) payload.cfg.matchPasswords = {};
+  var keys = enumerateMatchKeys(payload);
+  var changed = false;
+  keys.forEach(function(k) {
+    if (!payload.cfg.matchPasswords[k]) {
+      payload.cfg.matchPasswords[k] = generateMatchPassword();
+      changed = true;
+    }
+  });
+  return changed;
+}
+
+function leagueMatchSeqSrv(ri, ci, teamCount) {
+  var a = Math.min(ri, ci), b = Math.max(ri, ci), seq = 0;
+  for (var i = 0; i < a; i++) seq += (teamCount - 1 - i);
+  seq += (b - a);
+  return seq;
+}
+function padMatchNumSrv(n) { return n < 10 ? '0' + n : '' + n; }
+function tournMatchSeqSrv(seedCount, ri, mi) {
+  var size = 1; while (size < seedCount) size *= 2;
+  var seq = 0;
+  for (var r = 0; r < ri; r++) seq += Math.floor(size / Math.pow(2, r + 1));
+  seq += mi + 1;
+  return seq;
+}
+var ALPHA_SRV = 'ABCDEFGHIJKLMNOPQRST';
+
+// 試合パスワード一覧用: 試合名・チーム名・パスワードを含めて全試合返す
+function enumerateMatchInfo(payload) {
+  var info = [];
+  var cfg = payload.cfg || {};
+  var data = payload.data || [];
+  var pwds = cfg.matchPasswords || {};
+
+  (cfg.divisions || []).forEach(function(div, di) {
+    var divLeagues = data[di] || [];
+    divLeagues.forEach(function(lg, li) {
+      var teams = (lg && lg.teams) || [];
+      var teamCount = teams.length;
+      for (var ri = 0; ri < teamCount; ri++) {
+        for (var ci = ri + 1; ci < teamCount; ci++) {
+          var key = 'L_' + di + '_' + li + '_' + ri + '_' + ci;
+          info.push({
+            type: 'league',
+            key: key,
+            matchName: (di + 1) + ALPHA_SRV.charAt(li) + '-' + padMatchNumSrv(leagueMatchSeqSrv(ri, ci, teamCount)),
+            divisionName: div.name,
+            leagueLabel: ALPHA_SRV.charAt(li) + 'リーグ',
+            teamA: teams[ri] || '',
+            teamB: teams[ci] || '',
+            password: pwds[key] || ''
+          });
+        }
+      }
+    });
+  });
+
+  (payload.tournamentStates || []).forEach(function(ts, di) {
+    if (!ts || !ts.seeds || !ts.seeds.length) return;
+    var div = (cfg.divisions || [])[di] || {};
+    var seedCount = ts.seeds.length;
+    var size = 1; while (size < seedCount) size *= 2;
+    var rounds = computeRoundsServer(ts.seeds, ts.matchResults || {});
+    var totalRounds = rounds.length - 1;
+    var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
+    var roundSlots = size;
+    for (var rIdx = 0; rIdx < totalRounds; rIdx++) {
+      var matchCount = roundSlots / 2;
+      var rName = roundNames[Math.max(0, roundNames.length - totalRounds + rIdx)] || ('第' + (rIdx + 1) + '回戦');
+      for (var mi = 0; mi < matchCount; mi++) {
+        var key = 'T_' + di + '_' + rIdx + '_' + mi;
+        var teamA = rounds[rIdx] && rounds[rIdx][mi * 2];
+        var teamB = rounds[rIdx] && rounds[rIdx][mi * 2 + 1];
+        info.push({
+          type: 'tournament',
+          key: key,
+          matchName: (di + 1) + 'T-' + padMatchNumSrv(tournMatchSeqSrv(seedCount, rIdx, mi)),
+          divisionName: div.name,
+          roundName: rName,
+          teamA: teamA ? teamA.name : '(未定)',
+          teamB: teamB ? teamB.name : '(未定)',
+          password: pwds[key] || ''
+        });
+      }
+      roundSlots = matchCount;
+    }
+  });
+
+  return info;
+}
+
 function saveTournament(id, payloadJson) {
   var lock = LockService.getScriptLock();
   try {
@@ -84,11 +229,23 @@ function saveTournament(id, payloadJson) {
           try {
             var serverPayload = JSON.parse(rows[i][4]) || {};
             mergeNewServerEntries(payload, serverPayload, lastLoadTime);
+            // クライアントが matchPasswords を持っていない場合はサーバ側のものを保持
+            if (!payload.cfg) payload.cfg = {};
+            var srvPwds = serverPayload.cfg && serverPayload.cfg.matchPasswords;
+            if (srvPwds) {
+              if (!payload.cfg.matchPasswords) payload.cfg.matchPasswords = {};
+              Object.keys(srvPwds).forEach(function(k) {
+                if (!payload.cfg.matchPasswords[k]) payload.cfg.matchPasswords[k] = srvPwds[k];
+              });
+            }
           } catch(err) {}
           break;
         }
       }
     }
+
+    // 全試合のパスワードを保証（既存は保持・不足分のみ自動生成）
+    ensureMatchPasswords(payload);
 
     var name = (payload.cfg && payload.cfg.tournamentName) || '名前なし';
     var summary = ((payload.cfg && payload.cfg.divisions) || []).map(function(d) {
@@ -438,6 +595,171 @@ function computeRoundsServer(seeds, matchResults) {
 
 function getDeployUrl() {
   return ScriptApp.getService().getUrl();
+}
+
+// 全試合のパスワード + 試合情報を返す（未生成の場合はその場で生成して保存）
+function getAllMatchPasswords(id) {
+  if (!id) return {ok:false, error:'IDが指定されていません'};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        try {
+          var payload = JSON.parse(rows[i][4]) || {};
+          var changed = ensureMatchPasswords(payload);
+          if (changed) sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
+          return {ok:true, matches: enumerateMatchInfo(payload)};
+        } catch(e) { return {ok:false, error:'データエラー'}; }
+      }
+    }
+    return {ok:false, error:'大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function regenerateMatchPassword(id, matchKey) {
+  if (!id) return {ok:false, error:'IDが指定されていません'};
+  if (!matchKey) return {ok:false, error:'試合キーが指定されていません'};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        try {
+          var payload = JSON.parse(rows[i][4]) || {};
+          if (!payload.cfg) payload.cfg = {};
+          if (!payload.cfg.matchPasswords) payload.cfg.matchPasswords = {};
+          payload.cfg.matchPasswords[matchKey] = generateMatchPassword();
+          sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
+          return {ok:true, password: payload.cfg.matchPasswords[matchKey]};
+        } catch(e) { return {ok:false, error:'データエラー'}; }
+      }
+    }
+    return {ok:false, error:'大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function regenerateAllMatchPasswords(id) {
+  if (!id) return {ok:false, error:'IDが指定されていません'};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        try {
+          var payload = JSON.parse(rows[i][4]) || {};
+          if (!payload.cfg) payload.cfg = {};
+          payload.cfg.matchPasswords = {};
+          ensureMatchPasswords(payload);
+          sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
+          return {ok:true, matches: enumerateMatchInfo(payload)};
+        } catch(e) { return {ok:false, error:'データエラー'}; }
+      }
+    }
+    return {ok:false, error:'大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function deriveMatchKey(scoreType, sc) {
+  if (scoreType === 'league') {
+    var di = sc.di|0, li = sc.li|0, ri = sc.ri|0, ci = sc.ci|0;
+    return 'L_' + di + '_' + li + '_' + Math.min(ri, ci) + '_' + Math.max(ri, ci);
+  }
+  if (scoreType === 'tournament') {
+    return 'T_' + (sc.di|0) + '_' + (sc.ri|0) + '_' + (sc.mi|0);
+  }
+  return null;
+}
+
+// scoreType: 'league' または 'tournament'
+// scoreJson: {di, li, ri, ci, md, wd, xd}                       (league)
+//            {di, ri, mi, md, wd, xd, teamAName, teamBName, winnerOverride}  (tournament)
+// password は当該試合のパスワード
+function submitScoreFromPublic(id, password, scoreType, scoreJson) {
+  if (!id) return {ok:false, error:'IDが指定されていません'};
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] === id) {
+        var payload;
+        try { payload = JSON.parse(rows[i][4]) || {}; } catch(e) { return {ok:false, error:'データエラー'}; }
+        var sc;
+        try { sc = JSON.parse(scoreJson); } catch(e) { return {ok:false, error:'スコアデータの形式が不正です'}; }
+
+        var matchKey = deriveMatchKey(scoreType, sc);
+        if (!matchKey) return {ok:false, error:'不正な試合タイプ'};
+        // 未生成パスワードがあれば補完
+        ensureMatchPasswords(payload);
+        var serverPwd = normalizePassword(payload.cfg && payload.cfg.matchPasswords && payload.cfg.matchPasswords[matchKey]);
+        if (!serverPwd) return {ok:false, error:'この試合のパスワードが設定されていません'};
+        if (normalizePassword(password) !== serverPwd) return {ok:false, error:'パスワードが正しくありません'};
+
+        if (scoreType === 'league') {
+          var di = sc.di|0, li = sc.li|0, ri = sc.ri|0, ci = sc.ci|0;
+          if (ri === ci) return {ok:false, error:'同じチーム同士は対戦できません'};
+          if (!payload.data || !payload.data[di] || !payload.data[di][li]) return {ok:false, error:'リーグが見つかりません'};
+          var lg = payload.data[di][li];
+          var teamCount = (lg.teams || []).length;
+          if (ri < 0 || ci < 0 || ri >= teamCount || ci >= teamCount) return {ok:false, error:'チーム番号が不正です'};
+          var key = ri < ci ? (ri + '_' + ci) : (ci + '_' + ri);
+          var flip = ri > ci;
+          if (!lg.results) lg.results = {};
+          var result = {md:[], wd:[], xd:[]};
+          ['md','wd','xd'].forEach(function(cat) {
+            (sc[cat] || []).forEach(function(g) {
+              var a = parseInt(g.a) || 0, b = parseInt(g.b) || 0;
+              if (flip) result[cat].push({a:b, b:a});
+              else result[cat].push({a:a, b:b});
+            });
+          });
+          lg.results[key] = result;
+        } else if (scoreType === 'tournament') {
+          var tdi = sc.di|0, tri = sc.ri|0, tmi = sc.mi|0;
+          if (!payload.tournamentStates || !payload.tournamentStates[tdi]) return {ok:false, error:'トーナメントが見つかりません'};
+          var ts = payload.tournamentStates[tdi];
+          if (!ts.matchResults) ts.matchResults = {};
+          var tresult = {md:[], wd:[], xd:[]};
+          ['md','wd','xd'].forEach(function(cat) {
+            (sc[cat] || []).forEach(function(g) {
+              var a = parseInt(g.a) || 0, b = parseInt(g.b) || 0;
+              tresult[cat].push({a:a, b:b});
+            });
+          });
+          var wA = ['md','wd','xd'].filter(function(c){return catWinSrv(tresult[c])==='A';}).length;
+          var wB = ['md','wd','xd'].filter(function(c){return catWinSrv(tresult[c])==='B';}).length;
+          var winnerName = null;
+          if (sc.winnerOverride === 'A') winnerName = sc.teamAName;
+          else if (sc.winnerOverride === 'B') winnerName = sc.teamBName;
+          else if (wA > wB) winnerName = sc.teamAName;
+          else if (wB > wA) winnerName = sc.teamBName;
+          tresult.winnerName = winnerName || null;
+          ts.matchResults[tri + '_' + tmi] = tresult;
+        }
+
+        sheet.getRange(i + 1, 4).setValue(new Date());
+        sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
+        return {ok:true};
+      }
+    }
+    return {ok:false, error:'大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function deleteTournament(id) {

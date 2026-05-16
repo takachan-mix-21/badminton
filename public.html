@@ -207,6 +207,39 @@ input::placeholder{color:#c0a995}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes wiggle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:22px 18px calc(22px + var(--safe-bottom));width:100%;max-width:480px;max-height:90vh;overflow-y:auto;transform:translateY(100%);transition:transform .25s cubic-bezier(.22,1,.36,1);box-shadow:0 -10px 40px rgba(255,94,138,0.2)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:42px;height:5px;background:#ffd6c2;border-radius:3px;margin:0 auto 16px}
+.modal-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text);flex-wrap:wrap}
+.modal-vs{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--accent);padding:0 6px;font-weight:900}
+.match-name-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;padding:4px 12px;border-radius:10px;letter-spacing:.06em;box-shadow:0 2px 6px rgba(255,94,138,0.3);display:inline-block}
+.cat-block{background:linear-gradient(135deg,#fff5e6,#ffeede);border:none;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(255,94,138,0.06)}
+.cat-block-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.cat-tag{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;letter-spacing:.05em;padding:3px 10px;border-radius:8px;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.cat-tag.md{background:linear-gradient(135deg,#3dc9ff,#4fc3f7)}
+.cat-tag.wd{background:linear-gradient(135deg,#ff8fa3,#f48fb1)}
+.cat-tag.xd{background:linear-gradient(135deg,#9b6bff,#b39ddb)}
+.cat-block-name{font-size:12px;color:var(--text2);font-weight:700}
+.game-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.game-lbl{font-size:10px;color:var(--text2);width:48px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900}
+.score-inp{width:56px!important;margin:0!important;text-align:center;padding:8px 4px!important;font-size:16px!important;font-weight:800;min-height:44px;flex-shrink:0;border:2px solid #ffd6c2!important;border-radius:12px!important;background:#fff;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
+.score-inp:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(255,94,138,0.15)}
+.score-sep{color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:18px;flex-shrink:0}
+.team-side-lbl{font-size:11px;color:var(--text2);width:28px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:800}
+.se-section{margin-bottom:22px}
+.se-section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-left:6px;display:flex;align-items:center;gap:8px}
+.se-section-title::before{content:'';width:5px;height:18px;background:linear-gradient(180deg,#ff5e8a,#ff9148);border-radius:3px}
+.se-match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.se-match-card{background:#fff;border:2px solid #ffd6c2;border-radius:14px;padding:10px 12px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease;display:flex;flex-direction:column;gap:4px;min-height:78px}
+.se-match-card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 4px 12px rgba(255,94,138,0.15)}
+.se-match-card.filled{background:linear-gradient(135deg,#fff5e6,#ffeede);border-color:var(--accent)}
+.se-match-card .se-mname{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;color:var(--accent);letter-spacing:.06em}
+.se-match-card .se-mteams{font-size:12px;font-weight:700;color:var(--text);line-height:1.3;overflow:hidden;text-overflow:ellipsis}
+.se-match-card .se-mscore{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:800;color:var(--text2);margin-top:auto}
+.se-match-card .se-mstatus{font-size:10px;color:var(--text3);font-weight:700}
+.se-match-card.filled .se-mstatus{color:var(--pop-green)}
 #loading-overlay{display:none;position:fixed;inset:0;background:rgba(255,232,217,0.85);backdrop-filter:blur(6px);z-index:300;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 #loading-overlay .spinner{width:48px;height:48px;border:4px solid rgba(255,94,138,0.2);border-top-color:#ff5e8a;border-right-color:#ff9148;border-radius:50%;animation:spin .9s linear infinite}
 #toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;padding:12px 28px;border-radius:30px;font-size:14px;font-weight:800;opacity:0;transition:opacity .3s,transform .3s;z-index:400;pointer-events:none;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(255,94,138,0.4)}
@@ -276,7 +309,7 @@ input::placeholder{color:#c0a995}
   </div>
 
   <div class="page" id="page-status-form">
-    <div class="sec-title">エントリー状況確認</div>
+    <div class="sec-title">エントリー確認</div>
     <div class="card">
       <div class="tour-info-block">
         <div class="tour-info-lbl">TOURNAMENT</div>
@@ -303,13 +336,14 @@ input::placeholder{color:#c0a995}
     <a class="menu-pill" id="menu-pill-info" target="_top" href="#">大会要項</a>
     <a class="menu-pill" id="menu-pill-league" target="_top" href="#">リーグ表</a>
     <a class="menu-pill" id="menu-pill-tournament" target="_top" href="#">トーナメント表</a>
+    <a class="menu-pill" id="menu-pill-scoreedit" target="_top" href="#" style="background:linear-gradient(180deg,#ff8fa3 0%,#ff5e8a 100%);border-color:#c83a5e;box-shadow:0 5px 0 #a82a4a,0 8px 22px rgba(255,94,138,0.32)">🔑 スコア入力</a>
     <div class="menu-current-box">
       <div class="menu-current-title">現在試合中の試合番号</div>
       <div class="menu-current-grid" id="menu-current-matches"></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:18px">
       <a class="btn btn-ghost btn-block" id="menu-pill-entry" target="_top" href="#">エントリー登録</a>
-      <a class="btn btn-ghost btn-block" id="menu-pill-status" target="_top" href="#">状況確認</a>
+      <a class="btn btn-ghost btn-block" id="menu-pill-status" target="_top" href="#">エントリー確認</a>
     </div>
   </div>
 
@@ -340,8 +374,23 @@ input::placeholder{color:#c0a995}
     </div>
   </div>
 
+  <div class="page" id="page-score-edit">
+    <div class="sec-title">スコア入力 <span id="se-tour-name-tag" style="font-weight:400;color:var(--text3);font-size:11px;letter-spacing:0"></span></div>
+    <div class="alert alert-warn" style="margin-bottom:14px;font-size:12px">🔑 試合ごとに固有のパスワードが必要です。タップして担当試合のパスワードを入力してください。</div>
+    <div id="se-content"></div>
+  </div>
+
   <a id="top-btn" class="top-btn" href="?mode=public" target="_top" style="display:none">トップへ戻る</a>
 
+</div>
+
+<div class="modal-overlay" id="se-modal-overlay" onclick="seCloseModal(event)">
+  <div class="modal" id="se-modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="se-modal-title"></div>
+    <div id="se-modal-body"></div>
+    <button class="btn btn-primary btn-block" id="se-modal-save" onclick="seSaveScore()" style="margin-top:8px">保存する</button>
+  </div>
 </div>
 
 <div id="loading-overlay">
@@ -351,7 +400,7 @@ input::placeholder{color:#c0a995}
 <div id="toast"></div>
 
 <script>
-var validActions = {status:1, view:1, menu:1, info:1, entry:1};
+var validActions = {status:1, view:1, menu:1, info:1, entry:1, scoreedit:1};
 var initialAction;
 if (validActions[gasAction]) initialAction = gasAction;
 else if (gasId) initialAction = 'menu';
@@ -494,6 +543,7 @@ function renderTourMenu() {
   document.getElementById('menu-pill-info').href       = buildUrl('info', id);
   document.getElementById('menu-pill-league').href     = buildUrl('view', id, {v:'league'});
   document.getElementById('menu-pill-tournament').href = buildUrl('view', id, {v:'tournament'});
+  document.getElementById('menu-pill-scoreedit').href  = buildUrl('scoreedit', id);
   document.getElementById('menu-pill-entry').href      = buildUrl('entry', id);
   document.getElementById('menu-pill-status').href     = buildUrl('status', id);
   var grid = document.getElementById('menu-current-matches');
@@ -1151,8 +1201,325 @@ function renderThanks() {
     if (m.age!==''&&m.age!=null) meta.push(m.age+'歳');
     return '<div style="padding:4px 0">'+(i+1)+'. '+esc(m.name)+(meta.length?' <span style="color:var(--text3)">('+esc(meta.join(' / '))+')</span>':'')+'</div>';
   }).join('') + '</div>';
-  html += '<div style="margin-top:14px;padding:10px 14px;background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,209,102,0.3);border-radius:var(--radius);font-size:12px">⏳ 主催者の承認をお待ちください。承認後にこのメールアドレスで状況確認ができます。</div>';
+  html += '<div style="margin-top:14px;padding:10px 14px;background:var(--yellow-dim);color:var(--yellow);border:1px solid rgba(255,209,102,0.3);border-radius:var(--radius);font-size:12px">⏳ 主催者の承認をお待ちください。承認後にこのメールアドレスでエントリー確認ができます。</div>';
   document.getElementById('thanks-summary').innerHTML = html;
+}
+
+// ========== SCORE EDIT (試合ごとパスワード認証 + スコア入力) ==========
+var seTourId = null;
+var seData = null;
+var seCurrentMatch = null;
+var seCurrentMatchKey = null;
+var seWinnerOverride = null;
+
+function sePwdCacheKey(tournamentId, matchKey){ return 'badminton_se_pwd_' + tournamentId + '_' + matchKey; }
+function seGetCachedPwd(matchKey) {
+  try { return sessionStorage.getItem(sePwdCacheKey(seTourId, matchKey)) || ''; } catch(e) { return ''; }
+}
+function seSetCachedPwd(matchKey, pwd) {
+  try { sessionStorage.setItem(sePwdCacheKey(seTourId, matchKey), pwd); } catch(e) {}
+}
+
+function openScoreEditFor(id) {
+  seTourId = id;
+  seLoadDataAndShow();
+}
+
+function seLoadDataAndShow() {
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(d){
+      showLoading(false);
+      if (!d) { alert('大会データが取得できませんでした'); return; }
+      seData = d;
+      document.getElementById('se-tour-name-tag').textContent = '— ' + (d.name || '');
+      seRender();
+      showPage('score-edit');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+    .getPublicTournamentView(seTourId);
+}
+
+function seGetMatch(lg, ri, ci) {
+  if (!lg.results) return null;
+  var key = ri < ci ? (ri + '_' + ci) : (ci + '_' + ri);
+  if (!lg.results[key]) return null;
+  var r = lg.results[key];
+  if (ri < ci) return r;
+  var flip = function(g){return {a:g.b, b:g.a};};
+  return {md:(r.md||[]).map(flip), wd:(r.wd||[]).map(flip), xd:(r.xd||[]).map(flip)};
+}
+
+function seComputeRoundsForDiv(di) {
+  var ts = (seData.tournamentStates || [])[di];
+  if (!ts || !ts.seeds || !ts.seeds.length) return {seeds:[], rounds:[]};
+  var seeds = ts.seeds;
+  var matchResults = ts.matchResults || {};
+  var size = 1; while (size < seeds.length) size *= 2;
+  var slots = new Array(size).fill(null);
+  seeds.forEach(function(s, i){ slots[i] = s; });
+  var rounds = [slots.slice()];
+  var cur = slots.slice();
+  var ri = 0;
+  while (cur.length > 1) {
+    var next = [];
+    for (var mi = 0; mi < cur.length; mi += 2) {
+      var a = cur[mi], b = cur[mi+1];
+      if (a && !b) { next.push(a); continue; }
+      if (!a && b) { next.push(b); continue; }
+      var res = matchResults[ri+'_'+(mi/2)];
+      var w = null;
+      if (res && res.winnerName) {
+        for (var k = 0; k < seeds.length; k++) {
+          if (seeds[k] && seeds[k].name === res.winnerName) { w = seeds[k]; break; }
+        }
+      }
+      next.push(w);
+    }
+    rounds.push(next);
+    cur = next;
+    ri++;
+  }
+  return {seeds:seeds, rounds:rounds, matchResults:matchResults};
+}
+
+function seRender() {
+  var el = document.getElementById('se-content');
+  if (!seData) { el.innerHTML = '<div class="alert alert-warn">データがありません</div>'; return; }
+  var html = '';
+  (seData.divisions || []).forEach(function(div, di) {
+    var leagues = (seData.data || [])[di] || [];
+    if (!leagues.length) return;
+    html += '<div class="se-section">';
+    html += '<div class="se-section-title">'+esc(div.name)+' リーグ戦</div>';
+    leagues.forEach(function(lg, li) {
+      var teams = lg.teams || [];
+      if (teams.length < 2) return;
+      html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;color:var(--text2);padding:6px 0 4px;letter-spacing:.04em">'+ALPHA[li]+'リーグ</div>';
+      html += '<div class="se-match-grid">';
+      for (var ri = 0; ri < teams.length; ri++) {
+        for (var ci = ri+1; ci < teams.length; ci++) {
+          var r = seGetMatch(lg, ri, ci);
+          var mname = (di+1)+ALPHA[li]+'-'+vPadMatchNum(vLeagueMatchSeq(ri,ci,teams.length));
+          var statusText, statusCls = '';
+          var scoreLine = '';
+          if (r) {
+            var wA=0,wB=0; CATS.forEach(function(c){var w=vCatWin(r[c]);if(w==='A')wA++;else if(w==='B')wB++;});
+            statusText = '✓ 入力済み';
+            statusCls = 'filled';
+            scoreLine = wA+' - '+wB;
+          } else {
+            statusText = '未入力';
+            scoreLine = '—';
+          }
+          html += '<div class="se-match-card '+statusCls+'" onclick="seOpenLeagueMatch('+di+','+li+','+ri+','+ci+')">';
+          html += '<div class="se-mname">'+mname+'</div>';
+          html += '<div class="se-mteams">'+esc(teams[ri])+' <span style="color:var(--text3)">vs</span> '+esc(teams[ci])+'</div>';
+          html += '<div class="se-mscore">'+scoreLine+'</div>';
+          html += '<div class="se-mstatus">'+statusText+'</div>';
+          html += '</div>';
+        }
+      }
+      html += '</div>';
+    });
+
+    // トーナメント
+    var tres = seComputeRoundsForDiv(di);
+    if (tres.rounds.length > 1) {
+      html += '<div class="se-section-title" style="margin-top:18px">'+esc(div.name)+' トーナメント</div>';
+      var totalRounds = tres.rounds.length - 1;
+      var roundNames = ['1回戦','2回戦','準々決勝','準決勝','決勝'];
+      for (var rri = 0; rri < totalRounds; rri++) {
+        var rName = roundNames[Math.max(0, roundNames.length-totalRounds+rri)] || ('第'+(rri+1)+'回戦');
+        html += '<div style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;font-weight:800;color:var(--text2);padding:6px 0 4px;letter-spacing:.04em">'+rName+'</div>';
+        html += '<div class="se-match-grid">';
+        var matchCount = tres.rounds[rri].length / 2;
+        for (var mmi = 0; mmi < matchCount; mmi++) {
+          var teamA = tres.rounds[rri][mmi*2];
+          var teamB = tres.rounds[rri][mmi*2+1];
+          var hasBye = !teamA || !teamB;
+          var tname = (di+1)+'T-'+vPadMatchNum(seCalcTournSeq(tres.seeds.length, rri, mmi));
+          var res = tres.matchResults[rri+'_'+mmi];
+          var statusCls = '', statusText = '', scoreLine = '';
+          if (hasBye) {
+            statusCls = '';
+            statusText = (teamA && !teamB) || (!teamA && teamB) ? '不戦勝（入力不要）' : 'BYE';
+            scoreLine = '—';
+          } else if (res) {
+            statusCls = 'filled';
+            statusText = '✓ ' + (res.winnerName ? esc(res.winnerName) + ' 勝' : '入力済み');
+            var wA=0,wB=0; CATS.forEach(function(c){var w=vCatWin(res[c]);if(w==='A')wA++;else if(w==='B')wB++;});
+            scoreLine = wA+' - '+wB;
+          } else {
+            statusText = '未入力';
+            scoreLine = '—';
+          }
+          var clickAttr = hasBye ? '' : ' onclick="seOpenTournMatch('+di+','+rri+','+mmi+')"';
+          var styleAttr = hasBye ? ' style="opacity:.6;cursor:not-allowed"' : '';
+          html += '<div class="se-match-card '+statusCls+'"'+clickAttr+styleAttr+'>';
+          html += '<div class="se-mname">'+tname+'</div>';
+          html += '<div class="se-mteams">'+(teamA?esc(teamA.name):'BYE')+' <span style="color:var(--text3)">vs</span> '+(teamB?esc(teamB.name):'BYE')+'</div>';
+          html += '<div class="se-mscore">'+scoreLine+'</div>';
+          html += '<div class="se-mstatus">'+statusText+'</div>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+    }
+    html += '</div>';
+  });
+  if (!html) html = '<div class="alert alert-warn">スコア入力可能な試合がまだありません</div>';
+  el.innerHTML = html;
+}
+
+function seCalcTournSeq(seedCount, ri, mi) {
+  var size = 1; while (size < seedCount) size *= 2;
+  var seq = 0;
+  for (var r = 0; r < ri; r++) seq += Math.floor(size / Math.pow(2, r+1));
+  seq += mi + 1;
+  return seq;
+}
+
+function seBuildScoreInputs(prefix, existing) {
+  var gp = (seData.gamePoints) || [11,21,21];
+  var body = '';
+  var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
+  CATS.forEach(function(cat){
+    var games = existing ? existing[cat] : [{a:'',b:''},{a:'',b:''},{a:'',b:''}];
+    body += '<div class="cat-block"><div class="cat-block-header"><span class="cat-tag '+cat+'">'+CAT_LABELS[cat]+'</span><span class="cat-block-name">'+CAT_NAMES[cat]+'</span></div>';
+    [0,1,2].forEach(function(gi){
+      var gv = games[gi] || {a:'',b:''};
+      var gpt = gp[gi];
+      body += '<div class="game-row">'
+        + '<span class="game-lbl">G'+(gi+1)+'<span style="font-size:9px;color:var(--accent);display:block;line-height:1.2;margin-top:1px">'+gpt+'点</span></span>'
+        + '<span class="team-side-lbl">A</span>'
+        + '<input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="'+prefix+'_'+cat+'_'+gi+'_a" value="'+(gv.a!==''?esc(gv.a):'')+'" placeholder="0">'
+        + '<span class="score-sep">—</span>'
+        + '<input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="'+prefix+'_'+cat+'_'+gi+'_b" value="'+(gv.b!==''?esc(gv.b):'')+'" placeholder="0">'
+        + '<span class="team-side-lbl">B</span>'
+        + '</div>';
+    });
+    body += '</div>';
+  });
+  return body;
+}
+
+function sePwdFieldHtml(matchKey) {
+  var cached = seGetCachedPwd(matchKey);
+  return '<div style="padding:12px 14px;background:linear-gradient(135deg,#fff3d6,#ffe5a3);border-radius:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(255,170,0,0.18)">'
+    + '<div style="font-size:12px;font-weight:800;color:#a26b00;margin-bottom:6px">🔑 この試合のパスワード <span style="color:var(--red)">*</span></div>'
+    + '<input type="text" id="se-match-pwd" value="'+esc(cached)+'" placeholder="ABC-123" autocomplete="off" maxlength="20" style="width:100%;font-family:\'Barlow Condensed\',monospace;font-weight:900;font-size:18px;letter-spacing:.08em;padding:10px 14px;background:#fff;border:2px solid #ffd6c2;border-radius:10px;color:var(--text);outline:none;-webkit-appearance:none;text-align:center;text-transform:uppercase">'
+    + '<div style="font-size:11px;color:#a26b00;margin-top:6px;line-height:1.5">主催者から伝えられたパスワードを入力してください。</div>'
+    + '</div>';
+}
+
+function seBuildMatchKey(type, di, liOrRi, riOrMi, ci) {
+  if (type === 'league') {
+    var a = Math.min(riOrMi, ci), b = Math.max(riOrMi, ci);
+    return 'L_' + di + '_' + liOrRi + '_' + a + '_' + b;
+  }
+  return 'T_' + di + '_' + liOrRi + '_' + riOrMi;
+}
+
+function seOpenLeagueMatch(di, li, ri, ci) {
+  var lg = (seData.data || [])[di][li];
+  if (!lg) return;
+  var teamA = lg.teams[ri], teamB = lg.teams[ci];
+  var existing = seGetMatch(lg, ri, ci);
+  var mname = (di+1)+ALPHA[li]+'-'+vPadMatchNum(vLeagueMatchSeq(ri,ci,lg.teams.length));
+  var matchKey = seBuildMatchKey('league', di, li, ri, ci);
+  seCurrentMatch = {type:'league', di:di, li:li, ri:ri, ci:ci, teamA:teamA, teamB:teamB};
+  seCurrentMatchKey = matchKey;
+  seWinnerOverride = null;
+  document.getElementById('se-modal-title').innerHTML =
+    '<span class="match-name-chip">'+esc(mname)+'</span>' +
+    '<span style="font-weight:800">'+esc(teamA)+'</span>' +
+    '<span class="modal-vs">VS</span>' +
+    '<span style="font-weight:800">'+esc(teamB)+'</span>';
+  document.getElementById('se-modal-body').innerHTML = sePwdFieldHtml(matchKey) + seBuildScoreInputs('sel', existing);
+  document.getElementById('se-modal-overlay').classList.add('open');
+}
+
+function seOpenTournMatch(di, ri, mi) {
+  var tres = seComputeRoundsForDiv(di);
+  var teamA = tres.rounds[ri][mi*2], teamB = tres.rounds[ri][mi*2+1];
+  if (!teamA || !teamB) return;
+  var existing = tres.matchResults[ri+'_'+mi] || null;
+  var tname = (di+1)+'T-'+vPadMatchNum(seCalcTournSeq(tres.seeds.length, ri, mi));
+  var matchKey = seBuildMatchKey('tournament', di, ri, mi);
+  seCurrentMatch = {type:'tournament', di:di, ri:ri, mi:mi, teamA:teamA, teamB:teamB};
+  seCurrentMatchKey = matchKey;
+  seWinnerOverride = null;
+  document.getElementById('se-modal-title').innerHTML =
+    '<span class="match-name-chip">'+esc(tname)+'</span>' +
+    '<span style="font-size:10px;color:var(--text3);width:100%">'+esc(seData.divisions[di].name)+' トーナメント</span>' +
+    '<span style="font-weight:800">'+esc(teamA.name)+'</span>' +
+    '<span class="modal-vs">VS</span>' +
+    '<span style="font-weight:800">'+esc(teamB.name)+'</span>';
+  var body = sePwdFieldHtml(matchKey) + seBuildScoreInputs('set', existing);
+  var curWinner = existing ? (existing.winnerName === teamA.name ? 'A' : existing.winnerName === teamB.name ? 'B' : '') : '';
+  body += '<div style="margin-top:8px;padding:12px 14px;background:linear-gradient(135deg,#fff5e6,#ffeede);border-radius:14px;box-shadow:0 2px 8px rgba(255,94,138,0.06)">' +
+    '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:800">勝者（スコアから自動判定 / 手動上書き可）</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button id="se-tw-a" onclick="seSelectTournWinner(\'A\')" class="btn btn-sm" style="flex:1;'+(curWinner==='A'?'background:var(--accent-dim);color:var(--accent);border:2px solid rgba(255,94,138,0.4)':'')+'">'+esc(teamA.name)+'</button>' +
+    '<button id="se-tw-b" onclick="seSelectTournWinner(\'B\')" class="btn btn-sm" style="flex:1;'+(curWinner==='B'?'background:var(--accent-dim);color:var(--accent);border:2px solid rgba(255,94,138,0.4)':'')+'">'+esc(teamB.name)+'</button>' +
+    '</div></div>';
+  document.getElementById('se-modal-body').innerHTML = body;
+  document.getElementById('se-modal-overlay').classList.add('open');
+}
+
+function seSelectTournWinner(side) {
+  seWinnerOverride = side;
+  ['A','B'].forEach(function(s){
+    var btn = document.getElementById('se-tw-'+s.toLowerCase()); if (!btn) return;
+    if (s === side) { btn.style.background='var(--accent-dim)'; btn.style.color='var(--accent)'; btn.style.border='2px solid rgba(255,94,138,0.4)'; }
+    else { btn.style.background=''; btn.style.color=''; btn.style.border=''; }
+  });
+}
+
+function seCloseModal(e) {
+  if (e && e.target !== document.getElementById('se-modal-overlay')) return;
+  document.getElementById('se-modal-overlay').classList.remove('open');
+}
+
+function seSaveScore() {
+  if (!seCurrentMatch) return;
+  var pwdInput = document.getElementById('se-match-pwd');
+  var pwd = pwdInput ? (pwdInput.value || '').trim() : '';
+  if (!pwd) { alert('この試合のパスワードを入力してください'); if (pwdInput) pwdInput.focus(); return; }
+  var prefix = seCurrentMatch.type === 'league' ? 'sel' : 'set';
+  var sc = {};
+  CATS.forEach(function(cat){
+    sc[cat] = [];
+    [0,1,2].forEach(function(gi){
+      var a = parseInt(document.getElementById(prefix+'_'+cat+'_'+gi+'_a').value) || 0;
+      var b = parseInt(document.getElementById(prefix+'_'+cat+'_'+gi+'_b').value) || 0;
+      sc[cat].push({a:a, b:b});
+    });
+  });
+  if (seCurrentMatch.type === 'league') {
+    sc.di = seCurrentMatch.di; sc.li = seCurrentMatch.li;
+    sc.ri = seCurrentMatch.ri; sc.ci = seCurrentMatch.ci;
+  } else {
+    sc.di = seCurrentMatch.di; sc.ri = seCurrentMatch.ri; sc.mi = seCurrentMatch.mi;
+    sc.teamAName = seCurrentMatch.teamA.name;
+    sc.teamBName = seCurrentMatch.teamB.name;
+    sc.winnerOverride = seWinnerOverride;
+  }
+  if (typeof google === 'undefined' || !google.script) { showToast('GAS未接続'); return; }
+  var matchKey = seCurrentMatchKey;
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '保存に失敗しました'); return; }
+      seSetCachedPwd(matchKey, pwd);
+      seCloseModal();
+      showToast('保存しました');
+      seLoadDataAndShow();
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('保存エラー: '+e.message); })
+    .submitScoreFromPublic(seTourId, pwd, seCurrentMatch.type, JSON.stringify(sc));
 }
 
 if (directMode) {
@@ -1160,6 +1527,7 @@ if (directMode) {
   else if (initialAction === 'view') openViewFor(directTourId, gasViewMode || 'league');
   else if (initialAction === 'menu') openTourMenu(directTourId);
   else if (initialAction === 'info') showInfoPageFor(directTourId);
+  else if (initialAction === 'scoreedit') openScoreEditFor(directTourId);
   else openEntryFor(directTourId);
 } else {
   loadTourList();
