@@ -321,12 +321,10 @@ input::placeholder{color:#c0a995}
     <div class="sec-title" id="view-tour-title">リーグ表</div>
     <div class="alert alert-info" style="margin-bottom:12px;font-size:11px">📖 このページは閲覧専用です</div>
     <div class="view-mode-tabs">
-      <button class="view-mode-tab active" id="vt-league" onclick="switchViewMode('league')">リーグ表</button>
-      <button class="view-mode-tab" id="vt-ranking" onclick="switchViewMode('ranking')">順位表</button>
+      <button class="view-mode-tab active" id="vt-league" onclick="switchViewMode('league')">リーグ</button>
       <button class="view-mode-tab" id="vt-tournament" onclick="switchViewMode('tournament')">トーナメント</button>
-      <button class="view-mode-tab" id="vt-entries" onclick="switchViewMode('entries')">エントリー結果</button>
+      <button class="view-mode-tab" id="vt-ranking" onclick="switchViewMode('ranking')">順位表</button>
     </div>
-    <h2 class="view-mode-title" id="view-mode-title" style="display:none">トーナメント表</h2>
     <div class="div-tab-bar" id="view-div-tabs"></div>
     <div id="view-div-panels"></div>
   </div>
@@ -740,17 +738,6 @@ function openViewFor(id, initialMode) {
       ['league','ranking','tournament','entries'].forEach(function(m){
         var btn = document.getElementById('vt-'+m); if (btn) btn.classList.toggle('active', m===viewMode);
       });
-      var modeTabsEl = document.querySelector('.view-mode-tabs');
-      if (modeTabsEl) modeTabsEl.style.display = (viewMode === 'tournament') ? 'none' : '';
-      var modeTitleEl = document.getElementById('view-mode-title');
-      if (modeTitleEl) {
-        if (viewMode === 'tournament') {
-          modeTitleEl.style.display = '';
-          modeTitleEl.textContent = 'トーナメント表';
-        } else {
-          modeTitleEl.style.display = 'none';
-        }
-      }
       document.getElementById('view-tour-title').textContent = d.name;
       renderViewDivTabs();
       showPage('view');
@@ -764,17 +751,6 @@ function switchViewMode(m) {
   ['league','ranking','tournament','entries'].forEach(function(mode){
     var btn = document.getElementById('vt-'+mode); if (btn) btn.classList.toggle('active', mode===m);
   });
-  var modeTabsEl = document.querySelector('.view-mode-tabs');
-  if (modeTabsEl) modeTabsEl.style.display = (m === 'tournament') ? 'none' : '';
-  var modeTitleEl = document.getElementById('view-mode-title');
-  if (modeTitleEl) {
-    if (m === 'tournament') {
-      modeTitleEl.style.display = '';
-      modeTitleEl.textContent = 'トーナメント表';
-    } else {
-      modeTitleEl.style.display = 'none';
-    }
-  }
   renderViewDivTabs();
 }
 
