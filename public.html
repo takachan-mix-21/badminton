@@ -207,18 +207,16 @@ input::placeholder{color:#c0a995}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes wiggle{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
-.modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:stretch;justify-content:stretch;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay{position:fixed;inset:0;background:rgba(35,35,61,0.55);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
-.modal{background:linear-gradient(180deg,#fff8f0 0%,#ffe9d4 50%,#ffd9e8 100%);border-radius:0;padding:68px 16px calc(22px + var(--safe-bottom));width:100%;max-width:none;height:100%;overflow-y:auto;transform:translateY(12px);transition:transform .22s cubic-bezier(.22,1,.36,1);box-shadow:none;position:relative}
+.modal{background:linear-gradient(180deg,#fff8f0 0%,#ffe9d4 50%,#ffd9e8 100%);border-radius:22px;padding:54px 14px calc(20px + var(--safe-bottom));width:100%;max-width:560px;max-height:calc(100vh - 28px);overflow-y:auto;transform:translateY(12px);transition:transform .22s cubic-bezier(.22,1,.36,1);box-shadow:0 12px 40px rgba(255,94,138,0.28),0 4px 14px rgba(0,0,0,0.1);position:relative}
 .modal-overlay.open .modal{transform:translateY(0)}
-.modal-close{position:fixed;top:14px;right:14px;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid #ffd6c2;color:var(--text2);font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:210;font-weight:900;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform .12s ease,border-color .12s ease,color .12s ease}
+.modal-close{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background:#fff;border:2px solid #ffd6c2;color:var(--text2);font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;font-weight:900;padding:0;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:transform .12s ease,border-color .12s ease,color .12s ease}
 .modal-close:hover{border-color:var(--accent);color:var(--accent)}
 .modal-close:active{transform:scale(0.92)}
 .modal-handle{display:none}
-.modal > #se-modal-body,.modal > .modal-title,.modal > .btn-primary{max-width:560px;margin-left:auto!important;margin-right:auto!important}
-.modal > #se-modal-body{display:block}
-.modal > .modal-title{margin-bottom:16px;display:flex}
-.modal > .btn-primary{display:flex;width:calc(100% - 16px);font-size:16px;min-height:56px}
+.modal > .modal-title{margin-bottom:14px;display:flex;flex-wrap:wrap;padding-right:40px}
+.modal > .btn-primary{display:flex;width:100%;font-size:16px;min-height:54px;margin-top:10px}
 .modal-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--text);flex-wrap:wrap}
 .modal-vs{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--accent);padding:0 6px;font-weight:900}
 .match-name-chip{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;padding:4px 12px;border-radius:10px;letter-spacing:.06em;box-shadow:0 2px 6px rgba(255,94,138,0.3);display:inline-block}
@@ -229,12 +227,171 @@ input::placeholder{color:#c0a995}
 .cat-tag.wd{background:linear-gradient(135deg,#ff8fa3,#f48fb1)}
 .cat-tag.xd{background:linear-gradient(135deg,#9b6bff,#b39ddb)}
 .cat-block-name{font-size:12px;color:var(--text2);font-weight:700}
-.game-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.game-lbl{font-size:13px;color:var(--text2);width:54px;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900;line-height:1.2}
-.score-inp{flex:1;min-width:0;max-width:120px;margin:0!important;text-align:center;padding:12px 6px!important;font-size:22px!important;font-weight:800;min-height:54px;border:2px solid #ffd6c2!important;border-radius:14px!important;background:#fff;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
-.score-inp:focus{border-color:var(--accent)!important;box-shadow:0 0 0 3px rgba(255,94,138,0.15)}
-.score-sep{color:var(--text3);font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:22px;flex-shrink:0}
-.team-side-lbl{font-size:13px;color:var(--text2);width:24px;text-align:center;flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-weight:900}
+/* === オーダーシート入力ページ === */
+.os-title{font-size:22px;font-weight:900;text-align:center;margin:8px 0 18px;color:var(--text);letter-spacing:.02em;line-height:1.4}
+.os-header-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,0.05);display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.os-header-row{display:flex;flex-direction:column;gap:6px}
+.os-label{font-size:13px;font-weight:800;color:var(--text);margin:0;padding:0}
+.os-header-row input,.os-header-row select{padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;background:#fff;outline:none;width:100%;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:500;min-height:42px;margin:0}
+.os-header-row input:focus,.os-header-row select:focus{border-color:#1e3a8a}
+.os-section{border-radius:14px;padding:0;margin-bottom:16px;border:1.5px solid;overflow:hidden}
+.os-section.wd{background:#fff;border-color:#f9a8d4}
+.os-section.md{background:#fff;border-color:#93c5fd}
+.os-section.xd{background:#fff;border-color:#86efac}
+.os-section-title{font-size:18px;font-weight:900;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.os-section.wd .os-section-title{background:#fce7f3;color:#ec4899}
+.os-section.md .os-section-title{background:#dbeafe;color:#3b82f6}
+.os-section.xd .os-section-title{background:#dcfce7;color:#22c55e}
+.os-icon{font-size:20px;line-height:1}
+.os-cat-code{font-size:14px;font-weight:800;opacity:.85}
+.os-grid{display:grid;grid-template-columns:70px 1fr 1fr;gap:8px;align-items:center;padding:12px 16px}
+.os-grid-header{font-size:13px;color:var(--text2);font-weight:700;text-align:center;padding:4px 0}
+.os-grid-header:nth-child(2),.os-grid-header:nth-child(3){text-align:left;padding-left:8px}
+.os-order-num{font-size:24px;font-weight:900;text-align:center}
+.os-section.wd .os-order-num{color:#ec4899}
+.os-section.md .os-order-num{color:#3b82f6}
+.os-section.xd .os-order-num{color:#22c55e}
+.os-player-inp{padding:10px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;background:#fff;outline:none;width:100%;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:600;min-height:42px;margin:0}
+.os-section.wd .os-player-inp:focus{border-color:#ec4899}
+.os-section.md .os-player-inp:focus{border-color:#3b82f6}
+.os-section.xd .os-player-inp:focus{border-color:#22c55e}
+.os-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;margin-bottom:8px}
+.os-btn{padding:14px;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;font-family:'Zen Kaku Gothic New',sans-serif;transition:transform .1s ease}
+.os-btn:active{transform:scale(0.97)}
+.os-btn-reset{background:#fff;border:1.5px solid #d1d5db;color:var(--text2)}
+.os-btn-save{background:#1e3a8a;color:#fff}
+@media (max-width:400px){
+  .os-title{font-size:18px}
+  .os-header-card{grid-template-columns:1fr;gap:10px}
+  .os-grid{grid-template-columns:50px 1fr 1fr;gap:6px;padding:10px 12px}
+  .os-section-title{font-size:16px;padding:10px 14px}
+}
+
+/* === 試合終了 (結果送信) ページ === */
+.se-final-row{display:grid;grid-template-columns:80px 1fr auto;gap:14px;align-items:center;padding:14px 16px;background:#fff;border:2px solid #ffd6c2;border-radius:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(255,94,138,0.06)}
+.se-final-cat{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:.04em;text-align:center;color:#fff;padding:6px 10px;border-radius:10px}
+.se-final-cat.md{background:linear-gradient(135deg,#3dc9ff,#4fc3f7)}
+.se-final-cat.wd{background:linear-gradient(135deg,#ff8fa3,#f48fb1)}
+.se-final-cat.xd{background:linear-gradient(135deg,#9b6bff,#b39ddb)}
+.se-final-detail{font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--text);font-weight:700;line-height:1.4}
+.se-final-detail .games{font-size:15px;font-weight:900;letter-spacing:.04em}
+.se-final-detail .empty{color:var(--text3);font-style:italic;font-weight:600}
+.se-final-winner{font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;font-weight:800;color:var(--pop-green);background:rgba(34,211,154,0.12);padding:4px 10px;border-radius:8px;white-space:nowrap}
+.se-final-winner.empty{color:var(--text3);background:transparent}
+@media (max-width:520px){
+  .se-final-row{grid-template-columns:60px 1fr;gap:10px;padding:12px}
+  .se-final-cat{font-size:18px;padding:5px 6px}
+  .se-final-winner{grid-column:1 / -1;text-align:center;justify-self:center}
+}
+
+/* === 出場者入力ページ === */
+.roster-info-bar{display:flex;gap:12px;background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border:3px solid #4a8c1f;border-radius:14px;padding:10px 16px;margin-bottom:18px;box-shadow:0 4px 12px rgba(110,207,70,0.3);justify-content:space-around;align-items:center;flex-wrap:wrap}
+.roster-info-court{font-size:18px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
+.roster-info-match{font-size:14px;font-weight:800;opacity:.95;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
+.roster-team-headers{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;margin-bottom:12px;padding:0 4px}
+.roster-team-headers .roster-team-label{font-size:16px;font-weight:800;color:var(--text);text-align:center}
+.roster-grid{display:flex;flex-direction:column;gap:18px;position:relative;padding:0 4px}
+.roster-grid::before{content:'';position:absolute;left:50%;top:6px;bottom:6px;width:2px;background:#bbb;transform:translateX(-50%);pointer-events:none;z-index:0}
+.roster-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;position:relative;z-index:1}
+.roster-side{display:flex;flex-direction:column;gap:6px;padding:0 4px}
+.roster-cat-label{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:2px}
+.roster-player-inp{padding:8px 10px;border:2px solid #ffd6c2;border-radius:10px;font-size:14px;background:#fff8f0;color:var(--text);outline:none;width:100%;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:600;min-height:38px;margin:0}
+.roster-player-inp:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(255,94,138,0.15)}
+.roster-start-btn{background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border:3px solid #4a8c1f;border-radius:14px;padding:10px 14px;font-size:13px;font-weight:900;cursor:pointer;font-family:'Zen Kaku Gothic New',sans-serif;line-height:1.3;box-shadow:0 4px 10px rgba(110,207,70,0.3);transition:transform .1s ease;min-width:84px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
+.roster-start-btn:active{transform:scale(0.95)}
+.roster-start-btn .roster-start-cat{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;letter-spacing:.04em}
+@media (max-width:520px){
+  .roster-team-headers{gap:6px}
+  .roster-row{gap:6px}
+  .roster-side{padding:0 2px}
+  .roster-player-inp{padding:6px 8px;font-size:13px;min-height:34px}
+  .roster-start-btn{padding:8px 4px;font-size:11px;min-width:64px}
+  .roster-start-btn .roster-start-cat{font-size:14px}
+  .roster-cat-label{font-size:11px}
+}
+
+/* === スコア入力選択フォーム (横並びレイアウト) === */
+.se-form{display:flex;flex-direction:column;gap:20px;margin-bottom:24px}
+.se-form-row{display:flex;align-items:center;gap:14px}
+.se-form-row label{flex:0 0 120px;text-align:right;font-size:15px;font-weight:600;color:var(--text);margin:0;padding:0;line-height:1.3}
+.se-form-row input,.se-form-row select{flex:1;min-width:0;margin:0}
+@media (max-width:400px){
+  .se-form-row{gap:10px}
+  .se-form-row label{flex:0 0 100px;font-size:14px}
+}
+
+/* === スコアボード（参照画像レイアウト・選手名入力付き） === */
+.sb-portrait-hint{display:none;align-items:center;gap:8px;background:linear-gradient(135deg,#e3f4ff,#cfeaff);color:#0d6fa3;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;margin-bottom:12px;line-height:1.5}
+.sb-portrait-hint .icon{font-size:22px;animation:rotHint 1.8s ease-in-out infinite}
+@keyframes rotHint{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+@media (orientation: portrait){.sb-portrait-hint{display:flex}}
+
+/* 上部の情報カード（左: 試合情報 / 右: 3試合サマリー） */
+.sb-top{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.sb-info-card{background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border-radius:14px;padding:10px 16px;flex:1;min-width:180px;display:flex;flex-direction:column;gap:3px;box-shadow:0 4px 12px rgba(110,207,70,0.3);border:3px solid #4a8c1f}
+.sb-info-card-title{font-size:18px;font-weight:900;letter-spacing:.02em;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
+.sb-info-card-sub{font-size:13px;font-weight:700;opacity:.95}
+.sb-summary-card{background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border-radius:14px;padding:10px 14px;flex:1;min-width:180px;display:flex;flex-direction:column;gap:4px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:800;box-shadow:0 4px 12px rgba(110,207,70,0.3);border:3px solid #4a8c1f}
+.sb-summary-row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.sb-summary-row.active{background:rgba(255,255,255,0.18);border-radius:6px;padding:2px 6px;margin:-2px -6px}
+.sb-summary-row .val{letter-spacing:.04em;text-shadow:0 1px 2px rgba(0,0,0,0.18)}
+
+/* タブ */
+.sb-tabs-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;justify-content:center}
+.sb-tab{padding:8px 14px;border:2px solid #ffd6c2;background:#fff;color:var(--text2);font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;font-weight:800;border-radius:10px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;min-height:42px;display:inline-flex;align-items:center;gap:6px}
+.sb-tab .sb-tab-sub{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:900;background:#fff5e6;color:var(--text3);padding:2px 6px;border-radius:6px}
+.sb-tab.active{background:linear-gradient(135deg,#ff5e8a,#ff9148);color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(255,94,138,0.3)}
+.sb-tab.active .sb-tab-sub{background:rgba(255,255,255,0.3);color:#fff}
+.sb-tab:active{transform:scale(0.96)}
+
+/* チーム名ラベル */
+.sb-team-labels{display:grid;grid-template-columns:1fr 1fr;text-align:center;padding:0 14px;margin-bottom:6px;gap:14px}
+.sb-team-lbl{font-size:14px;font-weight:800;color:var(--text2)}
+
+/* メインスコアボード: 4カラムグリッド (player-A | score-A | score-B | player-B) */
+.sb-main-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.4fr;grid-template-rows:1fr 1fr;gap:2px;background:var(--text);border:3px solid var(--text);border-radius:12px;overflow:hidden;min-height:240px;margin-bottom:14px}
+.sb-cell{background:#fff;display:flex;align-items:center;padding:14px}
+.sb-cell.sb-cell-player{padding:18px 14px}
+.sb-cell.sb-cell-score{justify-content:center;align-items:center;padding:8px}
+.sb-cell-pa{grid-row:1;grid-column:1}
+.sb-cell-pb{grid-row:2;grid-column:1}
+.sb-cell-pc{grid-row:1;grid-column:4}
+.sb-cell-pd{grid-row:2;grid-column:4}
+.sb-cell-sa{grid-row:1/3;grid-column:2}
+.sb-cell-sb{grid-row:1/3;grid-column:3}
+
+/* 選手名入力 */
+.sb-player-inp{width:100%;border:none;outline:none;background:transparent;font-size:18px;font-weight:700;color:var(--text);text-align:left;padding:6px 8px;border-radius:8px;font-family:'Zen Kaku Gothic New',sans-serif;min-width:0}
+.sb-player-inp:focus{background:rgba(255,94,138,0.08)}
+.sb-player-inp::placeholder{color:#c0a995;font-weight:500}
+.sb-player-inp.serving{color:#e53935}
+
+/* 大きなスコア表示 */
+.sb-score-inp{width:100%;max-width:160px;border:none;outline:none;background:transparent;text-align:center;font-size:72px!important;font-weight:900;font-family:'Barlow Condensed',sans-serif;color:var(--text);padding:0!important;margin:0!important;-webkit-appearance:none;appearance:none;letter-spacing:.02em;line-height:1;min-height:0}
+.sb-score-inp:focus{color:var(--accent)}
+.sb-cell-score.winner{background:#fff5e6}
+.sb-cell-score.winner .sb-score-inp{color:var(--accent)}
+
+/* +/- ボタン (青色4ボタン) */
+.sb-ctrls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:6px}
+.sb-big-btn{background:#3b82f6;color:#fff;border:none;font-size:40px;font-weight:900;padding:10px;border-radius:14px;min-height:68px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 4px 12px rgba(59,130,246,0.35);transition:transform .1s ease}
+.sb-big-btn:active{transform:scale(0.94)}
+.sb-big-btn.minus{background:#3b82f6}
+
+/* 入力中表示 */
+.sb-game-info{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--text2);text-align:center;letter-spacing:.04em;margin-bottom:14px}
+.sb-game-info .sb-game-info-pts{color:var(--accent);padding-left:4px}
+
+/* 狭い画面用調整 */
+@media (max-width:520px){
+  .sb-main-grid{min-height:200px}
+  .sb-cell.sb-cell-player{padding:10px 8px}
+  .sb-player-inp{font-size:14px;padding:4px 6px}
+  .sb-score-inp{font-size:54px!important}
+  .sb-big-btn{font-size:32px;min-height:56px}
+  .sb-info-card-title{font-size:16px}
+  .sb-info-card-sub,.sb-summary-card{font-size:13px}
+}
 .se-section{margin-bottom:22px}
 .se-section-title{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:900;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-left:6px;display:flex;align-items:center;gap:8px}
 .se-section-title::before{content:'';width:5px;height:18px;background:linear-gradient(180deg,#ff5e8a,#ff9148);border-radius:3px}
@@ -341,6 +498,7 @@ input::placeholder{color:#c0a995}
     <h1 class="menu-tour-name" id="menu-tour-name">大会名</h1>
     <a class="menu-pill" id="menu-pill-entries" target="_top" href="#">エントリー結果</a>
     <a class="menu-pill" id="menu-pill-info" target="_top" href="#">大会要項</a>
+    <a class="menu-pill" id="menu-pill-ordersheet" target="_top" href="#">📋 エントリーシート提出</a>
     <a class="menu-pill" id="menu-pill-league" target="_top" href="#">リーグ表</a>
     <a class="menu-pill" id="menu-pill-tournament" target="_top" href="#">トーナメント表</a>
     <a class="menu-pill" id="menu-pill-scoreedit" target="_top" href="#" style="background:linear-gradient(180deg,#ff8fa3 0%,#ff5e8a 100%);border-color:#c83a5e;box-shadow:0 5px 0 #a82a4a,0 8px 22px rgba(255,94,138,0.32)">🔑 スコア入力</a>
@@ -381,24 +539,150 @@ input::placeholder{color:#c0a995}
     </div>
   </div>
 
+  <div class="page" id="page-ordersheet">
+    <h1 class="os-title">🏸 バドミントン オーダーシート入力 🏸</h1>
+    <div class="os-header-card">
+      <div class="os-header-row">
+        <label class="os-label">試合番号</label>
+        <select id="os-match-number" autocomplete="off" onchange="osUpdateTeamOptions()" style="font-family:'Barlow Condensed',monospace;font-weight:900;letter-spacing:.04em;font-size:14px">
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      <div class="os-header-row">
+        <label class="os-label">チーム名</label>
+        <select id="os-team-name" autocomplete="off" disabled>
+          <option value="">先に試合番号を選択</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="os-section wd">
+      <div class="os-section-title"><span class="os-icon">🚺</span><span>女子ダブルス <span class="os-cat-code">(WD)</span></span></div>
+      <div class="os-grid">
+        <div class="os-grid-header">オーダー</div>
+        <div class="os-grid-header">選手1</div>
+        <div class="os-grid-header">選手2</div>
+        <div class="os-order-num">1</div>
+        <input class="os-player-inp" id="os-wd-a-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-wd-a-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <div class="os-order-num">2</div>
+        <input class="os-player-inp" id="os-wd-b-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-wd-b-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="os-section md">
+      <div class="os-section-title"><span class="os-icon">🚹</span><span>男子ダブルス <span class="os-cat-code">(MD)</span></span></div>
+      <div class="os-grid">
+        <div class="os-grid-header">オーダー</div>
+        <div class="os-grid-header">選手1</div>
+        <div class="os-grid-header">選手2</div>
+        <div class="os-order-num">1</div>
+        <input class="os-player-inp" id="os-md-a-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-md-a-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <div class="os-order-num">2</div>
+        <input class="os-player-inp" id="os-md-b-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-md-b-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="os-section xd">
+      <div class="os-section-title"><span class="os-icon">🚹🚺</span><span>ミックスダブルス <span class="os-cat-code">(XD)</span></span></div>
+      <div class="os-grid">
+        <div class="os-grid-header">オーダー</div>
+        <div class="os-grid-header">選手1</div>
+        <div class="os-grid-header">選手2</div>
+        <div class="os-order-num">1</div>
+        <input class="os-player-inp" id="os-xd-a-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-xd-a-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <div class="os-order-num">2</div>
+        <input class="os-player-inp" id="os-xd-b-0" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+        <input class="os-player-inp" id="os-xd-b-1" placeholder="選手名を入力" maxlength="30" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="os-buttons">
+      <button class="os-btn os-btn-reset" onclick="osReset()">↺ リセット</button>
+      <button class="os-btn os-btn-save" onclick="osSubmit()">💾 保存</button>
+    </div>
+  </div>
+
   <div class="page" id="page-score-edit">
     <div class="sec-title">スコア入力 <span id="se-tour-name-tag" style="font-weight:400;color:var(--text3);font-size:11px;letter-spacing:0"></span></div>
-    <div class="alert alert-warn" style="margin-bottom:14px;font-size:12px">🔑 試合ごとに固有のパスワードが必要です。タップして担当試合のパスワードを入力してください。</div>
-    <div id="se-content"></div>
+    <div class="tour-info-block" style="margin-bottom:22px">
+      <div class="tour-info-lbl">TOURNAMENT</div>
+      <div class="tour-info-name" id="se-form-tour-name"></div>
+    </div>
+    <div class="se-form">
+      <div class="se-form-row">
+        <label for="se-form-court">コート番号選択</label>
+        <select id="se-form-court">
+          <option value="">1から10</option>
+          <option value="1">第1コート</option>
+          <option value="2">第2コート</option>
+          <option value="3">第3コート</option>
+          <option value="4">第4コート</option>
+          <option value="5">第5コート</option>
+          <option value="6">第6コート</option>
+          <option value="7">第7コート</option>
+          <option value="8">第8コート</option>
+          <option value="9">第9コート</option>
+          <option value="10">第10コート</option>
+        </select>
+      </div>
+      <div class="se-form-row">
+        <label for="se-form-match">試合番号選択</label>
+        <select id="se-form-match" autocomplete="off" style="font-family:'Barlow Condensed',monospace;font-weight:900;letter-spacing:.04em;font-size:15px">
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      <div class="se-form-row">
+        <label for="se-form-pwd">パスコード入力</label>
+        <input type="text" id="se-form-pwd" placeholder="ABC-123" autocomplete="off" maxlength="20" style="font-family:'Barlow Condensed',monospace;font-weight:900;letter-spacing:.06em;font-size:17px;text-transform:uppercase">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="seOpenFromForm()" style="margin-bottom:8px">スコア入力を開始</button>
+    <button class="btn btn-ghost btn-block" onclick="goHome()">キャンセル</button>
+  </div>
+
+  <div class="page" id="page-score-roster">
+    <div class="sec-title">出場者入力</div>
+    <div class="roster-info-bar">
+      <div class="roster-info-court">第<span id="se-roster-court">-</span>コート</div>
+      <div class="roster-info-match"><span id="se-roster-match">-</span></div>
+    </div>
+    <div class="roster-team-headers">
+      <div class="roster-team-label" id="se-roster-team-a">チームA</div>
+      <div></div>
+      <div class="roster-team-label" id="se-roster-team-b">チームB</div>
+    </div>
+    <div class="roster-grid" id="se-roster-grid"></div>
+    <button class="btn btn-block" onclick="seGoToFinal()" style="margin-top:18px;background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border:3px solid #4a8c1f;font-size:18px;font-weight:900;min-height:56px;text-shadow:0 1px 2px rgba(0,0,0,0.18);box-shadow:0 4px 10px rgba(110,207,70,0.3)">🏁 結果送信して試合終了</button>
+    <button class="btn btn-ghost btn-block" onclick="seBackToForm()" style="margin-top:10px">フォームに戻る</button>
+  </div>
+
+  <div class="page" id="page-score-input">
+    <div id="se-modal-body"></div>
+    <button class="btn btn-primary btn-block" id="se-modal-save" onclick="seSaveScore()" style="margin-top:14px;min-height:54px;font-size:16px">保存する</button>
+    <button class="btn btn-block" onclick="seFinalizeCurrentCat()" style="margin-top:8px;min-height:54px;font-size:16px;background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border:3px solid #4a8c1f;text-shadow:0 1px 2px rgba(0,0,0,0.18);box-shadow:0 4px 10px rgba(110,207,70,0.3)">🏁 試合終了</button>
+  </div>
+
+  <div class="page" id="page-score-final">
+    <h1 style="font-size:32px;font-weight:900;text-align:center;margin:18px 0 22px;color:var(--text);letter-spacing:.04em">試合終了</h1>
+    <div class="roster-info-bar" style="margin-bottom:20px">
+      <div class="roster-info-court">第<span id="se-final-court">-</span>コート</div>
+      <div class="roster-info-match"><span id="se-final-match">-</span></div>
+    </div>
+    <div id="se-final-results" style="margin-bottom:22px"></div>
+    <button class="btn btn-block" id="se-final-submit" onclick="seSubmitFinal()" style="background:linear-gradient(135deg,#7ed852,#5eb52b);color:#fff;border:3px solid #4a8c1f;font-size:22px;font-weight:900;min-height:64px;text-shadow:0 1px 2px rgba(0,0,0,0.18);box-shadow:0 6px 14px rgba(110,207,70,0.4);letter-spacing:.06em;border-radius:18px">送信</button>
+    <div style="font-size:12px;color:var(--text2);text-align:center;margin-top:16px;font-weight:600">※訂正がある場合は本部までお越しください。</div>
+    <button class="btn btn-ghost btn-block" onclick="showPage('score-input')" style="margin-top:14px">スコア入力に戻る</button>
   </div>
 
   <a id="top-btn" class="top-btn" href="?mode=public" target="_top" style="display:none">トップへ戻る</a>
 
 </div>
 
-<div class="modal-overlay" id="se-modal-overlay" onclick="seCloseModal(event)">
-  <div class="modal" id="se-modal">
-    <button class="modal-close" onclick="seCloseModal()" aria-label="閉じる">✕</button>
-    <div class="modal-title" id="se-modal-title"></div>
-    <div id="se-modal-body"></div>
-    <button class="btn btn-primary btn-block" id="se-modal-save" onclick="seSaveScore()" style="margin-top:8px">保存する</button>
-  </div>
-</div>
 
 <div id="loading-overlay">
   <div class="spinner"></div>
@@ -407,7 +691,7 @@ input::placeholder{color:#c0a995}
 <div id="toast"></div>
 
 <script>
-var validActions = {status:1, view:1, menu:1, info:1, entry:1, scoreedit:1};
+var validActions = {status:1, view:1, menu:1, info:1, entry:1, scoreedit:1, ordersheet:1};
 var initialAction;
 if (validActions[gasAction]) initialAction = gasAction;
 else if (gasId) initialAction = 'menu';
@@ -560,6 +844,7 @@ function renderTourMenu() {
   document.getElementById('menu-pill-league').href     = buildUrl('view', id, {v:'league'});
   document.getElementById('menu-pill-tournament').href = buildUrl('view', id, {v:'tournament'});
   document.getElementById('menu-pill-scoreedit').href  = buildUrl('scoreedit', id);
+  document.getElementById('menu-pill-ordersheet').href = buildUrl('ordersheet', id);
   document.getElementById('menu-pill-entry').href      = buildUrl('entry', id);
   document.getElementById('menu-pill-status').href     = buildUrl('status', id);
   var grid = document.getElementById('menu-current-matches');
@@ -1249,11 +1534,123 @@ function seLoadDataAndShow() {
       if (!d) { alert('大会データが取得できませんでした'); return; }
       seData = d;
       document.getElementById('se-tour-name-tag').textContent = '— ' + (d.name || '');
-      seRender();
+      var nameEl = document.getElementById('se-form-tour-name');
+      if (nameEl) nameEl.textContent = d.name || '';
+      populateMatchSelect(document.getElementById('se-form-match'));
       showPage('score-edit');
     })
     .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
     .getPublicTournamentView(seTourId);
+}
+
+// 大会の全試合を <select> に列挙
+function enumerateAllMatchNames(data) {
+  var list = [];
+  if (!data) return list;
+  (data.divisions || []).forEach(function(div, di) {
+    var divLeagues = (data.data || [])[di] || [];
+    divLeagues.forEach(function(lg, li) {
+      var teams = lg.teams || [];
+      var n = teams.length;
+      for (var ri = 0; ri < n - 1; ri++) {
+        for (var ci = ri + 1; ci < n; ci++) {
+          var seq = vLeagueMatchSeq(ri, ci, n);
+          var mname = (di+1) + ALPHA[li] + '-' + vPadMatchNum(seq);
+          list.push({
+            name: mname,
+            label: mname + ' — ' + (teams[ri]||'?') + ' vs ' + (teams[ci]||'?'),
+            type: 'league',
+            teamA: teams[ri] || '',
+            teamB: teams[ci] || ''
+          });
+        }
+      }
+    });
+  });
+  (data.tournamentStates || []).forEach(function(ts, di) {
+    if (!ts || !ts.seeds || !ts.seeds.length) return;
+    var size = 1; while (size < ts.seeds.length) size *= 2;
+    var rounds = (function(){
+      var matchResults = ts.matchResults || {};
+      var slots = new Array(size).fill(null);
+      ts.seeds.forEach(function(s,i){ slots[i] = s; });
+      var rs = [slots.slice()];
+      var cur = slots.slice();
+      var r = 0;
+      while (cur.length > 1) {
+        var next = [];
+        for (var mi=0; mi<cur.length; mi+=2) {
+          var a = cur[mi], b = cur[mi+1];
+          if (a && !b) { next.push(a); continue; }
+          if (!a && b) { next.push(b); continue; }
+          var rsl = matchResults[r+'_'+(mi/2)];
+          var w = null;
+          if (rsl && rsl.winnerName) {
+            for (var k=0; k<ts.seeds.length; k++) {
+              if (ts.seeds[k] && ts.seeds[k].name === rsl.winnerName) { w = ts.seeds[k]; break; }
+            }
+          }
+          next.push(w);
+        }
+        rs.push(next); cur = next; r++;
+      }
+      return rs;
+    })();
+    var roundSlots = size, rIdx = 0;
+    while (roundSlots > 1) {
+      var matchCount = roundSlots / 2;
+      for (var mi = 0; mi < matchCount; mi++) {
+        var seq2 = 0;
+        for (var rr = 0; rr < rIdx; rr++) seq2 += Math.floor(size / Math.pow(2, rr+1));
+        seq2 += mi + 1;
+        var tname = (di+1) + 'T-' + vPadMatchNum(seq2);
+        var teamA = rounds[rIdx] && rounds[rIdx][mi*2];
+        var teamB = rounds[rIdx] && rounds[rIdx][mi*2+1];
+        list.push({
+          name: tname,
+          label: tname + ' — ' + (teamA?teamA.name:'(未定)') + ' vs ' + (teamB?teamB.name:'(未定)'),
+          type: 'tournament',
+          teamA: teamA ? teamA.name : '',
+          teamB: teamB ? teamB.name : ''
+        });
+      }
+      roundSlots = matchCount;
+      rIdx++;
+    }
+  });
+  return list;
+}
+
+function populateMatchSelect(selectEl) {
+  if (!selectEl) return;
+  var prev = selectEl.value;
+  var list = enumerateAllMatchNames(seData);
+  var html = '<option value="">選択してください</option>';
+  list.forEach(function(m){
+    var attrs = ' data-team-a="'+esc(m.teamA||'')+'" data-team-b="'+esc(m.teamB||'')+'"';
+    html += '<option value="'+esc(m.name)+'"'+attrs+'>'+esc(m.label)+'</option>';
+  });
+  selectEl.innerHTML = html;
+  if (prev) selectEl.value = prev;
+}
+
+function osUpdateTeamOptions() {
+  var matchSel = document.getElementById('os-match-number');
+  var teamSel = document.getElementById('os-team-name');
+  if (!matchSel || !teamSel) return;
+  var opt = matchSel.options[matchSel.selectedIndex];
+  var teamA = opt && opt.getAttribute('data-team-a') || '';
+  var teamB = opt && opt.getAttribute('data-team-b') || '';
+  if (!matchSel.value) {
+    teamSel.innerHTML = '<option value="">先に試合番号を選択</option>';
+    teamSel.disabled = true;
+    return;
+  }
+  var html = '<option value="">チームを選択</option>';
+  if (teamA) html += '<option value="'+esc(teamA)+'">'+esc(teamA)+'</option>';
+  if (teamB) html += '<option value="'+esc(teamB)+'">'+esc(teamB)+'</option>';
+  teamSel.innerHTML = html;
+  teamSel.disabled = false;
 }
 
 function seGetMatch(lg, ri, ci) {
@@ -1396,28 +1793,539 @@ function seCalcTournSeq(seedCount, ri, mi) {
   return seq;
 }
 
-function seBuildScoreInputs(prefix, existing) {
-  var gp = (seData.gamePoints) || [11,21,21];
-  var body = '';
-  var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
-  CATS.forEach(function(cat){
-    var games = existing ? existing[cat] : [{a:'',b:''},{a:'',b:''},{a:'',b:''}];
-    body += '<div class="cat-block"><div class="cat-block-header"><span class="cat-tag '+cat+'">'+CAT_LABELS[cat]+'</span><span class="cat-block-name">'+CAT_NAMES[cat]+'</span></div>';
-    [0,1,2].forEach(function(gi){
-      var gv = games[gi] || {a:'',b:''};
-      var gpt = gp[gi];
-      body += '<div class="game-row">'
-        + '<span class="game-lbl">G'+(gi+1)+'<span style="font-size:9px;color:var(--accent);display:block;line-height:1.2;margin-top:1px">'+gpt+'点</span></span>'
-        + '<span class="team-side-lbl">A</span>'
-        + '<input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="'+prefix+'_'+cat+'_'+gi+'_a" value="'+(gv.a!==''?esc(gv.a):'')+'" placeholder="0">'
-        + '<span class="score-sep">—</span>'
-        + '<input class="score-inp" type="number" inputmode="numeric" min="0" max="99" id="'+prefix+'_'+cat+'_'+gi+'_b" value="'+(gv.b!==''?esc(gv.b):'')+'" placeholder="0">'
-        + '<span class="team-side-lbl">B</span>'
-        + '</div>';
-    });
-    body += '</div>';
+// === スコアボード状態管理 ===
+var seLocalScores = {md:[{a:0,b:0},{a:0,b:0},{a:0,b:0}], wd:[{a:0,b:0},{a:0,b:0},{a:0,b:0}], xd:[{a:0,b:0},{a:0,b:0},{a:0,b:0}]};
+var sePlayers = {md:{a:['',''],b:['','']}, wd:{a:['',''],b:['','']}, xd:{a:['',''],b:['','']}};
+var seActiveCat = 'md';
+var seActiveGameIdx = 0;
+var seTeamAName = '';
+var seTeamBName = '';
+var seMatchNameStr = '';
+var seCourt = '';
+var seSubmittedPwd = '';
+var seFinalizedCats = {};
+
+// 試合名から (di, li, ri, ci) または (di, ri, mi) を解決
+function parseMatchName(str) {
+  var s = String(str || '').trim().toUpperCase().replace(/\s+/g,'');
+  // リーグ戦: 例 1A-01
+  var m = s.match(/^(\d+)([A-Z])-?(\d+)$/);
+  if (m && m[2] !== 'T') {
+    var di = parseInt(m[1]) - 1;
+    var li = m[2].charCodeAt(0) - 'A'.charCodeAt(0);
+    var seq = parseInt(m[3]);
+    if (!seData || !seData.data || !seData.data[di] || !seData.data[di][li]) return null;
+    var teams = seData.data[di][li].teams || [];
+    var n = teams.length;
+    if (n < 2 || seq < 1) return null;
+    var remaining = seq;
+    for (var ri = 0; ri < n - 1; ri++) {
+      var rowMatches = n - 1 - ri;
+      if (remaining <= rowMatches) {
+        return {type:'league', di:di, li:li, ri:ri, ci:ri + remaining};
+      }
+      remaining -= rowMatches;
+    }
+    return null;
+  }
+  // トーナメント戦: 例 1T-03
+  m = s.match(/^(\d+)T-?(\d+)$/);
+  if (m) {
+    var tdi = parseInt(m[1]) - 1;
+    var tseq = parseInt(m[2]);
+    if (!seData || !seData.tournamentStates || !seData.tournamentStates[tdi]) return null;
+    var ts = seData.tournamentStates[tdi];
+    if (!ts.seeds || !ts.seeds.length) return null;
+    var size = 1; while (size < ts.seeds.length) size *= 2;
+    var roundSlots = size;
+    var rIdx = 0;
+    while (roundSlots > 1) {
+      var matchCount = roundSlots / 2;
+      if (tseq <= matchCount) {
+        return {type:'tournament', di:tdi, ri:rIdx, mi:tseq - 1};
+      }
+      tseq -= matchCount;
+      roundSlots = matchCount;
+      rIdx++;
+    }
+    return null;
+  }
+  return null;
+}
+
+function seOpenFromForm() {
+  var courtStr = document.getElementById('se-form-court').value;
+  var matchStr = (document.getElementById('se-form-match').value || '').trim().toUpperCase();
+  var pwdStr = (document.getElementById('se-form-pwd').value || '').trim();
+  if (!courtStr) { alert('コート番号を選択してください'); return; }
+  if (!matchStr) { alert('試合番号を入力してください'); return; }
+  if (!pwdStr) { alert('パスコードを入力してください'); return; }
+
+  var parsed = parseMatchName(matchStr);
+  if (!parsed) {
+    alert('試合番号が見つかりません。\n例: 1A-01 (リーグ戦) / 2T-03 (トーナメント戦)');
+    return;
+  }
+
+  seCourt = parseInt(courtStr);
+  seSubmittedPwd = pwdStr;
+
+  // 試合の情報を読み込み → 出場者入力ページへ
+  if (parsed.type === 'league') {
+    var lg = seData.data[parsed.di][parsed.li];
+    var teamA = lg.teams[parsed.ri], teamB = lg.teams[parsed.ci];
+    var existing = seGetMatch(lg, parsed.ri, parsed.ci);
+    var mname = (parsed.di+1)+ALPHA[parsed.li]+'-'+vPadMatchNum(vLeagueMatchSeq(parsed.ri,parsed.ci,lg.teams.length));
+    seCurrentMatch = {type:'league', di:parsed.di, li:parsed.li, ri:parsed.ri, ci:parsed.ci, teamA:teamA, teamB:teamB};
+    seCurrentMatchKey = seBuildMatchKey('league', parsed.di, parsed.li, parsed.ri, parsed.ci);
+    seMatchNameStr = mname;
+    seTeamAName = teamA;
+    seTeamBName = teamB;
+    seInitLocalScores(existing);
+  } else {
+    var tres = seComputeRoundsForDiv(parsed.di);
+    var teamA = tres.rounds[parsed.ri][parsed.mi*2], teamB = tres.rounds[parsed.ri][parsed.mi*2+1];
+    if (!teamA || !teamB) { alert('対戦相手がまだ確定していない試合です'); return; }
+    var existing = tres.matchResults[parsed.ri+'_'+parsed.mi] || null;
+    var tname = (parsed.di+1)+'T-'+vPadMatchNum(seCalcTournSeq(tres.seeds.length, parsed.ri, parsed.mi));
+    seCurrentMatch = {type:'tournament', di:parsed.di, ri:parsed.ri, mi:parsed.mi, teamA:teamA, teamB:teamB};
+    seCurrentMatchKey = seBuildMatchKey('tournament', parsed.di, parsed.ri, parsed.mi);
+    seMatchNameStr = tname;
+    seTeamAName = teamA.name;
+    seTeamBName = teamB.name;
+    seWinnerOverride = null;
+    seInitLocalScores(existing);
+  }
+
+  seRenderRoster();
+  showPage('score-roster');
+}
+
+function seRenderRoster() {
+  var courtEl = document.getElementById('se-roster-court');
+  var matchEl = document.getElementById('se-roster-match');
+  var aEl = document.getElementById('se-roster-team-a');
+  var bEl = document.getElementById('se-roster-team-b');
+  if (courtEl) courtEl.textContent = seCourt || '-';
+  if (matchEl) matchEl.textContent = seMatchNameStr || '-';
+  if (aEl) aEl.textContent = seTeamAName || 'チームA';
+  if (bEl) bEl.textContent = seTeamBName || 'チームB';
+
+  var CAT_NAMES = {wd:'女子ダブルス', md:'男子ダブルス', xd:'ミックスダブルス'};
+  var ORDER = ['wd', 'md', 'xd'];
+  var html = '';
+  ORDER.forEach(function(cat){
+    var p = sePlayers[cat] || {a:['',''],b:['','']};
+    var catUpper = cat.toUpperCase();
+    var isLocked = !!seFinalizedCats[cat];
+    var disabledAttr = isLocked ? ' disabled' : '';
+    var inpStyle = isLocked ? ' style="background:#f5f5f5;color:var(--text3);cursor:not-allowed"' : '';
+    html += '<div class="roster-row">';
+    html += '<div class="roster-side">';
+    html += '<div class="roster-cat-label">'+CAT_NAMES[cat]+' 出場者'+(isLocked?' <span style="color:var(--pop-green);font-weight:900">✓終了</span>':'')+'</div>';
+    html += '<input class="roster-player-inp" placeholder="選手1" id="se-r-a-'+cat+'-0" value="'+esc((p.a&&p.a[0])||'')+'" oninput="seSetPlayerByCat(\'a\',\''+cat+'\',0,this.value)" maxlength="30"'+disabledAttr+inpStyle+'>';
+    html += '<input class="roster-player-inp" placeholder="選手2" id="se-r-a-'+cat+'-1" value="'+esc((p.a&&p.a[1])||'')+'" oninput="seSetPlayerByCat(\'a\',\''+cat+'\',1,this.value)" maxlength="30"'+disabledAttr+inpStyle+'>';
+    html += '</div>';
+    if (isLocked) {
+      html += '<button type="button" class="roster-start-btn" disabled style="background:#bbb;border-color:#888;cursor:not-allowed;box-shadow:none;opacity:.85">試合終了済<span class="roster-start-cat">'+catUpper+'</span></button>';
+    } else {
+      html += '<button type="button" class="roster-start-btn" onclick="seStartCategory(\''+cat+'\')">試合開始<span class="roster-start-cat">'+catUpper+'</span></button>';
+    }
+    html += '<div class="roster-side">';
+    html += '<div class="roster-cat-label">'+CAT_NAMES[cat]+' 出場者'+(isLocked?' <span style="color:var(--pop-green);font-weight:900">✓終了</span>':'')+'</div>';
+    html += '<input class="roster-player-inp" placeholder="選手1" id="se-r-b-'+cat+'-0" value="'+esc((p.b&&p.b[0])||'')+'" oninput="seSetPlayerByCat(\'b\',\''+cat+'\',0,this.value)" maxlength="30"'+disabledAttr+inpStyle+'>';
+    html += '<input class="roster-player-inp" placeholder="選手2" id="se-r-b-'+cat+'-1" value="'+esc((p.b&&p.b[1])||'')+'" oninput="seSetPlayerByCat(\'b\',\''+cat+'\',1,this.value)" maxlength="30"'+disabledAttr+inpStyle+'>';
+    html += '</div>';
+    html += '</div>';
   });
-  return body;
+  document.getElementById('se-roster-grid').innerHTML = html;
+}
+
+function seSetPlayerByCat(side, cat, idx, val) {
+  if (!sePlayers[cat]) sePlayers[cat] = {a:['',''],b:['','']};
+  if (!sePlayers[cat][side]) sePlayers[cat][side] = ['',''];
+  sePlayers[cat][side][idx] = String(val||'').substring(0,30);
+}
+
+function seStartCategory(cat) {
+  if (!seCurrentMatch) { alert('試合情報が見つかりません'); seBackToForm(); return; }
+  if (seFinalizedCats[cat]) {
+    alert('このカテゴリは既に試合終了済みです。\n点数の変更はできません。');
+    return;
+  }
+  seActiveCat = cat;
+  seActiveGameIdx = 0;
+
+  var body = seBuildScoreboard(seTeamAName, seTeamBName, seMatchNameStr);
+
+  // トーナメント戦の場合は勝者上書き欄を追加
+  if (seCurrentMatch.type === 'tournament') {
+    var ts = (seData.tournamentStates || [])[seCurrentMatch.di];
+    var existing = ts && ts.matchResults && ts.matchResults[seCurrentMatch.ri + '_' + seCurrentMatch.mi];
+    var curWinner = existing ? (existing.winnerName === seTeamAName ? 'A' : existing.winnerName === seTeamBName ? 'B' : '') : '';
+    body += '<div style="margin-top:8px;padding:12px 14px;background:linear-gradient(135deg,#fff5e6,#ffeede);border-radius:14px;box-shadow:0 2px 8px rgba(255,94,138,0.06)">' +
+      '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:800">勝者（スコアから自動判定 / 手動上書き可）</div>' +
+      '<div style="display:flex;gap:8px">' +
+      '<button id="se-tw-a" onclick="seSelectTournWinner(\'A\')" class="btn btn-sm" style="flex:1;'+(curWinner==='A'?'background:var(--accent-dim);color:var(--accent);border:2px solid rgba(255,94,138,0.4)':'')+'">'+esc(seTeamAName)+'</button>' +
+      '<button id="se-tw-b" onclick="seSelectTournWinner(\'B\')" class="btn btn-sm" style="flex:1;'+(curWinner==='B'?'background:var(--accent-dim);color:var(--accent);border:2px solid rgba(255,94,138,0.4)':'')+'">'+esc(seTeamBName)+'</button>' +
+      '</div></div>';
+  }
+
+  document.getElementById('se-modal-body').innerHTML = body;
+  showPage('score-input');
+  seRenderScoreboard();
+}
+
+function seBackToRoster() {
+  seRenderRoster();
+  showPage('score-roster');
+}
+
+function seFinalizeCurrentCat() {
+  if (!seCurrentMatch) { alert('試合情報が見つかりません'); seBackToForm(); return; }
+  if (seFinalizedCats[seActiveCat]) {
+    alert('このカテゴリは既に試合終了済みです');
+    seBackToRoster();
+    return;
+  }
+  var pwd = (seSubmittedPwd || '').trim();
+  if (!pwd) {
+    alert('パスコードが見つかりません。フォーム画面で再入力してください。');
+    seBackToForm();
+    return;
+  }
+  var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
+  if (!confirm('「'+CAT_NAMES[seActiveCat]+'」を試合終了します。\n以降このカテゴリのスコアは変更できなくなります。よろしいですか？')) return;
+
+  var sc = {};
+  CATS.forEach(function(cat){
+    sc[cat] = seLocalScores[cat].map(function(g){ return {a: g.a||0, b: g.b||0}; });
+  });
+  sc.players = {};
+  CATS.forEach(function(cat){
+    sc.players[cat] = {
+      a: [(sePlayers[cat] && sePlayers[cat].a[0]) || '', (sePlayers[cat] && sePlayers[cat].a[1]) || ''],
+      b: [(sePlayers[cat] && sePlayers[cat].b[0]) || '', (sePlayers[cat] && sePlayers[cat].b[1]) || '']
+    };
+  });
+  if (seCurrentMatch.type === 'league') {
+    sc.di = seCurrentMatch.di; sc.li = seCurrentMatch.li;
+    sc.ri = seCurrentMatch.ri; sc.ci = seCurrentMatch.ci;
+  } else {
+    sc.di = seCurrentMatch.di; sc.ri = seCurrentMatch.ri; sc.mi = seCurrentMatch.mi;
+    sc.teamAName = seCurrentMatch.teamA.name;
+    sc.teamBName = seCurrentMatch.teamB.name;
+    sc.winnerOverride = seWinnerOverride;
+  }
+  sc.finalizeCat = seActiveCat;
+
+  if (typeof google === 'undefined' || !google.script) { showToast('GAS未接続'); return; }
+  var matchKey = seCurrentMatchKey;
+  var finalizedCat = seActiveCat;
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '送信に失敗しました'); return; }
+      seSetCachedPwd(matchKey, pwd);
+      seFinalizedCats[finalizedCat] = true;
+      showToast('「'+CAT_NAMES[finalizedCat]+'」を確定しました');
+      seRenderRoster();
+      showPage('score-roster');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('送信エラー: '+e.message); })
+    .submitScoreFromPublic(seTourId, pwd, seCurrentMatch.type, JSON.stringify(sc));
+}
+
+function seGoToFinal() {
+  if (!seCurrentMatch) { alert('試合情報が見つかりません'); seBackToForm(); return; }
+  seRenderFinal();
+  showPage('score-final');
+}
+
+function seRenderFinal() {
+  var courtEl = document.getElementById('se-final-court');
+  var matchEl = document.getElementById('se-final-match');
+  if (courtEl) courtEl.textContent = seCourt || '-';
+  if (matchEl) matchEl.textContent = seMatchNameStr || '-';
+
+  var el = document.getElementById('se-final-results');
+  var html = '';
+  var ORDER = ['md', 'wd', 'xd'];
+  ORDER.forEach(function(cat){
+    var games = seLocalScores[cat] || [];
+    var wA=0, wB=0, hasAny=false;
+    games.forEach(function(g){
+      if ((g.a||0) > 0 || (g.b||0) > 0) hasAny = true;
+      if (g.a > g.b) wA++;
+      else if (g.b > g.a) wB++;
+    });
+    var winner = '';
+    if (hasAny) {
+      if (wA > wB) winner = esc(seTeamAName) + ' 勝利';
+      else if (wB > wA) winner = esc(seTeamBName) + ' 勝利';
+      else winner = '引き分け';
+    }
+    var gameStr = '';
+    if (hasAny) {
+      gameStr = games.map(function(g){
+        if (!g || ((g.a||0)===0 && (g.b||0)===0)) return '—';
+        return g.a + '−' + g.b;
+      }).join(' / ');
+    } else {
+      gameStr = '<span class="empty">未入力</span>';
+    }
+    html += '<div class="se-final-row">'
+      + '<div class="se-final-cat '+cat+'">'+cat.toUpperCase()+'</div>'
+      + '<div class="se-final-detail">'
+      + '<div class="games">'+gameStr+'</div>'
+      + '<div style="font-size:11px;color:var(--text2);margin-top:3px;font-weight:600">取得G '+wA+'−'+wB+'</div>'
+      + '</div>'
+      + '<div class="se-final-winner'+(winner?'':' empty')+'">'+(winner||'結果なし')+'</div>'
+      + '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function seSubmitFinal() {
+  if (!seCurrentMatch) { alert('試合情報が見つかりません'); seBackToForm(); return; }
+  var pwd = (seSubmittedPwd || '').trim();
+  if (!pwd) {
+    alert('パスコードが見つかりません。フォーム画面で再入力してください。');
+    seBackToForm();
+    return;
+  }
+  if (!confirm('送信すると以降は変更できなくなります。\nよろしいですか？')) return;
+
+  var sc = {};
+  CATS.forEach(function(cat){
+    sc[cat] = seLocalScores[cat].map(function(g){ return {a: g.a||0, b: g.b||0}; });
+  });
+  sc.players = {};
+  CATS.forEach(function(cat){
+    sc.players[cat] = {
+      a: [(sePlayers[cat] && sePlayers[cat].a[0]) || '', (sePlayers[cat] && sePlayers[cat].a[1]) || ''],
+      b: [(sePlayers[cat] && sePlayers[cat].b[0]) || '', (sePlayers[cat] && sePlayers[cat].b[1]) || '']
+    };
+  });
+  if (seCurrentMatch.type === 'league') {
+    sc.di = seCurrentMatch.di; sc.li = seCurrentMatch.li;
+    sc.ri = seCurrentMatch.ri; sc.ci = seCurrentMatch.ci;
+  } else {
+    sc.di = seCurrentMatch.di; sc.ri = seCurrentMatch.ri; sc.mi = seCurrentMatch.mi;
+    sc.teamAName = seCurrentMatch.teamA.name;
+    sc.teamBName = seCurrentMatch.teamB.name;
+    sc.winnerOverride = seWinnerOverride;
+  }
+  sc.finalize = true;
+  if (typeof google === 'undefined' || !google.script) { showToast('GAS未接続'); return; }
+
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '送信に失敗しました'); return; }
+      showToast('送信しました。試合終了!');
+      // フォームに戻して状態クリア
+      var matchInp = document.getElementById('se-form-match');
+      var pwdFInp = document.getElementById('se-form-pwd');
+      if (matchInp) matchInp.value = '';
+      if (pwdFInp) pwdFInp.value = '';
+      seBackToForm();
+      seLoadDataAndShow();
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('送信エラー: '+e.message); })
+    .submitScoreFromPublic(seTourId, pwd, seCurrentMatch.type, JSON.stringify(sc));
+}
+
+function seInitLocalScores(existing) {
+  seLocalScores = {md:[], wd:[], xd:[]};
+  sePlayers = {md:{a:['',''],b:['','']}, wd:{a:['',''],b:['','']}, xd:{a:['',''],b:['','']}};
+  seFinalizedCats = {};
+  if (existing && existing.finalizedCats) {
+    CATS.forEach(function(c){ if (existing.finalizedCats[c]) seFinalizedCats[c] = true; });
+  }
+  CATS.forEach(function(cat){
+    var games = (existing && existing[cat]) || [];
+    [0,1,2].forEach(function(gi){
+      var g = games[gi] || {};
+      var a = (g.a !== '' && g.a != null) ? parseInt(g.a) : 0;
+      var b = (g.b !== '' && g.b != null) ? parseInt(g.b) : 0;
+      seLocalScores[cat].push({a: isNaN(a)?0:a, b: isNaN(b)?0:b});
+    });
+    var p = existing && existing.players && existing.players[cat];
+    if (p) {
+      sePlayers[cat].a = [(p.a && p.a[0]) || '', (p.a && p.a[1]) || ''];
+      sePlayers[cat].b = [(p.b && p.b[0]) || '', (p.b && p.b[1]) || ''];
+    }
+  });
+  seActiveCat = 'md';
+  seActiveGameIdx = 0;
+}
+
+function seBuildScoreboard(teamAName, teamBName, matchName) {
+  seTeamAName = teamAName || 'チームA';
+  seTeamBName = teamBName || 'チームB';
+  seMatchNameStr = matchName || '';
+  var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
+  var html = '';
+  html += '<div class="sb-portrait-hint"><span class="icon">📱</span><span>横向きにすると見やすくなります</span></div>';
+
+  // 上部 (試合情報 / 3試合サマリー)
+  html += '<div class="sb-top">';
+  html += '<div class="sb-info-card">'
+    + '<div class="sb-info-card-title">'+(seCourt ? '第'+seCourt+'コート' : (seMatchNameStr || '試合'))+'</div>'
+    + (seCourt ? '<div class="sb-info-card-sub" id="sb-info-match" style="opacity:.85">'+esc(seMatchNameStr || '')+'</div>' : '')
+    + '<div class="sb-info-card-sub" id="sb-info-cat">男子ダブルス</div>'
+    + '<div class="sb-info-card-sub" id="sb-info-game">第1試合 / 21点</div>'
+    + '</div>';
+  html += '<div class="sb-summary-card">';
+  [0,1,2].forEach(function(gi){
+    html += '<div class="sb-summary-row" data-sum-gi="'+gi+'" onclick="seSwitchGame('+gi+')" style="cursor:pointer">'
+      + '<span>第'+(gi+1)+'試合</span>'
+      + '<span class="val" data-sum-val="'+gi+'">0 − 0</span>'
+      + '</div>';
+  });
+  html += '</div></div>';
+
+  // チーム名ラベル
+  html += '<div class="sb-team-labels">'
+    + '<div class="sb-team-lbl">'+esc(seTeamAName)+'</div>'
+    + '<div class="sb-team-lbl">'+esc(seTeamBName)+'</div>'
+    + '</div>';
+
+  // メインスコアボード (4カラムグリッド)
+  html += '<div class="sb-main-grid" id="sb-board">'
+    + '<div class="sb-cell sb-cell-player sb-cell-pa">'
+    + '<input class="sb-player-inp" id="sb-p-a-0" placeholder="選手A" maxlength="30" oninput="seSetPlayer(\'a\',0,this.value)">'
+    + '</div>'
+    + '<div class="sb-cell sb-cell-score sb-cell-sa" id="sb-cell-sa">'
+    + '<input class="sb-score-inp" id="sb-score-a" type="number" inputmode="numeric" min="0" max="99" value="0" oninput="seSetScore(\'a\',this.value)">'
+    + '</div>'
+    + '<div class="sb-cell sb-cell-score sb-cell-sb" id="sb-cell-sb">'
+    + '<input class="sb-score-inp" id="sb-score-b" type="number" inputmode="numeric" min="0" max="99" value="0" oninput="seSetScore(\'b\',this.value)">'
+    + '</div>'
+    + '<div class="sb-cell sb-cell-player sb-cell-pc">'
+    + '<input class="sb-player-inp" id="sb-p-b-0" placeholder="選手C" maxlength="30" oninput="seSetPlayer(\'b\',0,this.value)">'
+    + '</div>'
+    + '<div class="sb-cell sb-cell-player sb-cell-pb">'
+    + '<input class="sb-player-inp" id="sb-p-a-1" placeholder="選手B" maxlength="30" oninput="seSetPlayer(\'a\',1,this.value)">'
+    + '</div>'
+    + '<div class="sb-cell sb-cell-player sb-cell-pd">'
+    + '<input class="sb-player-inp" id="sb-p-b-1" placeholder="選手D" maxlength="30" oninput="seSetPlayer(\'b\',1,this.value)">'
+    + '</div>'
+    + '</div>';
+
+  // 4ボタン (+A / -A / +B / -B)
+  html += '<div class="sb-ctrls">'
+    + '<button type="button" class="sb-big-btn plus" onclick="seSbAdjust(\'a\',1)">＋</button>'
+    + '<button type="button" class="sb-big-btn minus" onclick="seSbAdjust(\'a\',-1)">−</button>'
+    + '<button type="button" class="sb-big-btn plus" onclick="seSbAdjust(\'b\',1)">＋</button>'
+    + '<button type="button" class="sb-big-btn minus" onclick="seSbAdjust(\'b\',-1)">−</button>'
+    + '</div>';
+
+  return html;
+}
+
+function seRenderScoreboard() {
+  var s = seLocalScores[seActiveCat][seActiveGameIdx];
+  var CAT_NAMES = {md:'男子ダブルス',wd:'女子ダブルス',xd:'ミックスダブルス'};
+
+  // スコア表示
+  var aInp = document.getElementById('sb-score-a');
+  var bInp = document.getElementById('sb-score-b');
+  if (aInp && document.activeElement !== aInp) aInp.value = s.a;
+  if (bInp && document.activeElement !== bInp) bInp.value = s.b;
+
+  // 勝者強調 (現ゲーム)
+  var cellSa = document.getElementById('sb-cell-sa');
+  var cellSb = document.getElementById('sb-cell-sb');
+  if (cellSa && cellSb) {
+    cellSa.classList.remove('winner'); cellSb.classList.remove('winner');
+    if (s.a > s.b && s.a > 0) cellSa.classList.add('winner');
+    else if (s.b > s.a && s.b > 0) cellSb.classList.add('winner');
+  }
+
+  // 選手名表示
+  var p = sePlayers[seActiveCat] || {a:['',''],b:['','']};
+  var pInps = [
+    {id:'sb-p-a-0', val:(p.a && p.a[0]) || ''},
+    {id:'sb-p-a-1', val:(p.a && p.a[1]) || ''},
+    {id:'sb-p-b-0', val:(p.b && p.b[0]) || ''},
+    {id:'sb-p-b-1', val:(p.b && p.b[1]) || ''}
+  ];
+  pInps.forEach(function(x){
+    var el = document.getElementById(x.id);
+    if (el && document.activeElement !== el) el.value = x.val;
+  });
+
+  // 現カテゴリの3ゲームスコア (上部サマリーカード)
+  [0,1,2].forEach(function(gi){
+    var g = seLocalScores[seActiveCat][gi];
+    var sumEl = document.querySelector('[data-sum-val="'+gi+'"]');
+    if (sumEl) sumEl.textContent = g.a + ' − ' + g.b;
+    var sumRow = document.querySelector('[data-sum-gi="'+gi+'"]');
+    if (sumRow) sumRow.classList.toggle('active', gi === seActiveGameIdx);
+  });
+
+  // 上部情報カード
+  var gp = (seData.gamePoints || [11,21,21])[seActiveGameIdx];
+  var infoCat = document.getElementById('sb-info-cat');
+  if (infoCat) infoCat.textContent = CAT_NAMES[seActiveCat];
+  var infoGame = document.getElementById('sb-info-game');
+  if (infoGame) infoGame.textContent = '第' + (seActiveGameIdx+1) + '試合 / ' + gp + '点';
+}
+
+function seSwitchCat(cat) {
+  seActiveCat = cat;
+  seRenderScoreboard();
+}
+
+function seSwitchGame(gi) {
+  seActiveGameIdx = gi;
+  seRenderScoreboard();
+}
+
+function seSbAdjust(side, delta) {
+  var s = seLocalScores[seActiveCat][seActiveGameIdx];
+  var before = s[side] || 0;
+  s[side] = Math.max(0, Math.min(99, before + delta));
+  // スコアが実際に増えたら、加点側のチームの選手名を上下入れ替え
+  if (delta > 0 && s[side] > before) {
+    if (sePlayers[seActiveCat] && sePlayers[seActiveCat][side]) {
+      var arr = sePlayers[seActiveCat][side];
+      sePlayers[seActiveCat][side] = [arr[1] || '', arr[0] || ''];
+    }
+  }
+  seRenderScoreboard();
+}
+
+function seSetPlayer(side, idx, val) {
+  if (!sePlayers[seActiveCat]) sePlayers[seActiveCat] = {a:['',''],b:['','']};
+  if (!sePlayers[seActiveCat][side]) sePlayers[seActiveCat][side] = ['',''];
+  sePlayers[seActiveCat][side][idx] = String(val || '').substring(0,30);
+}
+
+function seSetScore(side, val) {
+  var n = parseInt(val);
+  if (isNaN(n)) n = 0;
+  seLocalScores[seActiveCat][seActiveGameIdx][side] = Math.max(0, Math.min(99, n));
+  // 入力中のフィールドはクリアしないが、サマリーは更新
+  // タブ表示やカテゴリ勝ち数だけ更新する軽量版
+  CATS.forEach(function(cat){
+    var wA=0, wB=0;
+    seLocalScores[cat].forEach(function(g){
+      if (g.a > g.b) wA++;
+      else if (g.b > g.a) wB++;
+    });
+    var el = document.querySelector('[data-cat-wins="'+cat+'"]');
+    if (el) el.textContent = wA + '−' + wB;
+  });
+  [0,1,2].forEach(function(gi){
+    var g = seLocalScores[seActiveCat][gi];
+    var el = document.querySelector('[data-game-score="'+gi+'"]');
+    if (el) el.textContent = g.a + '−' + g.b;
+  });
 }
 
 function sePwdFieldHtml(matchKey) {
@@ -1452,8 +2360,12 @@ function seOpenLeagueMatch(di, li, ri, ci) {
     '<span style="font-weight:800">'+esc(teamA)+'</span>' +
     '<span class="modal-vs">VS</span>' +
     '<span style="font-weight:800">'+esc(teamB)+'</span>';
-  document.getElementById('se-modal-body').innerHTML = sePwdFieldHtml(matchKey) + seBuildScoreInputs('sel', existing);
-  document.getElementById('se-modal-overlay').classList.add('open');
+  seInitLocalScores(existing);
+  document.getElementById('se-modal-body').innerHTML = seBuildScoreboard(teamA, teamB, mname);
+  var tag = document.getElementById('se-input-name-tag');
+  if (tag) tag.textContent = '— ' + (seData && seData.name ? seData.name : '');
+  showPage('score-input');
+  seRenderScoreboard();
 }
 
 function seOpenTournMatch(di, ri, mi) {
@@ -1472,7 +2384,8 @@ function seOpenTournMatch(di, ri, mi) {
     '<span style="font-weight:800">'+esc(teamA.name)+'</span>' +
     '<span class="modal-vs">VS</span>' +
     '<span style="font-weight:800">'+esc(teamB.name)+'</span>';
-  var body = sePwdFieldHtml(matchKey) + seBuildScoreInputs('set', existing);
+  seInitLocalScores(existing);
+  var body = seBuildScoreboard(teamA.name, teamB.name, tname);
   var curWinner = existing ? (existing.winnerName === teamA.name ? 'A' : existing.winnerName === teamB.name ? 'B' : '') : '';
   body += '<div style="margin-top:8px;padding:12px 14px;background:linear-gradient(135deg,#fff5e6,#ffeede);border-radius:14px;box-shadow:0 2px 8px rgba(255,94,138,0.06)">' +
     '<div style="font-size:11px;color:var(--text2);margin-bottom:8px;font-weight:800">勝者（スコアから自動判定 / 手動上書き可）</div>' +
@@ -1481,7 +2394,10 @@ function seOpenTournMatch(di, ri, mi) {
     '<button id="se-tw-b" onclick="seSelectTournWinner(\'B\')" class="btn btn-sm" style="flex:1;'+(curWinner==='B'?'background:var(--accent-dim);color:var(--accent);border:2px solid rgba(255,94,138,0.4)':'')+'">'+esc(teamB.name)+'</button>' +
     '</div></div>';
   document.getElementById('se-modal-body').innerHTML = body;
-  document.getElementById('se-modal-overlay').classList.add('open');
+  var tag2 = document.getElementById('se-input-name-tag');
+  if (tag2) tag2.textContent = '— ' + (seData && seData.name ? seData.name : '');
+  showPage('score-input');
+  seRenderScoreboard();
 }
 
 function seSelectTournWinner(side) {
@@ -1493,25 +2409,35 @@ function seSelectTournWinner(side) {
   });
 }
 
-function seCloseModal(e) {
-  if (e && e.target !== document.getElementById('se-modal-overlay')) return;
-  document.getElementById('se-modal-overlay').classList.remove('open');
+function seBackToForm() {
+  seSubmittedPwd = '';
+  showPage('score-edit');
+}
+// 後方互換のためのエイリアス
+function seCloseModal() {
+  seBackToRoster();
 }
 
 function seSaveScore() {
   if (!seCurrentMatch) return;
-  var pwdInput = document.getElementById('se-match-pwd');
-  var pwd = pwdInput ? (pwdInput.value || '').trim() : '';
-  if (!pwd) { alert('この試合のパスワードを入力してください'); if (pwdInput) pwdInput.focus(); return; }
-  var prefix = seCurrentMatch.type === 'league' ? 'sel' : 'set';
+  var pwd = (seSubmittedPwd || '').trim();
+  if (!pwd) {
+    alert('パスコードが見つかりません。フォーム画面で再入力してください。');
+    seBackToForm();
+    return;
+  }
   var sc = {};
   CATS.forEach(function(cat){
-    sc[cat] = [];
-    [0,1,2].forEach(function(gi){
-      var a = parseInt(document.getElementById(prefix+'_'+cat+'_'+gi+'_a').value) || 0;
-      var b = parseInt(document.getElementById(prefix+'_'+cat+'_'+gi+'_b').value) || 0;
-      sc[cat].push({a:a, b:b});
+    sc[cat] = seLocalScores[cat].map(function(g){
+      return {a: g.a||0, b: g.b||0};
     });
+  });
+  sc.players = {};
+  CATS.forEach(function(cat){
+    sc.players[cat] = {
+      a: [(sePlayers[cat] && sePlayers[cat].a[0]) || '', (sePlayers[cat] && sePlayers[cat].a[1]) || ''],
+      b: [(sePlayers[cat] && sePlayers[cat].b[0]) || '', (sePlayers[cat] && sePlayers[cat].b[1]) || '']
+    };
   });
   if (seCurrentMatch.type === 'league') {
     sc.di = seCurrentMatch.di; sc.li = seCurrentMatch.li;
@@ -1530,12 +2456,79 @@ function seSaveScore() {
       showLoading(false);
       if (!res || !res.ok) { alert((res && res.error) || '保存に失敗しました'); return; }
       seSetCachedPwd(matchKey, pwd);
-      seCloseModal();
       showToast('保存しました');
-      seLoadDataAndShow();
+      // データを再取得しつつ出場者入力ページに戻す
+      seRenderRoster();
+      showPage('score-roster');
     })
     .withFailureHandler(function(e){ showLoading(false); alert('保存エラー: '+e.message); })
     .submitScoreFromPublic(seTourId, pwd, seCurrentMatch.type, JSON.stringify(sc));
+}
+
+// ========== オーダーシート ==========
+var osTourId = null;
+
+function openOrdersheetFor(id) {
+  osTourId = id;
+  if (typeof google === 'undefined' || !google.script) {
+    showPage('ordersheet');
+    return;
+  }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(d){
+      showLoading(false);
+      if (!d) { alert('大会データが取得できませんでした'); return; }
+      seData = d;
+      populateMatchSelect(document.getElementById('os-match-number'));
+      showPage('ordersheet');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('読み込みエラー: '+e.message); })
+    .getPublicTournamentView(id);
+}
+
+function osReset() {
+  if (!confirm('入力内容をリセットしますか?')) return;
+  document.getElementById('os-match-number').value = '';
+  osUpdateTeamOptions();
+  ['wd','md','xd'].forEach(function(cat){
+    ['a','b'].forEach(function(side){
+      [0,1].forEach(function(idx){
+        var el = document.getElementById('os-'+cat+'-'+side+'-'+idx);
+        if (el) el.value = '';
+      });
+    });
+  });
+}
+
+function osSubmit() {
+  var teamName = (document.getElementById('os-team-name').value || '').trim();
+  var matchNumber = (document.getElementById('os-match-number').value || '').trim().toUpperCase();
+  if (!teamName) { alert('チーム名を入力してください'); return; }
+  if (!matchNumber) { alert('試合番号を入力してください'); return; }
+  var players = {};
+  ['wd','md','xd'].forEach(function(cat){
+    players[cat] = {
+      order1: [
+        (document.getElementById('os-'+cat+'-a-0').value || '').trim(),
+        (document.getElementById('os-'+cat+'-a-1').value || '').trim()
+      ],
+      order2: [
+        (document.getElementById('os-'+cat+'-b-0').value || '').trim(),
+        (document.getElementById('os-'+cat+'-b-1').value || '').trim()
+      ]
+    };
+  });
+  if (typeof google === 'undefined' || !google.script) { showToast('GAS未接続'); return; }
+  showLoading(true);
+  google.script.run
+    .withSuccessHandler(function(res){
+      showLoading(false);
+      if (!res || !res.ok) { alert((res && res.error) || '送信に失敗しました'); return; }
+      showToast('オーダーシートを送信しました');
+    })
+    .withFailureHandler(function(e){ showLoading(false); alert('送信エラー: '+e.message); })
+    .submitOrderSheet(osTourId, teamName, matchNumber, JSON.stringify(players));
 }
 
 if (directMode) {
@@ -1544,6 +2537,7 @@ if (directMode) {
   else if (initialAction === 'menu') openTourMenu(directTourId);
   else if (initialAction === 'info') showInfoPageFor(directTourId);
   else if (initialAction === 'scoreedit') openScoreEditFor(directTourId);
+  else if (initialAction === 'ordersheet') openOrdersheetFor(directTourId);
   else openEntryFor(directTourId);
 } else {
   loadTourList();

@@ -12,7 +12,7 @@ function doGet(e) {
       .setFaviconUrl(FAVICON_URL)
       .setTitle('バドミントン大会管理');
   }
-  var publicModes = {'':'', public:'', view:'view', status:'status', entry:'entry', menu:'menu', info:'info', scoreedit:'scoreedit'};
+  var publicModes = {'':'', public:'', view:'view', status:'status', entry:'entry', menu:'menu', info:'info', scoreedit:'scoreedit', ordersheet:'ordersheet'};
   var actionMap = (mode in publicModes) ? publicModes[mode] : '';
   var t = HtmlService.createTemplateFromFile('public');
   t.gasPage = 'public';
@@ -24,7 +24,8 @@ function doGet(e) {
               (mode === 'status') ? 'バドミントン大会 エントリー確認' :
               (mode === 'menu') ? 'バドミントン大会' :
               (mode === 'info') ? 'バドミントン大会要項' :
-              (mode === 'scoreedit') ? 'バドミントン大会 スコア入力' : 'バドミントン大会エントリー';
+              (mode === 'scoreedit') ? 'バドミントン大会 スコア入力' :
+              (mode === 'ordersheet') ? 'バドミントン大会 オーダーシート' : 'バドミントン大会エントリー';
   return t.evaluate()
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .setFaviconUrl(FAVICON_URL)
@@ -709,6 +710,72 @@ function submitScoreFromPublic(id, password, scoreType, scoreJson) {
         if (!serverPwd) return {ok:false, error:'この試合のパスワードが設定されていません'};
         if (normalizePassword(password) !== serverPwd) return {ok:false, error:'パスワードが正しくありません'};
 
+        // 既に試合終了済みか確認
+        var existingPriorResult = null;
+        if (scoreType === 'league') {
+          var lgPrev = payload.data && payload.data[sc.di|0] && payload.data[sc.di|0][sc.li|0];
+          if (lgPrev && lgPrev.results) {
+            var keyPrev = Math.min(sc.ri|0, sc.ci|0) + '_' + Math.max(sc.ri|0, sc.ci|0);
+            existingPriorResult = lgPrev.results[keyPrev];
+          }
+        } else if (scoreType === 'tournament') {
+          var tsPrev = payload.tournamentStates && payload.tournamentStates[sc.di|0];
+          if (tsPrev && tsPrev.matchResults) {
+            existingPriorResult = tsPrev.matchResults[(sc.ri|0) + '_' + (sc.mi|0)];
+          }
+        }
+        if (existingPriorResult && existingPriorResult.finalized) {
+          return {ok:false, error:'この試合は既に「試合終了」が送信済みのため変更できません'};
+        }
+
+        // 選手名の正規化: {md:{a:['',''],b:['','']}, wd:{...}, xd:{...}}
+        // チームが入れ替わった場合 (flip) は a/b を反転
+        function normalizePlayers(rawPlayers, flip) {
+          var out = {md:{a:['',''],b:['','']}, wd:{a:['',''],b:['','']}, xd:{a:['',''],b:['','']}};
+          ['md','wd','xd'].forEach(function(cat){
+            var p = rawPlayers && rawPlayers[cat];
+            if (!p) return;
+            var pa = (p.a || []).slice(0,2).map(function(s){return String(s||'').trim().substring(0,30);});
+            var pb = (p.b || []).slice(0,2).map(function(s){return String(s||'').trim().substring(0,30);});
+            while (pa.length < 2) pa.push('');
+            while (pb.length < 2) pb.push('');
+            if (flip) { out[cat].a = pb; out[cat].b = pa; }
+            else { out[cat].a = pa; out[cat].b = pb; }
+          });
+          return out;
+        }
+
+        // ロック済みカテゴリの保持処理
+        function mergeWithLocked(newResult, prevResult) {
+          var locked = (prevResult && prevResult.finalizedCats) || {};
+          ['md','wd','xd'].forEach(function(cat) {
+            if (locked[cat] && prevResult && prevResult[cat]) {
+              newResult[cat] = prevResult[cat].slice();
+            }
+          });
+          if (prevResult && prevResult.players) {
+            if (!newResult.players) newResult.players = {md:{a:['',''],b:['','']},wd:{a:['',''],b:['','']},xd:{a:['',''],b:['','']}};
+            ['md','wd','xd'].forEach(function(cat) {
+              if (locked[cat] && prevResult.players[cat]) {
+                newResult.players[cat] = {
+                  a: (prevResult.players[cat].a || ['','']).slice(),
+                  b: (prevResult.players[cat].b || ['','']).slice()
+                };
+              }
+            });
+          }
+          var newLocked = {};
+          ['md','wd','xd'].forEach(function(c) { if (locked[c]) newLocked[c] = true; });
+          if (sc.finalizeCat && ['md','wd','xd'].indexOf(sc.finalizeCat) >= 0) {
+            newLocked[sc.finalizeCat] = true;
+          }
+          if (newLocked.md || newLocked.wd || newLocked.xd) {
+            newResult.finalizedCats = newLocked;
+          }
+          if (prevResult && prevResult.finalized) newResult.finalized = true;
+          if (sc.finalize) newResult.finalized = true;
+        }
+
         if (scoreType === 'league') {
           var di = sc.di|0, li = sc.li|0, ri = sc.ri|0, ci = sc.ci|0;
           if (ri === ci) return {ok:false, error:'同じチーム同士は対戦できません'};
@@ -727,6 +794,8 @@ function submitScoreFromPublic(id, password, scoreType, scoreJson) {
               else result[cat].push({a:a, b:b});
             });
           });
+          result.players = normalizePlayers(sc.players, flip);
+          mergeWithLocked(result, existingPriorResult);
           lg.results[key] = result;
         } else if (scoreType === 'tournament') {
           var tdi = sc.di|0, tri = sc.ri|0, tmi = sc.mi|0;
@@ -740,6 +809,8 @@ function submitScoreFromPublic(id, password, scoreType, scoreJson) {
               tresult[cat].push({a:a, b:b});
             });
           });
+          tresult.players = normalizePlayers(sc.players, false);
+          mergeWithLocked(tresult, existingPriorResult);
           var wA = ['md','wd','xd'].filter(function(c){return catWinSrv(tresult[c])==='A';}).length;
           var wB = ['md','wd','xd'].filter(function(c){return catWinSrv(tresult[c])==='B';}).length;
           var winnerName = null;
@@ -755,6 +826,138 @@ function submitScoreFromPublic(id, password, scoreType, scoreJson) {
         sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
         return {ok:true};
       }
+    }
+    return {ok:false, error:'大会が見つかりません'};
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// オーダーシート (チーム自身が試合前に選手名を提出)
+// players: {wd:{order1:[name,name],order2:[name,name]}, md:{...}, xd:{...}}
+function submitOrderSheet(id, teamName, matchNumber, playersJson) {
+  if (!id) return {ok:false, error:'IDが指定されていません'};
+  teamName = String(teamName || '').trim();
+  matchNumber = String(matchNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+  if (!teamName) return {ok:false, error:'チーム名を入力してください'};
+  if (!matchNumber) return {ok:false, error:'試合番号を入力してください'};
+
+  var lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(10000);
+    var sheet = getSheet();
+    var rows = sheet.getDataRange().getValues();
+    for (var i = 1; i < rows.length; i++) {
+      if (rows[i][0] !== id) continue;
+      var payload;
+      try { payload = JSON.parse(rows[i][4]) || {}; } catch(e) { return {ok:false, error:'データエラー'}; }
+      var players;
+      try { players = JSON.parse(playersJson); } catch(e) { return {ok:false, error:'選手データの形式が不正です'}; }
+
+      // 試合番号をパース (リーグ: 1A-01, トーナメント: 1T-01)
+      var m = matchNumber.match(/^(\d+)([A-Z])-?(\d+)$/);
+      var parsed = null;
+      if (m && m[2] !== 'T') {
+        var di = parseInt(m[1]) - 1;
+        var li = m[2].charCodeAt(0) - 'A'.charCodeAt(0);
+        var seq = parseInt(m[3]);
+        var divLgs = (payload.data || [])[di];
+        if (!divLgs || !divLgs[li]) return {ok:false, error:'試合番号が見つかりません'};
+        var lg = divLgs[li];
+        var teams = lg.teams || [];
+        if (teams.length < 2) return {ok:false, error:'リーグのチームがありません'};
+        var remaining = seq;
+        for (var ri = 0; ri < teams.length - 1; ri++) {
+          var rowMatches = teams.length - 1 - ri;
+          if (remaining <= rowMatches) { parsed = {type:'league', di:di, li:li, ri:ri, ci:ri + remaining, lg:lg, teams:teams}; break; }
+          remaining -= rowMatches;
+        }
+      } else {
+        m = matchNumber.match(/^(\d+)T-?(\d+)$/);
+        if (m) {
+          var tdi = parseInt(m[1]) - 1;
+          var tseq = parseInt(m[2]);
+          var tsArr = payload.tournamentStates || [];
+          var ts = tsArr[tdi];
+          if (!ts || !ts.seeds || !ts.seeds.length) return {ok:false, error:'試合番号が見つかりません'};
+          var size = 1; while (size < ts.seeds.length) size *= 2;
+          var roundSlots = size, rIdx = 0;
+          while (roundSlots > 1) {
+            var matchCount = roundSlots / 2;
+            if (tseq <= matchCount) {
+              var rounds = computeRoundsServer(ts.seeds, ts.matchResults || {});
+              var teamA = rounds[rIdx] && rounds[rIdx][(tseq-1)*2];
+              var teamB = rounds[rIdx] && rounds[rIdx][(tseq-1)*2+1];
+              parsed = {type:'tournament', di:tdi, ri:rIdx, mi:tseq-1, ts:ts, teamA:teamA, teamB:teamB};
+              break;
+            }
+            tseq -= matchCount;
+            roundSlots = matchCount;
+            rIdx++;
+          }
+        }
+      }
+      if (!parsed) return {ok:false, error:'試合番号が見つかりません (例: 1A-01, 2T-03)'};
+
+      // チーム名から自分のサイド (A or B) を判定
+      var sideA, sideB, side;
+      if (parsed.type === 'league') {
+        sideA = parsed.teams[parsed.ri];
+        sideB = parsed.teams[parsed.ci];
+      } else {
+        sideA = parsed.teamA ? parsed.teamA.name : '';
+        sideB = parsed.teamB ? parsed.teamB.name : '';
+      }
+      var teamNameNorm = teamName.replace(/\s+/g, '').toLowerCase();
+      if (sideA && sideA.replace(/\s+/g,'').toLowerCase() === teamNameNorm) side = 'a';
+      else if (sideB && sideB.replace(/\s+/g,'').toLowerCase() === teamNameNorm) side = 'b';
+      else return {ok:false, error:'チーム名「'+teamName+'」がこの試合の対戦相手と一致しません'};
+
+      // 既存結果に players を merge (オーダー1とオーダー2を統合: order1 = a slot[0], order2 = a slot[1])
+      // ※doublesは2人なので order1[0], order1[1] の2名でペア・order2[0], order2[1] の2名で別のペアになる
+      // 既存スキーマ result.players[cat][side] = [name1, name2] は1ペアぶんなので、ここでは order1 のみを使うことにする
+      // ただし利便性のため両方とも保存する: result.players[cat][side] にはorder1, orderShelf にorder2を入れる…
+      // シンプル化: 各カテゴリに 1ペア = 2選手 (order1 のみを採用)
+      var key, existing;
+      if (parsed.type === 'league') {
+        if (!parsed.lg.results) parsed.lg.results = {};
+        key = Math.min(parsed.ri, parsed.ci) + '_' + Math.max(parsed.ri, parsed.ci);
+        existing = parsed.lg.results[key] || {md:[], wd:[], xd:[]};
+      } else {
+        if (!parsed.ts.matchResults) parsed.ts.matchResults = {};
+        key = parsed.ri + '_' + parsed.mi;
+        existing = parsed.ts.matchResults[key] || {md:[], wd:[], xd:[]};
+      }
+      if (!existing.players) existing.players = {md:{a:['',''],b:['','']},wd:{a:['',''],b:['','']},xd:{a:['',''],b:['','']}};
+
+      // ロック済みカテゴリは更新しない
+      var locked = existing.finalizedCats || {};
+      ['md','wd','xd'].forEach(function(cat) {
+        if (locked[cat]) return;
+        var pCat = players[cat] || {};
+        var o1 = pCat.order1 || ['',''];
+        var n1 = String(o1[0]||'').trim().substring(0,30);
+        var n2 = String(o1[1]||'').trim().substring(0,30);
+        if (!existing.players[cat]) existing.players[cat] = {a:['',''],b:['','']};
+        var sideOrder1Flip = (parsed.type === 'league' && parsed.ri > parsed.ci) ? (side==='a'?'b':'a') : side;
+        existing.players[cat][sideOrder1Flip] = [n1, n2];
+        // order2 は別フィールドに退避 (将来対応用)
+        var o2 = pCat.order2 || ['',''];
+        if (o2[0] || o2[1]) {
+          if (!existing.players[cat].order2) existing.players[cat].order2 = {};
+          existing.players[cat].order2[sideOrder1Flip] = [
+            String(o2[0]||'').trim().substring(0,30),
+            String(o2[1]||'').trim().substring(0,30)
+          ];
+        }
+      });
+
+      if (parsed.type === 'league') parsed.lg.results[key] = existing;
+      else parsed.ts.matchResults[key] = existing;
+
+      sheet.getRange(i + 1, 4).setValue(new Date());
+      sheet.getRange(i + 1, 5).setValue(JSON.stringify(payload));
+      return {ok:true, side: side, opponent: (side==='a'?sideB:sideA)};
     }
     return {ok:false, error:'大会が見つかりません'};
   } finally {
